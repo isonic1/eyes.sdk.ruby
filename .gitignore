@@ -16,3 +16,11 @@ rdoc
 .idea-*/
 spec/reports
 tmp
+ext/applitools/Makefile
+ext/applitools/resampling_fast.so
+ext/applitools/resampling_fast_ext.o
+ext/applitools/resampling_fast.bundle
+ext/applitools/.*
+
+
+
