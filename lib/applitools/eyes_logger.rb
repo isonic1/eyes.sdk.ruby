@@ -1,5 +1,4 @@
 require 'logger'
-require 'forwardable'
 
 module Applitools::EyesLogger
   class NullLogger < Logger
