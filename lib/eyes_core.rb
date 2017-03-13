@@ -1,3 +1,5 @@
+require 'forwardable'
+
 module Applitools
   # @!visibility private
   class << self
