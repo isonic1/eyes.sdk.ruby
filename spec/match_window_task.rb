@@ -1,4 +1,4 @@
 require 'spec_helper'
 
-RSpec.describe Applitools::Core::MatchWindowTask do
+RSpec.describe Applitools::MatchWindowTask do
 end

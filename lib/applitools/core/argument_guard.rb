@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   module ArgumentGuard
     extend self
     def not_nil(param, param_name)

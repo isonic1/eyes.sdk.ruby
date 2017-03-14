@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   # @!visibility private
   class FixedScaleProvider
     attr_reader :scale_ratio, :scale_method

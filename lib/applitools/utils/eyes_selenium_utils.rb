@@ -147,16 +147,16 @@ module Applitools::Utils
     end
 
     # @param [Applitools::Selenium::Driver] executor
-    # @return [Applitools::Core::Location] {Applitools::Core::Location} instance which indicates current scroll
+    # @return [Applitools::Location] {Applitools::Location} instance which indicates current scroll
     #   position
     def current_scroll_position(executor)
       position = Applitools::Utils.symbolize_keys executor.execute_script(JS_GET_CURRENT_SCROLL_POSITION).to_hash
-      Applitools::Core::Location.new position[:left], position[:top]
+      Applitools::Location.new position[:left], position[:top]
     end
 
     # scrolls browser to position specified by point.
     # @param [Applitools::Selenium::Driver] executor
-    # @param [Applitools::Core::Location] point position to scroll to. It can be any object,
+    # @param [Applitools::Location] point position to scroll to. It can be any object,
     #   having left and top properties
     def scroll_to(executor, point)
       with_timeout(0.25) { executor.execute_script(JS_SCROLL_TO % { left: point.left, top: point.top }) }
@@ -168,7 +168,7 @@ module Applitools::Utils
 
       begin
         width, height = executor.execute_script(JS_GET_VIEWPORT_SIZE)
-        result = Applitools::Core::RectangleSize.from_any_argument width: width, height: height
+        result = Applitools::RectangleSize.from_any_argument width: width, height: height
         Applitools::EyesLogger.debug "Viewport size is #{result}."
         return result
       rescue => e
@@ -180,7 +180,7 @@ module Applitools::Utils
       width, height = executor.manage.window.size.to_a
       width, height = height, width if executor.landscape_orientation? && height > width
 
-      result = Applitools::Core::RectangleSize.new width, height
+      result = Applitools::RectangleSize.new width, height
       Applitools::EyesLogger.debug "Viewport size is #{result}."
       result
     end
@@ -194,12 +194,12 @@ module Applitools::Utils
       total_width = [metrics[:scroll_width], metrics[:body_scroll_width]].max
       total_height = [max_document_element_height, max_body_height].max
 
-      Applitools::Core::RectangleSize.new(total_width, total_height)
+      Applitools::RectangleSize.new(total_width, total_height)
     end
 
     def current_frame_content_entire_size(executor)
       dimensions = executor.execute_script(JS_GET_CONTENT_ENTIRE_SIZE)
-      Applitools::Core::RectangleSize.new(dimensions.first.to_i, dimensions.last.to_i)
+      Applitools::RectangleSize.new(dimensions.first.to_i, dimensions.last.to_i)
     rescue
       raise Applitools::EyesDriverOperationException.new 'Failed to extract entire size!'
     end
@@ -246,13 +246,13 @@ module Applitools::Utils
     end
 
     # @param [Applitools::Selenium::Driver] executor
-    # @param [Applitools::Core::RectangleSize] viewport_size
+    # @param [Applitools::RectangleSize] viewport_size
     def set_viewport_size(executor, viewport_size)
-      Applitools::Core::ArgumentGuard.not_nil 'viewport_size', viewport_size
+      Applitools::ArgumentGuard.not_nil 'viewport_size', viewport_size
       Applitools::EyesLogger.info "Set viewport size #{viewport_size}"
 
-      required_size = Applitools::Core::RectangleSize.from_any_argument viewport_size
-      actual_viewport_size = Applitools::Core::RectangleSize.from_any_argument(extract_viewport_size(executor))
+      required_size = Applitools::RectangleSize.from_any_argument viewport_size
+      actual_viewport_size = Applitools::RectangleSize.from_any_argument(extract_viewport_size(executor))
 
       Applitools::EyesLogger.info "Initial viewport size: #{actual_viewport_size}"
 
@@ -292,7 +292,7 @@ module Applitools::Utils
       height_diff = actual_viewport_size.height - required_size.height
       height_step = height_diff > 0 ? -1 : 1
 
-      browser_size = Applitools::Core::RectangleSize.from_any_argument(executor.manage.window.size)
+      browser_size = Applitools::RectangleSize.from_any_argument(executor.manage.window.size)
 
       current_width_change = 0
       current_height_change = 0
@@ -305,9 +305,9 @@ module Applitools::Utils
           current_height_change += height_step if actual_viewport_size.height != required_size.height
 
           set_browser_size executor,
-            browser_size.dup + Applitools::Core::RectangleSize.new(current_width_change, current_height_change)
+            browser_size.dup + Applitools::RectangleSize.new(current_width_change, current_height_change)
 
-          actual_viewport_size = Applitools::Core::RectangleSize.from_any_argument extract_viewport_size(executor)
+          actual_viewport_size = Applitools::RectangleSize.from_any_argument extract_viewport_size(executor)
           Applitools::EyesLogger.info "Current viewport size: #{actual_viewport_size}"
           return if actual_viewport_size == required_size
         end
@@ -319,12 +319,12 @@ module Applitools::Utils
 
     def set_browser_size(executor, required_size)
       retries_left = VERIFY_RETRIES
-      current_size = Applitools::Core::RectangleSize.new(0, 0)
+      current_size = Applitools::RectangleSize.new(0, 0)
       while retries_left > 0 && current_size != required_size
         Applitools::EyesLogger.info "Trying to set browser size to #{required_size}"
         executor.manage.window.size = required_size
         sleep VERIFY_SLEEP_PERIOD
-        current_size = Applitools::Core::RectangleSize.from_any_argument(executor.manage.window.size)
+        current_size = Applitools::RectangleSize.from_any_argument(executor.manage.window.size)
         Applitools::EyesLogger.info "Current browser size: #{required_size}"
         retries_left -= 1
       end
@@ -332,7 +332,7 @@ module Applitools::Utils
     end
 
     def set_browser_size_by_viewport_size(executor, actual_viewport_size, required_size)
-      browser_size = Applitools::Core::RectangleSize.from_any_argument(executor.manage.window.size)
+      browser_size = Applitools::RectangleSize.from_any_argument(executor.manage.window.size)
       Applitools::EyesLogger.info "Current browser size: #{browser_size}"
       required_browser_size = browser_size + required_size - actual_viewport_size
       set_browser_size(executor, required_browser_size)

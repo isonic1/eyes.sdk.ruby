@@ -1,10 +1,10 @@
-module Applitools::Core
+module Applitools
   class MatchResult
     attr_reader :response_hash
     attr_accessor :screenshot
 
     def initialize(response_hash)
-      Applitools::Core::ArgumentGuard.hash response_hash, 'response hash', ['asExpected']
+      Applitools::ArgumentGuard.hash response_hash, 'response hash', ['asExpected']
       @response_hash = response_hash
     end
 

@@ -1,5 +1,5 @@
 require 'securerandom'
-module Applitools::Core
+module Applitools
   class BatchInfo
     def initialize(name = nil, started_at = Time.now)
       @name = name

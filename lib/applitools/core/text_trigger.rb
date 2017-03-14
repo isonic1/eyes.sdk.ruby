@@ -1,5 +1,5 @@
 require 'applitools/core/trigger'
-module Applitools::Core
+module Applitools
   class TextTrigger < Trigger
     TRIGGER_TYPE = :Text
     attr_reader :text, :control

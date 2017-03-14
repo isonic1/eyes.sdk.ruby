@@ -5,8 +5,8 @@ module Applitools::Selenium
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
     def initialize(executor, passed_element)
-      Applitools::Core::ArgumentGuard.not_nil 'executor', executor
-      Applitools::Core::ArgumentGuard.not_nil 'passed_element', passed_element
+      Applitools::ArgumentGuard.not_nil 'executor', executor
+      Applitools::ArgumentGuard.not_nil 'passed_element', passed_element
       self.driver = executor
       self.element = passed_element
       self.element = Applitools::Selenium::Element.new(driver, element) unless
@@ -15,14 +15,14 @@ module Applitools::Selenium
 
     def current_position
       logger.info 'current_position() has called.'
-      result = Applitools::Core::Location.for element.scroll_left, element.scroll_top
+      result = Applitools::Location.for element.scroll_left, element.scroll_top
       logger.info "Current position is #{result}"
       result
     end
 
     def entire_size
       logger.info 'entire_size()'
-      result = Applitools::Core::RectangleSize.new(element.scroll_width, element.scroll_height)
+      result = Applitools::RectangleSize.new(element.scroll_width, element.scroll_height)
       logger.info "Entire size: #{result}"
       result
     end

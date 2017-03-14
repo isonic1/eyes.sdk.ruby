@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe Applitools::Core::MatchWindowData do
+RSpec.describe Applitools::MatchWindowData do
   let(:app_output) do
     Object.new.tap do |o|
       o.instance_eval do
@@ -10,7 +10,7 @@ RSpec.describe Applitools::Core::MatchWindowData do
       end
     end
   end
-  subject { Applitools::Core::MatchWindowData.new(:user_inputs, app_output, :tag, :ignore_mismatch) }
+  subject { Applitools::MatchWindowData.new(:user_inputs, app_output, :tag, :ignore_mismatch) }
   it_should_behave_like 'responds to method', [
     :app_output,
     :app_output=,

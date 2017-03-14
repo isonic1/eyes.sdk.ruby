@@ -1,6 +1,6 @@
 require 'yaml'
 
-module Applitools::Core
+module Applitools
   class TestResults
     attr_accessor :is_new, :url
     attr_reader :steps, :matches, :mismatches, :missing

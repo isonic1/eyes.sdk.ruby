@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class Trigger
     TRIGGER_TYPE = :unknown
     def trigger_type

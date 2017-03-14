@@ -21,8 +21,8 @@ module Applitools::Selenium
       else
         screenshot = driver.screenshot_as(:png)
       end
-      logger.info 'Done getting screenshot! Creating Applitools::Core::Screenshot...'
-      Applitools::Core::Screenshot.new screenshot
+      logger.info 'Done getting screenshot! Creating Applitools::Screenshot...'
+      Applitools::Screenshot.new screenshot
     end
 
     private

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-RSpec.describe Applitools::Core::EyesScreenshot do
+RSpec.describe Applitools::EyesScreenshot do
   describe 'initializer' do
     it 'checks if screenshot is passed' do
-      expect { Applitools::Core::EyesScreenshot.new(:not_a_screennshot) }.to raise_error(
+      expect { Applitools::EyesScreenshot.new(:not_a_screennshot) }.to raise_error(
         Applitools::EyesIllegalArgument
       )
     end
@@ -11,8 +11,8 @@ RSpec.describe Applitools::Core::EyesScreenshot do
 
   describe 'methods:' do
     subject do
-      Applitools::Core::EyesScreenshot.new(
-        Applitools::Core::Screenshot.new(ChunkyPNG::Image.new(1, 1, ChunkyPNG::Color::TRANSPARENT).to_blob)
+      Applitools::EyesScreenshot.new(
+        Applitools::Screenshot.new(ChunkyPNG::Image.new(1, 1, ChunkyPNG::Color::TRANSPARENT).to_blob)
       )
     end
 

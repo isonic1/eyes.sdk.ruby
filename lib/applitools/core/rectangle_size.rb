@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   RectangleSize = Struct.new(:width, :height) do
     class << self
       def from_any_argument(value)

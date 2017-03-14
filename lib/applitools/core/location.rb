@@ -1,5 +1,5 @@
 require 'applitools/core/region'
-module Applitools::Core
+module Applitools
   class Location
     class << self
       def from_any_attribute(*args)

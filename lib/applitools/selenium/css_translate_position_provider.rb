@@ -22,7 +22,7 @@ module Applitools::Selenium
       transforms = value.values.select { |el| !el.empty? }
       Applitools::Utils::EyesSeleniumUtils.set_transforms(executor, value)
       if transforms.empty?
-        self.last_state_position = Applitools::Core::Location::TOP_LEFT
+        self.last_state_position = Applitools::Location::TOP_LEFT
       else
         positions = transforms.map { |s| get_position_from_transform(s) }
         positions.each { |p| raise Applitools::EyesError.new 'Got different css positions!' unless p == positions[0] }
@@ -31,7 +31,7 @@ module Applitools::Selenium
     end
 
     def position=(value)
-      Applitools::Core::ArgumentGuard.not_nil(value, 'value')
+      Applitools::ArgumentGuard.not_nil(value, 'value')
       logger.info "Setting position to: #{value}"
       Applitools::Utils::EyesSeleniumUtils.translate_to(executor, value)
       logger.info 'Done!'
@@ -39,7 +39,7 @@ module Applitools::Selenium
     end
 
     def force_offset
-      Applitools::Core::Location.from_any_attribute last_state_position
+      Applitools::Location.from_any_attribute last_state_position
     end
 
     alias scroll_to position=
@@ -60,7 +60,7 @@ module Applitools::Selenium
       raise Applitools::EyesError.new "Can't parse CSS transition: #{transform}!" unless data
       x = data[1].empty? ? data[2].to_i : -1 * data[2].to_i
       y = data[3].empty? ? data[4].to_i : -1 * data[4].to_i
-      Applitools::Core::Location.new(x, y)
+      Applitools::Location.new(x, y)
     end
   end
 end

@@ -1,5 +1,5 @@
 require 'base64'
-module Applitools::Core
+module Applitools
   class MatchWindowTask
     MATCH_INTERVAL = 0.5
     AppOuptut = Struct.new(:title, :screenshot64)
@@ -77,7 +77,7 @@ module Applitools::Core
       app_output = options[:app_output]
       tag = options[:tag]
       ignore_mismatch = options[:ignore_mismatch]
-      data = Applitools::Core::MatchWindowData.new user_inputs, app_output, tag, ignore_mismatch,
+      data = Applitools::MatchWindowData.new user_inputs, app_output, tag, ignore_mismatch,
         tag: tag, user_inputs: user_inputs, ignore_mismatch: ignore_mismatch, ignore_match: false,
         force_mistmatch: false, force_match: false
       Applitools::Connectivity::ServerConnector.match_window running_session, data

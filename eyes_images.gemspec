@@ -13,6 +13,8 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://www.applitools.com'
   spec.license       = 'Apache License, Version 2.0'
 
+  spec.metadata['yard.run'] = 'yri' # use "yard" to build full HTML docs.
+
   spec.files         = `git ls-files lib/applitools/images`.split($RS) +
     ['lib/eyes_images.rb', 'lib/applitools/version.rb']
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }

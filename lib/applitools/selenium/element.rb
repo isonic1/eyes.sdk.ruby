@@ -43,7 +43,7 @@ module Applitools::Selenium
     protected :web_element
 
     def click
-      @driver.add_mouse_trigger(Applitools::Core::MouseTrigger::MOUSE_ACTION[:click], self)
+      @driver.add_mouse_trigger(Applitools::MouseTrigger::MOUSE_ACTION[:click], self)
       # logger.info "click(#{bounds})";
       web_element.click
     end

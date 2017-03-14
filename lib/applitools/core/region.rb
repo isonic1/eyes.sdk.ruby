@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class Region
     attr_accessor :left, :top, :width, :height
     alias x left
@@ -31,7 +31,7 @@ module Applitools::Core
     end
 
     def size
-      Applitools::Core::RectangleSize.new width, height
+      Applitools::RectangleSize.new width, height
     end
 
     def location
@@ -81,7 +81,7 @@ module Applitools::Core
     def middle_offset
       mid_x = width / 2
       mid_y = height / 2
-      Applitools::Core::Location.for(mid_x.round, mid_y.round)
+      Applitools::Location.for(mid_x.round, mid_y.round)
     end
 
     def sub_regions(subregion_size, is_fixed_size = false)
@@ -108,11 +108,11 @@ module Applitools::Core
 
     class << self
       def sub_regions_with_fixed_size(container_region, sub_region)
-        Applitools::Core::ArgumentGuard.not_nil container_region, 'container_region'
-        Applitools::Core::ArgumentGuard.not_nil sub_region, 'sub_region'
+        Applitools::ArgumentGuard.not_nil container_region, 'container_region'
+        Applitools::ArgumentGuard.not_nil sub_region, 'sub_region'
 
-        Applitools::Core::ArgumentGuard.greater_than_zero(sub_region.width, 'sub_region.width')
-        Applitools::Core::ArgumentGuard.greater_than_zero(sub_region.height, 'sub_region.height')
+        Applitools::ArgumentGuard.greater_than_zero(sub_region.width, 'sub_region.width')
+        Applitools::ArgumentGuard.greater_than_zero(sub_region.height, 'sub_region.height')
 
         sub_region_width = sub_region.width
         sub_region_height = sub_region.height
@@ -145,11 +145,11 @@ module Applitools::Core
       end
 
       def sub_regions_with_varying_size(container_region, sub_region)
-        Applitools::Core::ArgumentGuard.not_nil container_region, 'container_region'
-        Applitools::Core::ArgumentGuard.not_nil sub_region, 'sub_region'
+        Applitools::ArgumentGuard.not_nil container_region, 'container_region'
+        Applitools::ArgumentGuard.not_nil sub_region, 'sub_region'
 
-        Applitools::Core::ArgumentGuard.greater_than_zero(sub_region.width, 'sub_region.width')
-        Applitools::Core::ArgumentGuard.greater_than_zero(sub_region.height, 'sub_region.height')
+        Applitools::ArgumentGuard.greater_than_zero(sub_region.width, 'sub_region.width')
+        Applitools::ArgumentGuard.greater_than_zero(sub_region.height, 'sub_region.height')
 
         current_top = container_region.top
         bottom = container_region.top + container_region.height

@@ -20,7 +20,7 @@ module Applitools::Selenium
 
       logger.info "Done! Setting position to #{location}..."
 
-      position_provider.position = Applitools::Core::Location.new(dst_x, dst_y)
+      position_provider.position = Applitools::Location.new(dst_x, dst_y)
       logger.info 'Done!'
     end
 

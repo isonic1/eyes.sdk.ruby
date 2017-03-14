@@ -10,7 +10,7 @@ RSpec.shared_examples 'can be disabled' do |method_name, arguments|
   end
 end
 
-describe Applitools::Core::EyesBase do
+describe Applitools::EyesBase do
   it_should_behave_like 'responds to method', [
     :agent_id,
     :agent_id=,
@@ -90,7 +90,7 @@ describe Applitools::Core::EyesBase do
     expect(subject.send(:agent_id)).to be_nil
     expect(subject.send(:save_new_tests)).to eq true
     expect(subject.send(:save_failed_tests)).to eq false
-    expect(subject.send(:match_timeout)).to eq Applitools::Core::EyesBase::DEFAULT_MATCH_TIMEOUT
+    expect(subject.send(:match_timeout)).to eq Applitools::EyesBase::DEFAULT_MATCH_TIMEOUT
   end
 
   context 'abort_if_not_closed' do
@@ -100,7 +100,7 @@ describe Applitools::Core::EyesBase do
         expect(subject).to receive(:disabled?).and_return false
         expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return true
         Applitools::Connectivity::ServerConnector.server_url = nil
-        subject.send(:running_session=, Applitools::Core::Session.new('id', 'url', true))
+        subject.send(:running_session=, Applitools::Session.new('id', 'url', true))
       end
 
       after do
@@ -183,22 +183,22 @@ describe Applitools::Core::EyesBase do
     it_behaves_like 'can be disabled', :close, [false]
 
     let(:success_old_results) do
-      Applitools::Core::TestResults.new 'steps' => 5, 'matches' => 5, 'mismatches' => 0, 'missing' => 0
+      Applitools::TestResults.new 'steps' => 5, 'matches' => 5, 'mismatches' => 0, 'missing' => 0
     end
 
     let(:failed_old_results) do
-      Applitools::Core::TestResults.new 'steps' => 5, 'matches' => 1, 'mismatches' => 2, 'missing' => 2
+      Applitools::TestResults.new 'steps' => 5, 'matches' => 1, 'mismatches' => 2, 'missing' => 2
     end
 
     let(:new_results) do
-      new = Applitools::Core::TestResults.new
+      new = Applitools::TestResults.new
       new.is_new = true
       new.url = 'http://see.results.url'
       new
     end
 
-    let(:r_session) { Applitools::Core::Session.new :session_id, :session_url, false }
-    let(:r_session_new) { Applitools::Core::Session.new :session_id, :session_url, true }
+    let(:r_session) { Applitools::Session.new :session_id, :session_url, false }
+    let(:r_session_new) { Applitools::Session.new :session_id, :session_url, true }
 
     before do
       subject.instance_variable_set :@running_session, r_session
@@ -232,8 +232,8 @@ describe Applitools::Core::EyesBase do
     it 'returns empty result if no session started' do
       subject.instance_variable_set :@running_session, nil
       close_result = subject.close(true)
-      expect(close_result).to be_a Applitools::Core::TestResults
-      expect(close_result).to eq Applitools::Core::TestResults.new
+      expect(close_result).to be_a Applitools::TestResults
+      expect(close_result).to eq Applitools::TestResults.new
     end
 
     it 'calls Applitools::Connectivity::ServerConnector.stop_session' do
@@ -256,7 +256,7 @@ describe Applitools::Core::EyesBase do
     context 'throws an exception for failed test if called like close(true)' do
       before do
         expect(subject).to receive(:session_start_info).and_return(
-          Applitools::Core::SessionStartInfo.new(
+          Applitools::SessionStartInfo.new(
             :agent_id => :a,
             :app_id_or_name => :b,
             :ver_id => :c,
@@ -285,7 +285,7 @@ describe Applitools::Core::EyesBase do
     context 'don\'t throw exception when called like close(false)' do
       before do
         expect(subject).to receive(:session_start_info).and_return(
-          Applitools::Core::SessionStartInfo.new(
+          Applitools::SessionStartInfo.new(
             :agent_id => :a,
             :app_id_or_name => :b,
             :ver_id => :c,
@@ -317,10 +317,10 @@ describe Applitools::Core::EyesBase do
     end
     it 'calls ServerConnector.start_session' do
       expect(Applitools::Connectivity::ServerConnector).to receive(:start_session).and_return(
-        Applitools::Core::Session.new(:session_id, :session_url, true)
+        Applitools::Session.new(:session_id, :session_url, true)
       )
       expect(subject).to receive(:viewport_size).and_return nil
-      expect(subject).to receive(:get_viewport_size).and_return Applitools::Core::RectangleSize.new(1024, 768)
+      expect(subject).to receive(:get_viewport_size).and_return Applitools::RectangleSize.new(1024, 768)
       expect(subject).to receive(:inferred_environment).and_return nil
       expect(subject).to receive(:base_agent_id).and_return nil
       subject.send :start_session

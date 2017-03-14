@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class Session
     attr_reader :id, :url
 

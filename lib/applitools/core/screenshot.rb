@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class Screenshot < Delegator
     extend Forwardable
     def_delegators :header, :width, :height
@@ -10,7 +10,7 @@ module Applitools::Core
     end
 
     def initialize(image)
-      @datastream = ChunkyPNG::Datastream.from_string image
+      @datastream = ::ChunkyPNG::Datastream.from_string image
     end
 
     def to_blob
@@ -43,7 +43,7 @@ module Applitools::Core
     end
 
     def restore
-      ChunkyPNG::Image.from_datastream @datastream
+      ::ChunkyPNG::Image.from_datastream @datastream
     end
   end
 end

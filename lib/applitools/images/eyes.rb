@@ -9,7 +9,7 @@ module Applitools::Images
   #   eyes.open(app_name: 'App name', test_name: 'Test name')
   #   eyes.check_image(eyes.check_image(image_path: '~/test/some_screenshot.png', tag: 'My Test')
   #   eyes.close(true)
-  class Eyes < Applitools::Core::EyesBase
+  class Eyes < Applitools::EyesBase
     # @!visibility private
     attr_accessor :base_agent_id, :screenshot, :inferred_environment, :title
 
@@ -37,8 +37,8 @@ module Applitools::Images
     # @example
     #   eyes.open app_name: 'my app', test_name: 'my test'
     def open(options = {})
-      Applitools::Core::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
-      options[:viewport_size] = Applitools::Core::RectangleSize.from_any_argument options[:viewport_size]
+      Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
+      options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size]
       open_base options
     end
 
@@ -61,7 +61,7 @@ module Applitools::Images
     # Matches the input image with the next expected image. Takes a hash as an argument. Returns +boolean+
     # as result of matching.
     # @param [Hash] options
-    # @option options [Applitools::Core::Screenshot] :image
+    # @option options [Applitools::Screenshot] :image
     # @option options [String] :image_bytes image in PNG format. Can be obtained as ChunkyPNG::Image.to_blob()
     # @option options [String] :image_path
     # @option options [String] :tag An optional tag to be associated with the validation checkpoint.
@@ -69,7 +69,7 @@ module Applitools::Images
     #   result for the visual validation. (+false+ by default)
     # @example Image is a file
     #   eyes.check_image(image_path: '~/test/some_screenshot.png', tag: 'My Test')
-    # @example Image is a +Applitools::Core::Screenshot+ instance
+    # @example Image is a +Applitools::Screenshot+ instance
     #   eyes.check_image(image: my_image, tag: 'My Test')
     # @example Image is a +String+
     #   eyes.check_image(image_bytes: string_represents_image, tag: 'My Test')
@@ -86,15 +86,15 @@ module Applitools::Images
       image = get_image_from_options options
 
       logger.info "check_image(image, #{options[:tag]}, #{options[:ignore_mismatch]})"
-      if image.is_a? Applitools::Core::Screenshot
-        self.viewport_size = Applitools::Core::RectangleSize.new image.width, image.height if viewport_size.nil?
+      if image.is_a? Applitools::Screenshot
+        self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
         self.screenshot = EyesImagesScreenshot.new image
       end
       self.title = options[:tag] || ''
       region_provider = Object.new
       region_provider.instance_eval do
         define_singleton_method :region do
-          Applitools::Core::Region::EMPTY
+          Applitools::Region::EMPTY
         end
 
         define_singleton_method :coordinate_type do
@@ -102,14 +102,14 @@ module Applitools::Images
         end
       end
       mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-        Applitools::Core::EyesBase::USE_DEFAULT_TIMEOUT
+        Applitools::EyesBase::USE_DEFAULT_TIMEOUT
       mr.as_expected?
     end
 
     # Performs visual validation for the current image.
     # @param [Hash] options
-    # @option options [Applitools::Core::Region] :region A region to validate within the image
-    # @option options [Applitools::Core::Screenshot] :image Image to validate
+    # @option options [Applitools::Region] :region A region to validate within the image
+    # @option options [Applitools::Screenshot] :image Image to validate
     # @option options [String] :image_bytes Image in +PNG+ format. Can be obtained as ChunkyPNG::Image.to_blob()
     # @option options [String] :image_path Path to image file
     # @option options [String] :tag An optional tag to be associated with the validation checkpoint.
@@ -117,7 +117,7 @@ module Applitools::Images
     #   result for the visual validation
     # @example Image is a file
     #   eyes.check_region(image_path: '~/test/some_screenshot.png', region: my_region, tag: 'My Test')
-    # @example Image is a Applitools::Core::Screenshot instance
+    # @example Image is a Applitools::Screenshot instance
     #   eyes.check_region(image: my_image, tag: 'My Test', region: my_region)
     # @example Image is a +String+
     #   eyes.check_region(image_bytes: string_represents_image, tag: 'My Test', region: my_region)
@@ -129,13 +129,13 @@ module Applitools::Images
         return false
       end
 
-      Applitools::Core::ArgumentGuard.not_nil options[:region], 'options[:region] can\'t be nil!'
+      Applitools::ArgumentGuard.not_nil options[:region], 'options[:region] can\'t be nil!'
       image = get_image_from_options options
 
       logger.info "check_region(image, #{options[:region]}, #{options[:tag]}, #{options[:ignore_mismatch]})"
 
-      if image.is_a? Applitools::Core::Screenshot
-        self.viewport_size = Applitools::Core::RectangleSize.new image.width, image.height if viewport_size.nil?
+      if image.is_a? Applitools::Screenshot
+        self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
         self.screenshot = EyesImagesScreenshot.new image
       end
       self.title = options[:tag] || ''
@@ -146,26 +146,26 @@ module Applitools::Images
           options[:region]
         end
         define_singleton_method :coordinate_type do
-          Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
+          Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
         end
       end
       mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-        Applitools::Core::EyesBase::USE_DEFAULT_TIMEOUT
+        Applitools::EyesBase::USE_DEFAULT_TIMEOUT
       mr.as_expected?
     end
 
     # Adds a mouse trigger
     # @param [Symbol] action A mouse action. Can be one of  +:click+, +:right_click+, +:double_click+, +:move+,
     #   +:down+, +:up+
-    # @param [Applitools::Core::Region] control The control on which the trigger is activated
+    # @param [Applitools::Region] control The control on which the trigger is activated
     #   (context relative coordinates).
-    # @param [Applitools::Core::Location] cursor The cursor's position relative to the control.
+    # @param [Applitools::Location] cursor The cursor's position relative to the control.
     def add_mouse_trigger(action, control, cursor)
       add_mouse_trigger_base action, control, cursor
     end
 
     # Adds a keyboard trigger
-    # @param [Applitools::Core::Region] control the control's context-relative region.
+    # @param [Applitools::Region] control the control's context-relative region.
     # @param text The trigger's text.
     def add_text_trigger(control, text)
       add_text_trigger_base control, text
@@ -178,25 +178,25 @@ module Applitools::Images
     end
 
     def vp_size=(value)
-      Applitools::Core::ArgumentGuard.not_nil 'value', value
-      @viewport_size = Applitools::Core::RectangleSize.for value
+      Applitools::ArgumentGuard.not_nil 'value', value
+      @viewport_size = Applitools::RectangleSize.for value
     end
 
     alias get_viewport_size vp_size
     alias set_viewport_size vp_size=
 
     def get_image_from_options(options)
-      if options[:image].nil? && !options[:image].is_a?(Applitools::Core::Screenshot)
+      if options[:image].nil? && !options[:image].is_a?(Applitools::Screenshot)
         if !options[:image_path].nil? && !options[:image_path].empty?
-          image = Applitools::Core::Screenshot.new ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
+          image = Applitools::Screenshot.new ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
         elsif options[:image_bytes].nil? && !options[:image_bytes].empty?
-          image = Applitools::Core::Screenshot.new options[:image_bytes]
+          image = Applitools::Screenshot.new options[:image_bytes]
         end
       else
         image = options[:image]
       end
 
-      Applitools::Core::ArgumentGuard.not_nil image, 'options[:image] can\'t be nil!'
+      Applitools::ArgumentGuard.not_nil image, 'options[:image] can\'t be nil!'
 
       image
     end
