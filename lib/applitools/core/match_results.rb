@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class MatchResults
     attr_accessor :screenshot, :window_id, :as_expected
 

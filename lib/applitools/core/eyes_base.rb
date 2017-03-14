@@ -1,16 +1,16 @@
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
 
-module Applitools::Core
+module Applitools
   class EyesBase
     extend Forwardable
-    extend Applitools::Core::Helpers
+    extend Applitools::Helpers
 
     DEFAULT_MATCH_TIMEOUT = 2 # seconds
     USE_DEFAULT_TIMEOUT = -1
 
-    SCREENSHOT_AS_IS = Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is].freeze
-    CONTEXT_RELATIVE = Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
+    SCREENSHOT_AS_IS = Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is].freeze
+    CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
 
     MATCH_LEVEL = {
       none: 'None',
@@ -121,18 +121,18 @@ module Applitools::Core
         return
       end
 
-      Applitools::Core::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
+      Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
       default_options = { session_type: 'SEQUENTAL' }
       options = default_options.merge options
 
       if app_name.nil?
-        Applitools::Core::ArgumentGuard.not_nil options[:app_name], 'options[:app_name]'
+        Applitools::ArgumentGuard.not_nil options[:app_name], 'options[:app_name]'
         self.current_app_name = options[:app_name]
       else
         self.current_app_name = app_name
       end
 
-      Applitools::Core::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
+      Applitools::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
       self.test_name = options[:test_name]
       logger.info "Agent = #{full_agent_id}"
       logger.info "openBase(app_name: #{options[:app_name]}, test_name: #{options[:test_name]}," \
@@ -157,13 +157,13 @@ module Applitools::Core
     def check_window_base(region_provider, tag, ignore_mismatch, retry_timeout)
       if disabled?
         logger.info "#{__method__} Ignored"
-        result = Applitools::Core::MatchResults.new
+        result = Applitools::MatchResults.new
         result.as_expected = true
         return result
       end
 
       raise Applitools::EyesError.new 'Eyes not open' unless open?
-      Applitools::Core::ArgumentGuard.not_nil region_provider, 'region_provider'
+      Applitools::ArgumentGuard.not_nil region_provider, 'region_provider'
 
       logger.info "check_window_base(#{region_provider}, #{tag}, #{ignore_mismatch}, #{retry_timeout})"
 
@@ -173,7 +173,7 @@ module Applitools::Core
         logger.info 'No running session, calling start session..'
         start_session
         logger.info 'Done!'
-        @match_window_task = Applitools::Core::MatchWindowTask.new(
+        @match_window_task = Applitools::MatchWindowTask.new(
           logger,
           running_session,
           match_timeout,
@@ -237,7 +237,7 @@ module Applitools::Core
       unless running_session
         logger.info 'Server session was not started'
         logger.info '--- Empty test ended'
-        return Applitools::Core::TestResults.new
+        return Applitools::TestResults.new
       end
 
       is_new_session = running_session.new_session?
@@ -291,7 +291,7 @@ module Applitools::Core
     private :full_agent_id, :full_agent_id=
 
     def app_environment
-      Applitools::Core::AppEnvironment.new os: host_os, hosting_app: host_app,
+      Applitools::AppEnvironment.new os: host_os, hosting_app: host_app,
           display_size: @viewport_size, inferred: inferred_environment
     end
 
@@ -309,7 +309,7 @@ module Applitools::Core
         return
       end
 
-      Applitools::Core::ArgumentGuard.not_nil(trigger, 'trigger')
+      Applitools::ArgumentGuard.not_nil(trigger, 'trigger')
       @user_inputs.add(trigger)
     end
 
@@ -319,10 +319,10 @@ module Applitools::Core
         return
       end
 
-      Applitools::Core::ArgumentGuard.not_nil control, 'control'
-      Applitools::Core::ArgumentGuard.not_nil text, 'control'
+      Applitools::ArgumentGuard.not_nil control, 'control'
+      Applitools::ArgumentGuard.not_nil text, 'control'
 
-      control = Applitools::Core::Region.new control.left, control.top, control.width, control.height
+      control = Applitools::Region.new control.left, control.top, control.width, control.height
 
       if last_screenshot.nil?
         logger.info "Ignoring '#{text}' (no screenshot)"
@@ -337,7 +337,7 @@ module Applitools::Core
         return
       end
 
-      trigger = Applitools::Core::TextTrigger.new text, control
+      trigger = Applitools::TextTrigger.new text, control
       add_user_input trigger
       logger.info "Added '#{trigger}'"
     end
@@ -348,16 +348,16 @@ module Applitools::Core
         return
       end
 
-      Applitools::Core::ArgumentGuard.not_nil action, 'action'
-      Applitools::Core::ArgumentGuard.not_nil control, 'control'
-      Applitools::Core::ArgumentGuard.not_nil cursor, 'cursor'
+      Applitools::ArgumentGuard.not_nil action, 'action'
+      Applitools::ArgumentGuard.not_nil control, 'control'
+      Applitools::ArgumentGuard.not_nil cursor, 'cursor'
 
       if last_screenshot.nil?
         logger.info "Ignoring '#{action}' (no screenshot)"
         return
       end
 
-      cursor_in_screenshot = Applitools::Core::Location.new cursor.x, cursor.y
+      cursor_in_screenshot = Applitools::Location.new cursor.x, cursor.y
       cursor_in_screenshot.offset(control)
 
       begin
@@ -371,10 +371,10 @@ module Applitools::Core
 
       unless control_screenshot_intersect.empty?
         l = control_screenshot_intersect.location
-        cursor_in_screenshot.offset Applitools::Core::Location.new(-l.x, -l.y)
+        cursor_in_screenshot.offset Applitools::Location.new(-l.x, -l.y)
       end
 
-      trigger = Applitools::Core::MouseTrigger.new action, control_screenshot_intersect, cursor_in_screenshot
+      trigger = Applitools::MouseTrigger.new action, control_screenshot_intersect, cursor_in_screenshot
       add_user_input trigger
 
       logger.info "Added #{trigger}"
@@ -437,8 +437,8 @@ module Applitools::Core
       logger.info 'Done! Getting title...'
       a_title = title
       logger.info 'Done!'
-      Applitools::Core::AppOutputWithScreenshot.new(
-        Applitools::Core::AppOutput.new(a_title, compress_result),
+      Applitools::AppOutputWithScreenshot.new(
+        Applitools::AppOutput.new(a_title, compress_result),
         screenshot
       )
     end

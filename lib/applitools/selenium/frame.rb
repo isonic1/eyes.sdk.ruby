@@ -9,13 +9,13 @@ module Applitools::Selenium
       end
 
       raise 'options[:location] must be instance of Applitools::Base::Point' unless
-          location.is_a? Applitools::Core::Location
+          location.is_a? Applitools::Location
 
-      raise 'options[:parent_scroll_position] must be instance of Applitools::Core::Location' unless
-          location.is_a? Applitools::Core::Location
+      raise 'options[:parent_scroll_position] must be instance of Applitools::Location' unless
+          location.is_a? Applitools::Location
 
-      raise 'options[:size] must be instance of Applitools::Core::RectangleSize' unless
-          size.is_a? Applitools::Core::RectangleSize
+      raise 'options[:size] must be instance of Applitools::RectangleSize' unless
+          size.is_a? Applitools::RectangleSize
 
       return if reference.is_a? Applitools::Selenium::Element
       raise 'options[:reference] must be instance of Applitools::Selenium::Element'

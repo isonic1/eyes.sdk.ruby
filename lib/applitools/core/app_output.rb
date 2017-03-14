@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class AppOutput
     attr_reader :title, :screenshot64
 

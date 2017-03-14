@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   class AppEnvironment
     attr_accessor :os, :hosting_app, :display_size, :inferred_environment
 

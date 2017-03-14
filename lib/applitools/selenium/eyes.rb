@@ -1,6 +1,6 @@
 module Applitools::Selenium
   # The main API gateway for the SDK
-  class Eyes < Applitools::Core::EyesBase
+  class Eyes < Applitools::EyesBase
     # @!visibility private
     UNKNOWN_DEVICE_PIXEL_RATIO = 0
 
@@ -37,9 +37,9 @@ module Applitools::Selenium
       end
 
       def set_viewport_size(driver, viewport_size)
-        Applitools::Core::ArgumentGuard.not_nil(driver, 'Driver')
-        Applitools::Core::ArgumentGuard.not_nil(viewport_size, 'viewport_size')
-        Applitools::Core::ArgumentGuard.is_a?(viewport_size, 'viewport_size', Applitools::Core::RectangleSize)
+        Applitools::ArgumentGuard.not_nil(driver, 'Driver')
+        Applitools::ArgumentGuard.not_nil(viewport_size, 'viewport_size')
+        Applitools::ArgumentGuard.is_a?(viewport_size, 'viewport_size', Applitools::RectangleSize)
         begin
           Applitools::Utils::EyesSeleniumUtils.set_viewport_size eyes_driver(driver), viewport_size
         rescue => e
@@ -110,10 +110,10 @@ module Applitools::Selenium
     #   trigger recording and frame handling
     def open(options = {})
       driver = options.delete(:driver)
-      options[:viewport_size] = Applitools::Core::RectangleSize.from_any_argument options[:viewport_size] if
+      options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size] if
           options[:viewport_size]
-      Applitools::Core::ArgumentGuard.not_nil driver, 'options[:driver]'
-      Applitools::Core::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
+      Applitools::ArgumentGuard.not_nil driver, 'options[:driver]'
+      Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
 
       if disabled?
         logger.info('Ignored')
@@ -171,7 +171,7 @@ module Applitools::Selenium
       region_provider = Object.new
       region_provider.instance_eval do
         define_singleton_method :region do
-          Applitools::Core::Region::EMPTY
+          Applitools::Region::EMPTY
         end
         define_singleton_method :coordinate_type do
           nil
@@ -198,7 +198,7 @@ module Applitools::Selenium
 
     # @!visibility private
     def get_viewport_size(web_driver = driver)
-      Applitools::Core::ArgumentGuard.not_nil 'web_driver', web_driver
+      Applitools::ArgumentGuard.not_nil 'web_driver', web_driver
       Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(driver)
     end
 
@@ -250,8 +250,8 @@ module Applitools::Selenium
     # @option options []
     def check_region_in_frame(options = {})
       options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil, stitch_content: false }.merge!(options)
-      Applitools::Core::ArgumentGuard.not_nil options[:by], 'options[:by]'
-      Applitools::Core::ArgumentGuard.is_a? options[:by], 'options[:by]', Array
+      Applitools::ArgumentGuard.not_nil options[:by], 'options[:by]'
+      Applitools::ArgumentGuard.is_a? options[:by], 'options[:by]', Array
 
       how_what = options.delete(:by)
 
@@ -464,7 +464,7 @@ module Applitools::Selenium
           logger.info 'Building screenshot object...'
           self.screenshot = Applitools::Selenium::EyesWebDriverScreenshot.new entire_frame_or_element,
             driver: driver,
-            entire_frame_size: Applitools::Core::RectangleSize.new(entire_frame_or_element.width,
+            entire_frame_size: Applitools::RectangleSize.new(entire_frame_or_element.width,
               entire_frame_or_element.height)
         elsif force_full_page_screenshot
           logger.info 'Full page screenshot requested'
@@ -474,7 +474,7 @@ module Applitools::Selenium
           region_provider = Object.new
           region_provider.instance_eval do
             def region
-              Applitools::Core::Region::EMPTY
+              Applitools::Region::EMPTY
             end
 
             def coordinate_type
@@ -555,7 +555,7 @@ module Applitools::Selenium
       rescue StandardError
         logger.info 'Failed to set ContextBasedScaleProvider'
         logger.info 'Using FixedScaleProvider instead'
-        self.scale_provider = Applitools::Core::FixedScaleProvider.new(1.to_f / device_pixel_ratio)
+        self.scale_provider = Applitools::FixedScaleProvider.new(1.to_f / device_pixel_ratio)
       end
       logger.info 'Done!'
     end
@@ -580,13 +580,13 @@ module Applitools::Selenium
         return
       end
 
-      Applitools::Core::ArgumentGuard.not_nil control, 'control'
-      return _add_text_trigger(control, text) if control.is_a? Applitools::Core::Region
+      Applitools::ArgumentGuard.not_nil control, 'control'
+      return _add_text_trigger(control, text) if control.is_a? Applitools::Region
 
       pl = control.location
       ds = control.size
 
-      element_region = Applitools::Core::Region.new(pl.x, pl.y, ds.width, ds.height)
+      element_region = Applitools::Region.new(pl.x, pl.y, ds.width, ds.height)
 
       return _add_text_trigger(element_region, text) if control.is_a? Applitools::Selenium::Element
     end
@@ -603,13 +603,13 @@ module Applitools::Selenium
         raise Applitools::EyesIllegalArgument.new 'Element[] doesn\'t contain required keys!'
       end
 
-      Applitools::Core::ArgumentGuard.not_nil element, 'element'
-      Applitools::Core::ArgumentGuard.is_a? element, 'element', Applitools::Selenium::Element
+      Applitools::ArgumentGuard.not_nil element, 'element'
+      Applitools::ArgumentGuard.is_a? element, 'element', Applitools::Selenium::Element
 
       pl = element.location
       ds = element.size
 
-      element_region = Applitools::Core::Region.new(pl.x, pl.y, ds.width, ds.height)
+      element_region = Applitools::Region.new(pl.x, pl.y, ds.width, ds.height)
 
       unless last_screenshot
         logger.info "Ignoring #{mouse_action} (no screenshot)"
@@ -632,8 +632,8 @@ module Applitools::Selenium
         return
       end
 
-      Applitools::Core::ArgumentGuard.is_a? control, 'control', Applitools::Core::Region
-      Applitools::Core::ArgumentGuard.is_a? cursor, 'cursor', Applitools::Core::Location
+      Applitools::ArgumentGuard.is_a? control, 'control', Applitools::Region
+      Applitools::ArgumentGuard.is_a? cursor, 'cursor', Applitools::Location
 
       if driver.frame_chain.same_frame_chain? last_screenshot.frame_chain
         logger.info "Ignoring #{mouse_action} (different_frame)"
@@ -652,7 +652,7 @@ module Applitools::Selenium
       region_provider = Object.new.tap do |provider|
         provider.instance_eval do
           define_singleton_method :region do
-            Applitools::Core::Region::EMPTY
+            Applitools::Region::EMPTY
           end
           define_singleton_method :coordinate_type do
             nil
@@ -662,12 +662,12 @@ module Applitools::Selenium
 
       self.region_to_check = Object.new.tap do |provider|
         current_frame_size = lambda do
-          frame_region = Applitools::Core::Region.from_location_size(
-            Applitools::Core::Location.new(0, 0), driver.frame_chain!.current_frame.size
+          frame_region = Applitools::Region.from_location_size(
+            Applitools::Location.new(0, 0), driver.frame_chain!.current_frame.size
           )
           begin
-            frame_region.intersect Applitools::Core::Region.from_location_size(
-              Applitools::Core::Location.new(0, 0),
+            frame_region.intersect Applitools::Region.from_location_size(
+              Applitools::Location.new(0, 0),
               Applitools::Utils::EyesSeleniumUtils.entire_page_size(driver)
             )
             frame_region
@@ -681,7 +681,7 @@ module Applitools::Selenium
             current_frame_size.call
           end
           define_singleton_method :coordinate_type do
-            Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
           end
         end
       end
@@ -749,23 +749,23 @@ module Applitools::Selenium
       match_timeout = options[:match_timeout] || USE_DEFAULT_MATCH_TIMEOUT
 
       logger.info "check_region(element, #{match_timeout}, #{tag}): Ignored" && return if disabled?
-      Applitools::Core::ArgumentGuard.not_nil 'options[:element]', element
+      Applitools::ArgumentGuard.not_nil 'options[:element]', element
       logger.info "check_region(element: element, #{match_timeout}, #{tag})"
 
       location_as_point = element.location
       region_visibility_strategy.move_to_region position_provider,
-        Applitools::Core::Location.new(location_as_point.x.to_i, location_as_point.y.to_i)
+        Applitools::Location.new(location_as_point.x.to_i, location_as_point.y.to_i)
 
       region_provider = Object.new.tap do |prov|
         prov.instance_eval do
           define_singleton_method :region do
             p = element.location
             d = element.size
-            Applitools::Core::Region.from_location_size p, d
+            Applitools::Region.from_location_size p, d
           end
 
           define_singleton_method :coordinate_type do
-            Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
           end
         end
       end
@@ -811,7 +811,7 @@ module Applitools::Selenium
 
       location_as_point = eyes_element.location
       region_visibility_strategy.move_to_region position_provider,
-        Applitools::Core::Location.new(location_as_point.x.to_i, location_as_point.y.to_i)
+        Applitools::Location.new(location_as_point.x.to_i, location_as_point.y.to_i)
 
       original_overflow = nil
       original_position_provider = position_provider
@@ -830,7 +830,7 @@ module Applitools::Selenium
         border_right_width = eyes_element.border_right_width
         border_bottom_width = eyes_element.border_bottom_width
 
-        element_region = Applitools::Core::Region.new(
+        element_region = Applitools::Region.new(
           p.x + border_left_width,
           p.y + border_top_width,
           d.width - border_left_width - border_right_width,
@@ -846,7 +846,7 @@ module Applitools::Selenium
             end
 
             define_singleton_method :coordinate_type do
-              Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+              Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
             end
           end
         end
@@ -854,7 +854,7 @@ module Applitools::Selenium
         base_check_region_provider = Object.new.tap do |prov|
           prov.instance_eval do
             define_singleton_method :region do
-              Applitools::Core::Region::EMPTY
+              Applitools::Region::EMPTY
             end
 
             define_singleton_method :coordinate_type do

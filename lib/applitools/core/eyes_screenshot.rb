@@ -1,7 +1,7 @@
-module Applitools::Core
+module Applitools
   class EyesScreenshot
     extend Forwardable
-    extend Applitools::Core::Helpers
+    extend Applitools::Helpers
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
     attr_accessor :image
@@ -12,7 +12,7 @@ module Applitools::Core
     }.freeze
 
     def initialize(screenshot)
-      Applitools::Core::ArgumentGuard.is_a? screenshot, 'screenshot', Applitools::Core::Screenshot
+      Applitools::ArgumentGuard.is_a? screenshot, 'screenshot', Applitools::Screenshot
       self.image = screenshot
     end
 
@@ -22,11 +22,11 @@ module Applitools::Core
     abstract_method :intersected_region, false
 
     def convert_region_location(region, from, to)
-      Applitools::Core::ArgumentGuard.not_nil region, 'region'
-      Applitools::Core::ArgumentGuard.is_a? region, 'region', Applitools::Core::Region
+      Applitools::ArgumentGuard.not_nil region, 'region'
+      Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
       return Region.new(0, 0, 0, 0) if region.empty?
-      Applitools::Core::ArgumentGuard.not_nil from, 'from'
-      Applitools::Core::ArgumentGuard.not_nil to, 'to'
+      Applitools::ArgumentGuard.not_nil from, 'from'
+      Applitools::ArgumentGuard.not_nil to, 'to'
 
       updated_location = convert_location(region.location, from, to)
       Region.new updated_location.x, updated_location.y, region.width, region.height

@@ -42,7 +42,7 @@ module Applitools::Selenium
     end
 
     def force_offset
-      Applitools::Core::Location.new(0, 0)
+      Applitools::Location.new(0, 0)
     end
 
     private

@@ -1,5 +1,5 @@
 require 'applitools/core/trigger'
-module Applitools::Core
+module Applitools
   class MouseTrigger < Trigger
     TRIGGER_TYPE = :Mouse
 

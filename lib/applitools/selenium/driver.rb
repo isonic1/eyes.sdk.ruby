@@ -102,7 +102,7 @@ module Applitools::Selenium
       raise "Invalid format (#{format}) passed! Available formats: :png, :base64" unless %i(base64 png).include? format
       png_screenshot = driver.screenshot_as(:png)
       yield png_screenshot if block_given?
-      screenshot = Applitools::Core::Screenshot.new(png_screenshot)
+      screenshot = Applitools::Screenshot.new(png_screenshot)
       self.class.normalize_rotation(self, screenshot, rotation)
       return Applitools::Utils::ImageUtils.base64_from_png_image(screenshot.restore) if format == :base64
       screenshot.to_blob
@@ -180,7 +180,7 @@ module Applitools::Selenium
     # Gets +default_content_viewport_size+
     # @param [Boolean] force_query if set to true, forces querying of viewport size from the browser,
     #   otherwise returns cached value
-    # @return [Applitools::Core::RectangleSize]
+    # @return [Applitools::RectangleSize]
     def default_content_viewport_size(force_query = false)
       logger.info('default_content_viewport_size()')
       if cached_default_content_viewport_size && !force_query
@@ -267,8 +267,8 @@ module Applitools::Selenium
           return parent.frame_chain!.push(
             Applitools::Selenium::Frame.new(
               reference: target_frame, frame_id: '',
-              location: Applitools::Core::Location.for(frame_location_size.location),
-              size: Applitools::Core::RectangleSize.for(frame_location_size.size),
+              location: Applitools::Location.for(frame_location_size.location),
+              size: Applitools::RectangleSize.for(frame_location_size.size),
               parent_scroll_position: Applitools::Selenium::ScrollPositionProvider.new(parent).current_position
             )
           )

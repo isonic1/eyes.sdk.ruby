@@ -1,4 +1,4 @@
-module Applitools::Core
+module Applitools
   module Helpers
     def abstract_attr_accessor(*names)
       names.each do |method_name|

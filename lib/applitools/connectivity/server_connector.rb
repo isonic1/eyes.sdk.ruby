@@ -44,7 +44,7 @@ module Applitools::Connectivity
       Applitools::EyesLogger.debug 'Sending match data...'
       res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status}") unless res.success?
-      Applitools::Core::MatchResult.new Oj.load(res.body)
+      Applitools::MatchResult.new Oj.load(res.body)
     end
 
     def start_session(session_start_info)
@@ -53,7 +53,7 @@ module Applitools::Connectivity
       raise Applitools::EyesError.new("Request failed: #{res.status}") unless res.success?
 
       response = Oj.load(res.body)
-      Applitools::Core::Session.new(response['id'], response['url'], res.status == HTTP_STATUS_CODES[:created])
+      Applitools::Session.new(response['id'], response['url'], res.status == HTTP_STATUS_CODES[:created])
     end
 
     def stop_session(session, aborted = nil, save = false)
@@ -61,7 +61,7 @@ module Applitools::Connectivity
       raise Applitools::EyesError.new("Request failed: #{res.status}") unless res.success?
 
       response = Oj.load(res.body)
-      Applitools::Core::TestResults.new(response)
+      Applitools::TestResults.new(response)
     end
 
     private

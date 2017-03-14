@@ -26,7 +26,7 @@ module Applitools::Selenium
       set_position_retries = 3
       while current_position.nil? ||
           (current_position.x.nonzero? || current_position.y.nonzero?) && set_position_retries > 0
-        origin_provider.position = Applitools::Core::Location.new(0, 0)
+        origin_provider.position = Applitools::Location.new(0, 0)
         sleep wait_before_screenshot
         current_position = origin_provider.current_position
         set_position_retries -= 1
@@ -43,7 +43,7 @@ module Applitools::Selenium
       rescue Applitools::EyesDriverOperationException => e
         logger.error "Failed to extract entire size of region context: #{e.message}"
         logger.error "Using image size instead: #{image.width}x#{image.height}"
-        entire_size = Applitools::Core::RectangleSize.new image.width, image.height
+        entire_size = Applitools::RectangleSize.new image.width, image.height
       end
 
       logger.info 'Getting top/left image...'
@@ -57,8 +57,8 @@ module Applitools::Selenium
         left_top_image = screenshot.sub_screenshot(region_provider.region, region_provider.coordinate_type)
       else
         left_top_image = screenshot.sub_screenshot(
-          Applitools::Core::Region.from_location_size(Applitools::Core::Location.new(0, 0), entire_size),
-          Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+          Applitools::Region.from_location_size(Applitools::Location.new(0, 0), entire_size),
+          Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
         )
       end
 
@@ -72,28 +72,28 @@ module Applitools::Selenium
         return image
       end
 
-      part_image_size = Applitools::Core::RectangleSize.new image.width,
+      part_image_size = Applitools::RectangleSize.new image.width,
         [image.height - MAX_SCROLL_BAR_SIZE, MIN_SCREENSHOT_PART_HEIGHT].max
 
       logger.info "Total size: #{entire_size}, image_part_size: #{part_image_size}"
 
       # Getting the list of sub-regions composing the whole region (we'll
       # take screenshot for each one).
-      entire_page = Applitools::Core::Region.from_location_size Applitools::Core::Location::TOP_LEFT, entire_size
+      entire_page = Applitools::Region.from_location_size Applitools::Location::TOP_LEFT, entire_size
       image_parts = entire_page.sub_regions(part_image_size)
 
       logger.info "Creating stitchedImage container. Size: #{entire_size}"
 
       # Notice stitched_image uses the same type of image as the screenshots.
-      stitched_image = Applitools::Core::Screenshot.from_region entire_size
+      stitched_image = Applitools::Screenshot.from_region entire_size
       logger.info 'Done! Adding initial screenshot..'
       logger.info "Initial part:(0,0) [#{image.width} x #{image.height}]"
 
       stitched_image.replace! image, 0, 0
       logger.info 'Done!'
 
-      last_successful_location = Applitools::Core::Location.new 0, 0
-      last_successful_part_size = Applitools::Core::RectangleSize.new image.width, image.height
+      last_successful_location = Applitools::Location.new 0, 0
+      last_successful_part_size = Applitools::RectangleSize.new image.width, image.height
 
       original_stitched_state = position_provider.state
 
@@ -115,11 +115,11 @@ module Applitools::Selenium
 
         logger.info 'Done!'
         begin
-          region_to_check = Applitools::Core::Region.from_location_size(
+          region_to_check = Applitools::Region.from_location_size(
             part_region.location.offset(region_provider.region.location), part_region.size
           )
           a_screenshot = eyes_screenshot_factory.call(part_image).sub_screenshot(region_to_check,
-            Applitools::Core::EyesScreenshot::COORDINATE_TYPES[:context_relative], false)
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative], false)
         rescue Applitools::OutOfBoundsException => e
           logger.error e.message
           break
@@ -130,9 +130,9 @@ module Applitools::Selenium
         stitched_image.replace! a_screenshot.image, part_region.x, part_region.y
         logger.info 'Done!'
 
-        last_successful_location = Applitools::Core::Location.for part_region.x, part_region.y
+        last_successful_location = Applitools::Location.for part_region.x, part_region.y
         next unless a_screenshot
-        last_successful_part_size = Applitools::Core::RectangleSize.new(
+        last_successful_part_size = Applitools::RectangleSize.new(
           a_screenshot.image.width,
           a_screenshot.image.height
         )

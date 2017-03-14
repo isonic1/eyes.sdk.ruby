@@ -11,8 +11,8 @@ module Applitools::Selenium
       raise Applitools::EyesIllegalArgument.new 'Passed element is not Applitools::Selenium::Element instance!' unless
           element.is_a? Applitools::Selenium::Element
       self.element = element
-      self.location = Applitools::Core::Location.for element.location
-      self.size = Applitools::Core::RectangleSize.for element.size
+      self.location = Applitools::Location.for element.location
+      self.size = Applitools::RectangleSize.for element.size
       calculate_location_size
     end
 
@@ -29,13 +29,13 @@ module Applitools::Selenium
       padding_top = element.padding_top_width
       padding_bottom = element.padding_bottom_width
 
-      location.offset Applitools::Core::Location.new(border_left + padding_left, border_top + padding_top)
-      size - Applitools::Core::RectangleSize.new(padding_left + padding_right + border_left + border_right,
+      location.offset Applitools::Location.new(border_left + padding_left, border_top + padding_top)
+      size - Applitools::RectangleSize.new(padding_left + padding_right + border_left + border_right,
         padding_top + padding_bottom + border_top + border_bottom)
 
     rescue Applitools::EyesDriverOperationException
-      self.location = Applitools::Core::Location.for element.location
-      self.size = Applitools::Core::RectangleSize.for element.size
+      self.location = Applitools::Location.for element.location
+      self.size = Applitools::RectangleSize.for element.size
     end
   end
 end
