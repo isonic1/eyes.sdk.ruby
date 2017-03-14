@@ -3,8 +3,9 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'applitools/version'
 
-module_files = `git ls-files lib/eyes_core/images`.split($RS) + `git ls-files lib/eyes_core/selenium`.split($RS) +
-  ['lib/eyes_images', 'lib/eyes_core/capybara', 'lib/eyes_selenium']
+module_files = `git ls-files lib/eyes_core/images`.split($RS) + `git ls-files lib/applitools/selenium`.split($RS) +
+  `git ls-files lib/applitools/poltergeist`.split($RS) +
+  ['lib/eyes_images', 'lib/applitools/capybara', 'lib/eyes_selenium']
 
 CURRENT_RUBY_VERSION = Gem::Version.new RUBY_VERSION
 
