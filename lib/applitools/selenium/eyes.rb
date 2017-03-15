@@ -83,7 +83,7 @@ module Applitools::Selenium
     # @param server_url The Eyes Server URL
     def initialize(server_url = nil)
       super
-      self.base_agent_id = "eyes.selenium.ruby/#{Applitools::VERSION})".freeze
+      self.base_agent_id = "eyes.selenium.ruby/#{Applitools::VERSION}".freeze
       self.check_frame_or_element = false
       self.region_to_check = nil
       self.force_full_page_screenshot = false

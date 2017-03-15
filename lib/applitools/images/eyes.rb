@@ -24,7 +24,7 @@ module Applitools::Images
     # @param server_url The Eyes Server URL
     def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
       super
-      self.base_agent_id = 'eyes.images.ruby/1.0.0'
+      self.base_agent_id = "eyes.images.ruby/#{Applitools::VERSION}".freeze
     end
 
     # Starts a test.
