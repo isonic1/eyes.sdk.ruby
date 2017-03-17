@@ -23,7 +23,7 @@ module Applitools
         result = send(field)
         result = result.to_hash if result.respond_to? :to_hash
         [field, result] if [String, Symbol, Hash, Array, FalseClass, TrueClass].include? result.class
-      end
+      end.compact
       Hash[ary]
     end
 
