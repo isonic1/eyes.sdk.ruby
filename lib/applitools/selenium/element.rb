@@ -70,7 +70,7 @@ module Applitools::Selenium
     end
     alias send_key send_keys
 
-    def boubds
+    def bounds
       point = location
       left = point.x
       top = point.y
