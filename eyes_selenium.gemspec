@@ -21,4 +21,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'eyes_core', "= #{Applitools::VERSION}"
   spec.add_dependency 'selenium-webdriver'
   spec.add_dependency 'capybara'
+  spec.add_dependency 'watir'
 end
