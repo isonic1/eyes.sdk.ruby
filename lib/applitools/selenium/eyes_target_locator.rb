@@ -170,7 +170,7 @@ module Applitools::Selenium
         logger.info 'Scrolling by parent scroll position...'
         # scroll_position_provider.scroll_to frame.parent_scroll_position
         logger.info 'Done! Switching to frame...'
-        frame frame_element: frame.reference
+        frame(frame_element: frame.reference)
         logger.info 'Done!'
         logger.info 'Done switching into nested frames!'
         driver
