@@ -122,7 +122,7 @@ module Applitools
       end
 
       Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
-      default_options = { session_type: 'SEQUENTAL' }
+      default_options = { session_type: 'SEQUENTIAL' }
       options = default_options.merge options
 
       if app_name.nil?
