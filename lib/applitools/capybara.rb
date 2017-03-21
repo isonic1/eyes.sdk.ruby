@@ -1,6 +1,6 @@
 require 'capybara'
 
-Applitools.require_dir 'selenium/capybara'
+Applitools::Selenium.require_dir 'selenium/capybara'
 
 module Applitools
   extend Applitools::Selenium::Capybara::CapybaraSettings

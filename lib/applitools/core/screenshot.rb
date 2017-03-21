@@ -5,7 +5,7 @@ module Applitools
 
     class << self
       def from_region(region)
-        new ChunkyPNG::Image.new(region.width, region.height).to_blob
+        new ::ChunkyPNG::Image.new(region.width, region.height).to_blob
       end
     end
 
