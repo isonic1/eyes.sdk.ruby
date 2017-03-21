@@ -6,10 +6,13 @@ eyes = Applitools::Images::Eyes.new
 eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 
+viber_home_image_bytes = File.read('./images/viber-home.png', mode:'rb')
+viber_home_image = Applitools::Screenshot.new viber_home_image_bytes
+
 eyes.test(app_name: 'Eyes.Java', test_name: 'home1') do
   eyes.check_image(image_path: './images/viber-home.png')
   eyes.check_region(
-    image_path: './images/viber-home.png',
+    image_bytes: viber_home_image_bytes,
     region: Applitools::Region.new(1773, 372, 180, 220),
     tag: 'Bada region'
   )
@@ -18,6 +21,6 @@ eyes.test(app_name: 'Eyes.Java', test_name: 'home1') do
 end
 
 eyes.test(app_name: 'Eyes.Java', test_name: 'home2') do
-  eyes.check_image(image_path: './images/viber-home.png')
+  eyes.check_image(image: viber_home_image)
   eyes.check_image(image_path: './images/viber-bada.png')
 end

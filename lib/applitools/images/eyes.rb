@@ -186,10 +186,10 @@ module Applitools::Images
     alias set_viewport_size vp_size=
 
     def get_image_from_options(options)
-      if options[:image].nil? && !options[:image].is_a?(Applitools::Screenshot)
+      if options[:image].nil? || !options[:image].is_a?(Applitools::Screenshot)
         if !options[:image_path].nil? && !options[:image_path].empty?
           image = Applitools::Screenshot.new ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
-        elsif options[:image_bytes].nil? && !options[:image_bytes].empty?
+        elsif !options[:image_bytes].nil? && !options[:image_bytes].empty?
           image = Applitools::Screenshot.new options[:image_bytes]
         end
       else
