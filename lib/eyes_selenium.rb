@@ -12,7 +12,6 @@ module Applitools::Selenium
   end
 end
 
-
 Applitools::Selenium.require_dir 'selenium'
 Applitools::Selenium.require_dir 'poltergeist'
 
