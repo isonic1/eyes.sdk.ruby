@@ -138,6 +138,12 @@ module Applitools::Selenium
 
       self.position_provider = self.class.position_provider(stitch_mode, driver)
 
+      self.eyes_screenshot_factory = lambda do |image|
+        Applitools::Selenium::EyesWebDriverScreenshot.new(
+            image, driver: @driver, force_offset: position_provider.force_offset
+        )
+      end
+
       open_base options
       @driver
     end
