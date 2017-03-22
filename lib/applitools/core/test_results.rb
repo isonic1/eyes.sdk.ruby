@@ -3,7 +3,7 @@ require 'yaml'
 module Applitools
   class TestResults
     attr_accessor :is_new, :url
-    attr_reader :steps, :matches, :mismatches, :missing
+    attr_reader :steps, :matches, :mismatches, :missing, :original_results
 
     def initialize(results = {})
       @steps = results.fetch('steps', 0)
