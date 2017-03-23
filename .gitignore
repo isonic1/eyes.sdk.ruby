@@ -5,6 +5,7 @@
 .config
 .yardoc
 Gemfile.lock
+!/*/Gemfile.lock
 InstalledFiles
 _yardoc
 coverage
@@ -18,13 +19,15 @@ spec/reports
 tmp
 # C ext compilation
 ext/eyes_core/Makefile
-ext/eyes_core/resampling_fast.so
-ext/eyes_core/resampling_fast_ext.o
-ext/eyes_core/resampling_fast.bundle
+
 ext/eyes_core/.*
-ext/eyes_core/.time
-ext/applitools/*.time
+ext/eyes_core/*.time
+ext/eyes_core/eyes_core.o
+ext/eyes_core/eyes_core.so
+
 
 # Local RVM files
 .ruby-gemset
+!/*/.ruby-gemset
 .ruby-version
+!/*/.ruby-version
