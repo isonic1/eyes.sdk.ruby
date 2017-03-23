@@ -85,7 +85,8 @@ module Applitools::Selenium
       logger.info "Creating stitchedImage container. Size: #{entire_size}"
 
       # Notice stitched_image uses the same type of image as the screenshots.
-      stitched_image = Applitools::Screenshot.from_region entire_size
+      # stitched_image = Applitools::Screenshot.from_region entire_size
+      stitched_image = ::ChunkyPNG::Image.new(entire_size.width, entire_size.height)
       logger.info 'Done! Adding initial screenshot..'
       logger.info "Initial part:(0,0) [#{image.width} x #{image.height}]"
 
@@ -156,7 +157,7 @@ module Applitools::Selenium
         logger.info 'Done!'
       end
 
-      stitched_image
+      Applitools::Screenshot.new(stitched_image)
     end
   end
 end
