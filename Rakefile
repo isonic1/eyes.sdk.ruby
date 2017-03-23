@@ -12,6 +12,12 @@ require 'rubocop/rake_task'
 
 RSpec::Core::RakeTask.new('spec')
 
-task :default => :spec
-
 RuboCop::RakeTask.new
+
+task :perform_tests => [:spec, :rubocop]
+task :default => :perform_tests
+
+task :export_to_docker do
+  branch_name = `git branch | grep \\* | cut -d ' ' -f2`
+  `git archive #{branch_name.chomp} -o ./pkg/repo.tar.gz`
+end
