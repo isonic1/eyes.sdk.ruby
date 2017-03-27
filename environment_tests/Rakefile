@@ -1,5 +1,6 @@
 #!/usr/bin/env rake
 require 'rake/clean'
+require 'knapsack'
 
 require 'rspec/core/rake_task'
 
@@ -9,5 +10,7 @@ task :export_to_docker do
   `bin/create_git_archive.sh`
 end
 
+
+Knapsack.load_tasks if defined?(Knapsack)
 
 
