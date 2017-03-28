@@ -18,7 +18,11 @@ typedef unsigned char BYTE; // Bytes use 8 bits unsigned integers
 void Init_resampling();
 
 VALUE c_interpolate_cubic(VALUE,VALUE);
+VALUE raw_interpolate_cubic(VALUE, double, VALUE, VALUE, VALUE, VALUE);
+VALUE scale_points2(VALUE, VALUE, VALUE, VALUE, VALUE);
 VALUE c_merge_pixels(VALUE, VALUE);
+VALUE raw_merge_pixels(VALUE[], unsigned int);
+VALUE c_bicubic_points(VALUE, VALUE, VALUE, VALUE);
 BYTE interpolate_char(double, BYTE, BYTE, BYTE, BYTE);
 
 #endif
