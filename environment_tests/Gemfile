@@ -3,5 +3,3 @@ source :rubygems
 gem 'rake'
 gem 'rspec'
 gem 'rspec-shell-expectations'
-
-gem 'knapsack'
