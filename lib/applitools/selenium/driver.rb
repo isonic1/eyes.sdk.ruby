@@ -99,7 +99,7 @@ module Applitools::Selenium
     # @param [:Symbol] format A format to store screenshot (one of +:base64+ or +:png+)
     # @return [String] A byte string, representing the screenshot
     def screenshot_as(format)
-      raise "Invalid format (#{format}) passed! Available formats: :png, :base64" unless %i(base64 png).include? format
+      raise "Invalid format (#{format}) passed! Available formats: :png, :base64" unless [:base64, :png].include? format
       png_screenshot = driver.screenshot_as(:png)
       yield png_screenshot if block_given?
       screenshot = Applitools::Screenshot.new(png_screenshot)

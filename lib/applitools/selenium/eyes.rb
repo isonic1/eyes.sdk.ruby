@@ -140,7 +140,7 @@ module Applitools::Selenium
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::EyesWebDriverScreenshot.new(
-            image, driver: @driver, force_offset: position_provider.force_offset
+          image, driver: @driver, force_offset: position_provider.force_offset
         )
       end
 
@@ -327,7 +327,7 @@ module Applitools::Selenium
           '  or :frame_chain option or :frames_path option'
       end
 
-      if (needed_keys = (options.keys & %i(index name_or_id frame_element frame_chain frames_path))).length == 1
+      if (needed_keys = (options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path])).length == 1
         frame_key = needed_keys.first
       else
         raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' \
@@ -393,7 +393,7 @@ module Applitools::Selenium
           'or :frame_chain option or :frames_path option'
       end
 
-      if (needed_keys = (options.keys & %i(index name_or_id frame_element frame_chain frames_path))).length == 1
+      if (needed_keys = (options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path])).length == 1
         frame_key = needed_keys.first
       else
         raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' /

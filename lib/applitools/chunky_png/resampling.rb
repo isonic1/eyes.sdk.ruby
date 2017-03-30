@@ -1,3 +1,15 @@
+module Applitools
+  class Enumerator < ::Enumerator
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.0.0')
+      attr_reader :size
+      def initialize(*args)
+        @size = args[0] if args.size == 1
+        super()
+      end
+    end
+  end
+end
+
 module Applitools::ChunkyPNG
   module Resampling
     def resample_bicubic!(dst_width, dst_height)
@@ -60,7 +72,7 @@ module Applitools::ChunkyPNG
         steps[i] = (i * step).to_i
         residues[i] = i * step - steps[i]
       end
-      Enumerator.new(pixels_size) do |enum|
+      Applitools::Enumerator.new(pixels_size) do |enum|
         (y_start_position..y_bounds - 1).each do |y|
           line = (direction ? column(y) : row(y))
 
@@ -79,7 +91,7 @@ module Applitools::ChunkyPNG
     end
 
     def scale_points(dst_width, dst_height, w_m, h_m)
-      Enumerator.new(dst_width * dst_height) do |enum|
+      Applitools::Enumerator.new(dst_width * dst_height) do |enum|
         (0..dst_height - 1).each do |i|
           (0..dst_width - 1).each do |j|
             pixels_to_merge = []
