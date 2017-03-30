@@ -45,3 +45,5 @@ end
 
 desc 'Run default tests for different ruby versions'
 task environment_test: ['export_to_docker', 'docker:build_images', 'spec']
+
+Knapsack.load_tasks if defined?(Knapsack)
