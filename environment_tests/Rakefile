@@ -2,6 +2,7 @@
 require 'rake/clean'
 require 'rspec/core/rake_task'
 require_relative 'spec/docker_files_list'
+require 'knapsack'
 
 CLOBBER.include 'log/*.log'
 RSpec::Core::RakeTask.new('spec')
@@ -44,6 +45,6 @@ task :export_to_docker do
 end
 
 desc 'Run default tests for different ruby versions'
-task environment_test: ['export_to_docker', 'docker:build_images', 'spec']
+task prepare_environment_test: ['export_to_docker', 'docker:build_images']
 
-Knapsack.load_tasks if defined?(Knapsack)
+Knapsack.load_tasks
