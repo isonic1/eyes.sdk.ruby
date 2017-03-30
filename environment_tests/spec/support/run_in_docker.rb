@@ -1,4 +1,4 @@
-RSpec.shared_examples "run in docker container" do |dockerfile|
+RSpec.shared_examples 'run in docker container' do |dockerfile|
   include Rspec::Shell::Expectations
 
   let(:stubbed_env) { create_stubbed_env }
