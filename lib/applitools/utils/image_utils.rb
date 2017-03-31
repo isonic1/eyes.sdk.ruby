@@ -84,7 +84,9 @@ module Applitools::Utils
       image_ratio = image.width.to_f / image.height.to_f
       scale_width = (image.width * scale_ratio).ceil
       scale_height = (scale_width / image_ratio).ceil
-      resize_image!(image, scale_width, scale_height)
+      buffered_image = image.image
+      resize_image!(buffered_image, scale_width, scale_height)
+      image.update!(buffered_image)
     end
 
     def scale(image, scale_ratio)
@@ -95,7 +97,7 @@ module Applitools::Utils
       Applitools::ArgumentGuard.not_nil(new_width, 'new_width')
       Applitools::ArgumentGuard.not_nil(new_height, 'new_height')
       Applitools::ArgumentGuard.not_nil(image, 'image')
-      Applitools::ArgumentGuard.is_a?(image, 'image', Applitools::Screenshot)
+      Applitools::ArgumentGuard.is_a?(image, 'image', ::ChunkyPNG::Image)
 
       raise Applitools::EyesIllegalArgument.new "Invalid width: #{new_width}" if new_width <= 0
       raise Applitools::EyesIllegalArgument.new "Invalid height: #{new_height}" if new_height <= 0
