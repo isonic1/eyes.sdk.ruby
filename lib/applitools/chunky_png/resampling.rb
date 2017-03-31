@@ -1,6 +1,3 @@
-require 'benchmark'
-require 'pry'
-
 module Applitools::ChunkyPNG
   module Resampling
     def resample_bicubic!(dst_width, dst_height)
