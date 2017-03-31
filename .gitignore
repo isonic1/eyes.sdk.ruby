@@ -20,11 +20,11 @@ tmp
 # C ext compilation
 ext/eyes_core/Makefile
 
-ext/eyes_core/.*
 ext/eyes_core/*.time
-ext/eyes_core/eyes_core.o
-ext/eyes_core/eyes_core.so
-
+ext/eyes_core/*.o
+ext/eyes_core/*.so
+ext/applitools/*.time
+ext/eyes_core/*.bundle
 
 # Local RVM files
 .ruby-gemset
