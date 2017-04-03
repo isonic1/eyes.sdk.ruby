@@ -13,9 +13,12 @@ module Applitools::Selenium
   RUBY_KEY = [RUBY_1_9_3, RUBY_2_0_0, RUBY_2_2_2, RUBY_2_4_0].select { |v| v <= CURRENT_RUBY_VERSION }.last
 
   EYES_GEM_SPECS = {
-      RUBY_2_0_0 => proc do |spec|
-        spec.add_dependency 'nokogiri', '~> 1.6'
-      end
+    RUBY_1_9_3 => proc {},
+    RUBY_2_0_0 => proc do |spec|
+      spec.add_dependency 'nokogiri', '~> 1.6'
+    end,
+    RUBY_2_2_2 => proc {},
+    RUBY_2_4_0 => proc {}
   }.freeze
 end
 
