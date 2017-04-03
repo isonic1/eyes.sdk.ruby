@@ -23,7 +23,7 @@ namespace :docker do
     image_id = `docker images -q #{tag}`
     if image_id.empty?
       puts "Building the image: \"#{tag}\""
-      %x("docker build -t #{tag} -f #{file} ..")
+      `docker build -t #{tag} -f #{file} ..`
       puts 'Done!'
     else
       puts "Image #{tag} already exists. Skipping it."
@@ -34,7 +34,7 @@ namespace :docker do
   task :remove_images do
     DockerFilesList.dockerfiles do |dockerfile, _dir|
       image_id = `docker images -q #{dockerfile}`
-      %x("docker rmi -f #{image_id}") unless image_id.empty?
+      `docker rmi -f #{image_id}` unless image_id.empty?
     end
   end
 end
