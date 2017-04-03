@@ -48,14 +48,14 @@ desc 'Run default tests for different ruby versions'
 task prepare_environment_test: ['export_to_docker', 'docker:build_images']
 
 desc 'Run environment test in one thread'
-task environment_test: :prepare_environment_test do
+task :environment_test => :prepare_environment_test do
   ENV['KNAPSACK_GENERATE_REPORT'] = 'true'
   Rake::Task['spec'].invoke
 end
 
 task :run_knapsack_test_in_background, [:threads, :index] do |_t, args|
   pid = Process.spawn(
-    {'CI_NODE_TOTAL' => args[:threads].to_s, 'CI_NODE_INDEX' => args[:index].to_s},
+    { 'CI_NODE_TOTAL' => args[:threads].to_s, 'CI_NODE_INDEX' => args[:index].to_s },
     'bundle', 'exec', 'rake', 'knapsack:rspec'
   )
   Process.detach pid
