@@ -124,7 +124,7 @@ VALUE raw_merge_pixels(VALUE merge_pixels[], unsigned int size) {
 }
 
 VALUE c_bicubic_points(VALUE self, VALUE src_dimension, VALUE dst_dimension, VALUE direction) {
-  unsigned long y_bounds, pixels_size, c_src_dimension, c_dst_dimension, index, index_y;
+  unsigned long y_bounds, pixels_size, c_src_dimension, c_dst_dimension, index, index_y, i, y, x;
   double step;
   VALUE result_array;
 
@@ -146,16 +146,16 @@ VALUE c_bicubic_points(VALUE self, VALUE src_dimension, VALUE dst_dimension, VAL
   pixels_size = y_bounds * c_dst_dimension;
   result_array = rb_ary_new2(pixels_size);
 
-  for (unsigned long i=0; i < c_dst_dimension; i++) {
+  for (i = 0; i < c_dst_dimension; i++) {
     steps[i] = (unsigned long)i*step;
     residues[i] = i*step - steps[i];
   };
 
-  for (unsigned long y=0; y < y_bounds; y++) {
+  for (y = 0; y < y_bounds; y++) {
     line_bounds = rb_funcall(self, rb_intern("line_with_bounds"), 3, UINT2NUM(y), src_dimension, direction);
 
     index_y = c_dst_dimension * y;
-    for (unsigned long x=0; x < c_dst_dimension; x++) {
+    for (x = 0; x < c_dst_dimension; x++) {
       if (RTEST(direction)) {
         index = y_bounds * x + y;
       } else {
@@ -174,8 +174,8 @@ VALUE c_bicubic_points(VALUE self, VALUE src_dimension, VALUE dst_dimension, VAL
 }
 
 VALUE scale_points2(VALUE self, VALUE dst_width, VALUE dst_height, VALUE w_m, VALUE h_m) {
-  unsigned long c_dst_height, c_dst_width, y_pos, x_pos, index;
-  unsigned int c_w_m, c_h_m, buffer_index, buffer_size;
+  unsigned long c_dst_height, c_dst_width, y_pos, x_pos, index, i, j;
+  unsigned int c_w_m, c_h_m, buffer_index, buffer_size, x, y;
   VALUE pixels_to_merge [NUM2UINT(w_m) * NUM2UINT(h_m)];
   VALUE result;
 
@@ -188,12 +188,12 @@ VALUE scale_points2(VALUE self, VALUE dst_width, VALUE dst_height, VALUE w_m, VA
   result = rb_ary_new2(c_dst_width * c_dst_height);
   buffer_size = c_h_m * c_w_m;
 
-  for (unsigned long i = 0; i < c_dst_height; i++) {
-    for (unsigned long j = 0; j < c_dst_width; j++) {
+  for (i = 0; i < c_dst_height; i++) {
+    for (j = 0; j < c_dst_width; j++) {
       buffer_index = 0;
-      for (unsigned int y = 0; y < c_h_m; y++) {
+      for (y = 0; y < c_h_m; y++) {
         y_pos = i * c_h_m + y;
-        for (unsigned int x = 0; x < c_w_m; x++) {
+        for (x = 0; x < c_w_m; x++) {
           x_pos = j * c_w_m + x;
           pixels_to_merge[buffer_index++] = rb_funcall(self, rb_intern("get_pixel"), 2, UINT2NUM(x_pos), UINT2NUM(y_pos));
         }
