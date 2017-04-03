@@ -13,6 +13,13 @@ module Applitools
       @datastream = ::ChunkyPNG::Datastream.from_string image
     end
 
+    def update!(image)
+      Applitools::ArgumentGuard.not_nil(image, 'image')
+      Applitools::ArgumentGuard.is_a?(image, 'image', ::ChunkyPNG::Image)
+      @datastream = image.to_datastream
+      self
+    end
+
     def to_blob
       @datastream.to_blob
     end
@@ -20,6 +27,8 @@ module Applitools
     def __getobj__
       restore
     end
+
+    alias image __getobj__
 
     def header
       @datastream.header_chunk
