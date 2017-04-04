@@ -1,4 +1,3 @@
-require 'pry'
 module Applitools
   class Screenshot < Delegator
     class << self
@@ -45,6 +44,7 @@ module Applitools
     class Datastream < self
       extend Forwardable
       def_delegators :header, :width, :height
+      attr_reader :datastream
 
       def initialize(image)
         Applitools::ArgumentGuard.not_nil(image, 'image')
@@ -53,7 +53,6 @@ module Applitools
         ) unless image.is_a?(String)
 
         @datastream = ::ChunkyPNG::Datastream.from_string image
-
       end
 
       def update!(image)
@@ -65,10 +64,6 @@ module Applitools
 
       def to_blob
         @datastream.to_blob
-      end
-
-      def datastream
-        @datastream
       end
 
       def header
@@ -92,14 +87,12 @@ module Applitools
     end
 
     class Image < self
+      attr_reader :image
+
       def initialize(image)
         Applitools::ArgumentGuard.not_nil(image, 'image')
         Applitools::ArgumentGuard.is_a?(image, 'image', ::ChunkyPNG::Image)
         @image = image
-      end
-
-      def image
-        return @image
       end
 
       def update!(image)

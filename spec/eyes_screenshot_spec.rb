@@ -12,7 +12,7 @@ RSpec.describe Applitools::EyesScreenshot do
   describe 'methods:' do
     subject do
       Applitools::EyesScreenshot.new(
-        Applitools::Screenshot.new(ChunkyPNG::Image.new(1, 1, ChunkyPNG::Color::TRANSPARENT).to_blob)
+        Applitools::Screenshot.from_datastream(ChunkyPNG::Image.new(1, 1, ChunkyPNG::Color::TRANSPARENT).to_blob)
       )
     end
 

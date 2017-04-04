@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'pry'
 
 RSpec.describe Applitools::Screenshot do
-
   must_have_methods = [
     :image,
     :to_blob,
@@ -34,7 +33,7 @@ RSpec.describe Applitools::Screenshot do
       expect(obj).to be_a(subject)
     end
 
-    it ':from_region returns Applitools::Screenshot::Image'do
+    it ':from_region returns Applitools::Screenshot::Image' do
       obj = subject.from_region(region)
       expect(obj).to be_a(subject::Image)
       expect(obj).to be_a(subject)

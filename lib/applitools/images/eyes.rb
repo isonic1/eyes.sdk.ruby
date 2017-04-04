@@ -186,19 +186,17 @@ module Applitools::Images
     alias set_viewport_size vp_size=
 
     def get_image_from_options(options)
-      if options[:image].nil? || !options[:image].is_a?(Applitools::Screenshot)
-        if !options[:image_path].nil? && !options[:image_path].empty?
-          image = Applitools::Screenshot.from_datastream ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
-        elsif !options[:image_bytes].nil? && !options[:image_bytes].empty?
-          image = Applitools::Screenshot.from_datastream options[:image_bytes]
-        end
-      else
-        if image.is_a? ChunkyPNG::Image
-          image = Applitools::Screenshot.from_image options[:image]
-        else
-          image = options[:image]
-        end
-      end
+      image = if options[:image].nil? || !options[:image].is_a?(Applitools::Screenshot)
+                if !options[:image_path].nil? && !options[:image_path].empty?
+                  Applitools::Screenshot.from_datastream ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
+                elsif !options[:image_bytes].nil? && !options[:image_bytes].empty?
+                  Applitools::Screenshot.from_datastream options[:image_bytes]
+                end
+              elsif options[:image].is_a? ChunkyPNG::Image
+                Applitools::Screenshot.from_image options[:image]
+              else
+                options[:image]
+              end
 
       Applitools::ArgumentGuard.not_nil image, 'options[:image] can\'t be nil!'
 
