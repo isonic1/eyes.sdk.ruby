@@ -22,7 +22,7 @@ module Applitools::Selenium
         screenshot = driver.screenshot_as(:png)
       end
       logger.info 'Done getting screenshot! Creating Applitools::Screenshot...'
-      Applitools::Screenshot.new screenshot
+      Applitools::Screenshot.from_datastream screenshot
     end
 
     private

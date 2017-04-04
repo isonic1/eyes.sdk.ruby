@@ -188,12 +188,16 @@ module Applitools::Images
     def get_image_from_options(options)
       if options[:image].nil? || !options[:image].is_a?(Applitools::Screenshot)
         if !options[:image_path].nil? && !options[:image_path].empty?
-          image = Applitools::Screenshot.new ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
+          image = Applitools::Screenshot.from_datastream ChunkyPNG::Datastream.from_file(options[:image_path]).to_s
         elsif !options[:image_bytes].nil? && !options[:image_bytes].empty?
-          image = Applitools::Screenshot.new options[:image_bytes]
+          image = Applitools::Screenshot.from_datastream options[:image_bytes]
         end
       else
-        image = options[:image]
+        if image.is_a? ChunkyPNG::Image
+          image = Applitools::Screenshot.from_image options[:image]
+        else
+          image = options[:image]
+        end
       end
 
       Applitools::ArgumentGuard.not_nil image, 'options[:image] can\'t be nil!'

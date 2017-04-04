@@ -84,7 +84,7 @@ module Applitools::Images
           " screenshot bounds #{bounds}"
       end
 
-      sub_screenshot_image = Applitools::Screenshot.new image.crop(sub_screen_region.left, sub_screen_region.top,
+      sub_screenshot_image = Applitools::Screenshot.from_any_image image.crop(sub_screen_region.left, sub_screen_region.top,
         sub_screen_region.width, sub_screen_region.height).to_datastream.to_blob
 
       relative_sub_screenshot_region = convert_region_location(sub_screen_region, SCREENSHOT_AS_IS, CONTEXT_RELATIVE)
