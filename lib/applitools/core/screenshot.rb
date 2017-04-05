@@ -50,7 +50,7 @@ module Applitools
         Applitools::ArgumentGuard.not_nil(image, 'image')
         unless image.is_a?(String)
           Applitools::ArgumentGuard.raise_argument_error(
-              "Expected image to be Datastream or String, but got #{image.class}"
+            "Expected image to be Datastream or String, but got #{image.class}"
           )
         end
         @datastream = ::ChunkyPNG::Datastream.from_string image
