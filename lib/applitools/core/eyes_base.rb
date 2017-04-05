@@ -62,7 +62,7 @@ module Applitools
         end
       end
 
-      self.default_match_settings = MATCH_LEVEL[:exact]
+      @default_match_settings = { match_level: MATCH_LEVEL[:strict], exact: nil }
     end
 
     def full_agent_id
@@ -71,6 +71,14 @@ module Applitools
       else
         base_agent_id
       end
+    end
+
+    def match_level=(level)
+      @default_match_settings[:match_level] = level
+    end
+
+    def match_level
+      @default_match_settings[:match_level]
     end
 
     def disabled=(value)
@@ -283,8 +291,7 @@ module Applitools
     private
 
     attr_accessor :running_session, :last_screenshot, :current_app_name, :test_name, :session_type,
-      :scale_provider, :default_match_settings, :session_start_info,
-      :should_match_window_run_once_on_timeout, :app_output_provider
+      :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider
 
     attr_reader :user_inputs
 
@@ -405,7 +412,6 @@ module Applitools
                                                 scenario_id_or_name: test_name, batch_info: test_batch,
                                                 env_name: baseline_name, environment: app_env,
                                                 default_match_settings: default_match_settings,
-                                                match_level: default_match_settings,
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name
 
       logger.info 'Starting server session...'
