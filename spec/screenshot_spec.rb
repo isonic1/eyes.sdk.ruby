@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'pry'
 
 RSpec.describe Applitools::Screenshot do
   must_have_methods = [
