@@ -157,7 +157,7 @@ module Applitools::Selenium
         logger.info 'Done!'
       end
 
-      Applitools::Screenshot.new(stitched_image.to_blob)
+      Applitools::Screenshot.from_any_image(stitched_image.to_blob)
     end
   end
 end
