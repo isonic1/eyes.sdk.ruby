@@ -32,7 +32,7 @@ module Applitools
     def ==(other)
       if other.is_a? self.class
         result = true
-        %i(is_new url steps matches mismatches missing).each do |field|
+        %w(is_new url steps matches mismatches missing).each do |field|
           result &&= send(field) == other.send(field)
         end
         return result if result

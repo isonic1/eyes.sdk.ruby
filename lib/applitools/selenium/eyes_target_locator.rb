@@ -21,7 +21,7 @@ module Applitools::Selenium
     def frame(options = {})
       raise Applitools::EyesIllegalArgument.new 'You must pass :index or :name_or_id or :frame_element option' unless
           options[:index] || options[:name_or_id] || options[:frame_element]
-      if (needed_keys = (options.keys & %i(index name_or_id frame_element))).length == 1
+      if (needed_keys = (options.keys & [:index, :name_or_id, :frame_element])).length == 1
         send "frame_by_#{needed_keys.first}", options[needed_keys.first]
       else
         raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' /
@@ -48,7 +48,7 @@ module Applitools::Selenium
       raise Applitools::EyesIllegalArgument.new 'You must pass :frame_chain or :frames_path' if
           options[:frame_chain].nil? & options[:frames_path].nil?
 
-      if (needed_keys = (options.keys & %i(frame_chain frames_path))).length == 1
+      if (needed_keys = (options.keys & [:frame_chain, :frames_path])).length == 1
         send "frames_by_#{needed_keys.first}", options[needed_keys.first]
       else
         raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' /
