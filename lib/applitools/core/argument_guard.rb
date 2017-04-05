@@ -31,5 +31,9 @@ module Applitools
       raise Applitools::EyesIllegalArgument.new "Expected #{param_name} to be" \
         " instance of #{klass}"
     end
+
+    def raise_argument_error(error)
+      raise Applitools::EyesIllegalArgument.new error
+    end
   end
 end
