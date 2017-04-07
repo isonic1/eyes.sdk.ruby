@@ -1,6 +1,15 @@
-require 'benchmark'
+module Applitools
+  class Enumerator < ::Enumerator
+    if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.0.0')
+      attr_reader :size
+      def initialize(*args)
+        @size = args[0] if args.size == 1
+        super()
+      end
+    end
+  end
+end
 
-require 'pry'
 module Applitools::ChunkyPNG
   module Resampling
     def resample_bicubic!(dst_width, dst_height)

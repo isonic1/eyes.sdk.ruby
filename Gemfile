@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source :rubygems
 
 gemspec name: 'eyes_core'
 gemspec :name => 'eyes_selenium', :development_group => :eyes_selenium

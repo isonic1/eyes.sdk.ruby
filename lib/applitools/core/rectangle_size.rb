@@ -1,5 +1,7 @@
+require_relative 'hash_extension'
 module Applitools
   RectangleSize = Struct.new(:width, :height) do
+    include Applitools::HashExtension
     class << self
       def from_any_argument(value)
         return from_string(value) if value.is_a? String
@@ -25,6 +27,11 @@ module Applitools
       end
     end
 
+    def initialize(*args)
+      super
+      struct_define_to_h_method if respond_to? :struct_define_to_h_method
+    end
+
     def to_s
       "#{width}x#{height}"
     end
@@ -41,6 +48,8 @@ module Applitools
       self
     end
 
-    alias_method :to_hash, :to_h
+    def to_hash
+      to_h
+    end
   end
 end

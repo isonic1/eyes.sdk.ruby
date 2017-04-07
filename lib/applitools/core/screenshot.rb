@@ -53,7 +53,6 @@ module Applitools
             "Expected image to be Datastream or String, but got #{image.class}"
           )
         end
-
         @datastream = ::ChunkyPNG::Datastream.from_string image
       end
 
