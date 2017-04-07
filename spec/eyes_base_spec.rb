@@ -55,16 +55,16 @@ describe Applitools::EyesBase do
     :open_base,
     :check_window_base,
     :cut_provider,
-    :cut_provider=
+    :cut_provider=,
+    :default_match_settings,
+    :default_match_settings=
   ]
 
   it_should_behave_like 'has private method', [
     :clear_user_inputs,
     :user_inputs,
     :start_session,
-    :base_agent_id,
-    :default_match_settings,
-    :default_match_settings=
+    :base_agent_id
     # :close_response_time
   ]
 
