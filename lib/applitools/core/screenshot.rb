@@ -48,9 +48,11 @@ module Applitools
 
       def initialize(image)
         Applitools::ArgumentGuard.not_nil(image, 'image')
-        Applitools::ArgumentGuard.raise_argument_error(
-          "Expected image to be Datastream or String, but got #{image.class}"
-        ) unless image.is_a?(String)
+        unless image.is_a?(String)
+          Applitools::ArgumentGuard.raise_argument_error(
+            "Expected image to be Datastream or String, but got #{image.class}"
+          )
+        end
 
         @datastream = ::ChunkyPNG::Datastream.from_string image
       end
