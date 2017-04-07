@@ -17,12 +17,17 @@ typedef unsigned char BYTE; // Bytes use 8 bits unsigned integers
 
 void Init_resampling();
 
-VALUE c_interpolate_cubic(VALUE,VALUE);
-VALUE raw_interpolate_cubic(VALUE, double, VALUE, VALUE, VALUE, VALUE);
-VALUE scale_points2(VALUE, VALUE, VALUE, VALUE, VALUE);
-VALUE c_merge_pixels(VALUE, VALUE);
-VALUE raw_merge_pixels(VALUE[], unsigned int);
-VALUE c_bicubic_points(VALUE, VALUE, VALUE, VALUE);
+
 BYTE interpolate_char(double, BYTE, BYTE, BYTE, BYTE);
+
+PIXEL* get_bicubic_points(PIXEL*, unsigned long int, unsigned long int, unsigned long int, unsigned long int);
+
+PIXEL* get_c_array(VALUE);
+VALUE c_resampling_first_step(VALUE, VALUE, VALUE);
+VALUE get_ruby_array(VALUE, PIXEL*, unsigned long int);
+PIXEL get_line_pixel(PIXEL*, unsigned long int, long int, unsigned long int);
+PIXEL get_column_pixel(PIXEL*, unsigned long int, long int, unsigned long int, unsigned long int);
+PIXEL raw_merge_pixels(PIXEL*, unsigned int);
+PIXEL* c_scale_points(PIXEL*, unsigned long int, unsigned long int, unsigned long int, unsigned long int);
 
 #endif

@@ -13,22 +13,9 @@ end
 module Applitools::ChunkyPNG
   module Resampling
     def resample_bicubic!(dst_width, dst_height)
-      w_m = [1, width / dst_width].max
-      h_m = [1, height / dst_height].max
-
-      dst_width2 = dst_width * w_m
-      dst_height2 = dst_height * h_m
-
-      pixels = bicubic_x_points(dst_width2)
-      replace_canvas!(dst_width2, height, pixels)
-
-      pixels = bicubic_y_points(dst_height2)
-      replace_canvas!(dst_width2, dst_height2, pixels)
-
-      return self unless w_m * h_m > 1
-
-      pixels = scale_points2(dst_width, dst_height, w_m, h_m)
-      replace_canvas!(dst_width, dst_height, pixels)
+      new_pixels = resampling_first_step(dst_width, dst_height)
+      replace_canvas!(dst_width, dst_height, new_pixels)
+      self
     end
 
     def resample_bicubic(new_width, new_height)
