@@ -134,8 +134,9 @@ PIXEL raw_merge_pixels(PIXEL* merge_pixels, unsigned int size) {
 
 void setup_steps_residues(unsigned long int *steps, double *residues,
   unsigned long int src_dimension, unsigned long int dst_dimension) {
+  unsigned long int i;
   double step = (double) (src_dimension - 1) / (dst_dimension - 1);
-  for(unsigned long int i = 0; i < dst_dimension - 1; i++) {
+  for(i = 0; i < dst_dimension - 1; i++) {
     steps[i] = (unsigned long int) i*step;
     residues[i]  = i*step - steps[i];
   };
