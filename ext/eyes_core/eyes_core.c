@@ -168,7 +168,7 @@ PIXEL* get_bicubic_points(PIXEL* source_array,
   unsigned long int src_dimension_x, unsigned long int src_dimension_y,
   unsigned long int dst_dimension_x, unsigned long int dst_dimension_y) {
   PIXEL* dest, *source;
-  unsigned long int index_y, index;
+  unsigned long int index_y, index, y, x;
   unsigned long int* steps;
   double* residues;
 
@@ -179,9 +179,9 @@ PIXEL* get_bicubic_points(PIXEL* source_array,
   source = source_array;
   dest = (PIXEL*)malloc( src_dimension_y*dst_dimension_x*sizeof(PIXEL) );
 
-  for (unsigned long int y=0; y < src_dimension_y; y++) {
+  for (y=0; y < src_dimension_y; y++) {
     index_y = dst_dimension_x * y;
-    for (unsigned long int x=0; x < dst_dimension_x; x++) {
+    for (x=0; x < dst_dimension_x; x++) {
       index = index_y + x;
       dest[index] = raw_interpolate_cubic(residues[x],
         get_line_pixel(source, y, steps[x] - 1, src_dimension_x),
@@ -200,8 +200,8 @@ PIXEL* get_bicubic_points(PIXEL* source_array,
   source = dest;
   dest = (PIXEL*)malloc( dst_dimension_x * dst_dimension_y * sizeof(PIXEL));
 
-  for (unsigned long y=0; y < dst_dimension_x; y++) {
-    for (unsigned long x=0; x < dst_dimension_y; x++) {
+  for (y=0; y < dst_dimension_x; y++) {
+    for (x=0; x < dst_dimension_y; x++) {
       index = dst_dimension_x * x + y;
       dest[index] = raw_interpolate_cubic(residues[x],
         get_column_pixel(source, y, steps[x] - 1, src_dimension_y, dst_dimension_x),
@@ -222,7 +222,7 @@ PIXEL* get_bicubic_points(PIXEL* source_array,
 PIXEL* c_scale_points(PIXEL* source, unsigned long int dst_width, unsigned long int dst_height,
   unsigned long int w_m, unsigned long int h_m) {
 
-  unsigned long y_pos, x_pos, index;
+  unsigned long int y_pos, x_pos, index, i, j, x, y;
   unsigned int buffer_index, buffer_size;
   PIXEL* pixels_to_merge;
   PIXEL* result;
@@ -232,12 +232,12 @@ PIXEL* c_scale_points(PIXEL* source, unsigned long int dst_width, unsigned long 
 
   buffer_size = h_m * w_m;
 
-  for (unsigned long i = 0; i < dst_height; i++) {
-    for (unsigned long j = 0; j < dst_width; j++) {
+  for (i = 0; i < dst_height; i++) {
+    for (j = 0; j < dst_width; j++) {
       buffer_index = 0;
-      for (unsigned int y = 0; y < h_m; y++) {
+      for (y = 0; y < h_m; y++) {
         y_pos = i * h_m + y;
-        for (unsigned int x = 0; x < w_m; x++) {
+        for (x = 0; x < w_m; x++) {
           x_pos = j * w_m + x;
           pixels_to_merge[buffer_index++] = source[dst_width * w_m * y_pos + x_pos];
         };
