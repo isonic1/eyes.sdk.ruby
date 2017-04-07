@@ -223,8 +223,7 @@ PIXEL* get_bicubic_points(PIXEL* source_array,
 PIXEL* c_scale_points(PIXEL* source, unsigned long int dst_width, unsigned long int dst_height,
   unsigned long int w_m, unsigned long int h_m) {
 
-  unsigned long int y_pos, x_pos, index, i, j, x, y;
-  unsigned int buffer_index, buffer_size;
+  unsigned long int y_pos, x_pos, index, i, j, x, y, buffer_size, buffer_index;
   PIXEL* pixels_to_merge;
   PIXEL* result;
 
