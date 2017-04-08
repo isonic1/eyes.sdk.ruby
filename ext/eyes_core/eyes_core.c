@@ -124,11 +124,11 @@ PIXEL raw_merge_pixels(PIXEL* merge_pixels, unsigned int size) {
   };
 
   if(real_colors > 0) {
-    new_r = (BYTE)(acum_r/real_colors + 0.5);
-    new_g = (BYTE)(acum_g/real_colors + 0.5);
-    new_b = (BYTE)(acum_b/real_colors + 0.5);
+    new_r = (BYTE)(acum_r/real_colors);
+    new_g = (BYTE)(acum_g/real_colors);
+    new_b = (BYTE)(acum_b/real_colors);
   };
-  new_a = (BYTE)(acum_a/(size - 1) + 0.5);
+  new_a = (BYTE)(acum_a/size);
   return BUILD_PIXEL(new_r, new_g, new_b, new_a);
 };
 
