@@ -6,8 +6,10 @@ module Applitools::Selenium
 
     attr_accessor :last_state_position
 
-    def initialize(executor)
+    def initialize(executor, disable_horizontal = false, disable_vertical = false)
       self.executor = executor
+      self.disable_horizontal = disable_horizontal
+      self.disable_vertical = disable_vertical
     end
 
     def current_position
@@ -45,14 +47,17 @@ module Applitools::Selenium
     alias scroll_to position=
 
     def entire_size
+      viewport_size = Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(executor)
       e_size = Applitools::Utils::EyesSeleniumUtils.current_frame_content_entire_size(executor)
       logger.info "Entire size: #{e_size}"
+      e_size.width = viewport_size.width if disable_horizontal
+      e_size.height = viewport_size.height if disable_vertical
       e_size
     end
 
     private
 
-    attr_accessor :executor
+    attr_accessor :executor, :disable_horizontal, :disable_vertical
 
     def get_position_from_transform(transform)
       regexp = /^translate\(\s*(\-?)(\d+)px,\s*(\-?)(\d+)px\s*\)/

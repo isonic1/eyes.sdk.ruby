@@ -73,7 +73,8 @@ module Applitools::Selenium
     #   @return [boolean] stitch_mode (:CSS or :SCROLL)
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
-      :wait_before_screenshots, :debug_screenshot, :stitch_mode
+      :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
+      :disable_vertical_scrolling
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -94,6 +95,8 @@ module Applitools::Selenium
       self.wait_before_screenshots = DEFAULT_WAIT_BEFORE_SCREENSHOTS
       self.region_visibility_strategy = MoveToRegionVisibilityStrategy.new
       self.debug_screenshot = false
+      self.disable_horizontal_scrolling = false
+      self.disable_vertical_scrolling = false
     end
 
     # Starts a test
@@ -136,7 +139,9 @@ module Applitools::Selenium
 
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
 
-      self.position_provider = self.class.position_provider(stitch_mode, driver)
+      self.position_provider = self.class.position_provider(
+        stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling
+      )
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::EyesWebDriverScreenshot.new(
@@ -150,7 +155,11 @@ module Applitools::Selenium
 
     def stitch_mode=(value)
       @stitch_mode = value.to_s.upcase == STICH_MODE[:css].to_s ? STICH_MODE[:css] : STICH_MODE[:scroll]
-      self.position_provider = self.class.position_provider(stitch_mode, driver) unless driver.nil?
+      unless driver.nil?
+        self.position_provider = self.class.position_provider(
+          stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling
+        )
+      end
       if stitch_mode == STICH_MODE[:css]
         @css_transition_original_hide_scrollbars = hide_scrollbars
         self.hide_scrollbars = true
@@ -909,12 +918,12 @@ module Applitools::Selenium
     end
 
     class << self
-      def position_provider(stitch_mode, driver)
+      def position_provider(stitch_mode, driver, disable_horizontal = false, disable_vertical = false)
         case stitch_mode
         when :SCROLL
-          Applitools::Selenium::ScrollPositionProvider.new(driver)
+          Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical)
         when :CSS
-          Applitools::Selenium::CssTranslatePositionProvider.new(driver)
+          Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical)
         end
       end
     end
