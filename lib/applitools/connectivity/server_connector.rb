@@ -22,7 +22,7 @@ module Applitools::Connectivity
 
     attr_accessor :server_url, :api_key
     attr_reader :endpoint_url
-    attr_accessor :proxy
+    attr_reader :proxy
 
     def server_url=(url)
       @server_url = url.nil? ? DEFAULT_SERVER_URL : url
@@ -35,6 +35,14 @@ module Applitools::Connectivity
 
     def set_proxy(uri, user = nil, password = nil)
       self.proxy = Proxy.new uri, user, password
+    end
+
+    def proxy=(value)
+      unless value.nil? || value.is_a?(Applitools::Connectivity::Proxy)
+        raise Applitools::EyesIllegalArgument.new 'Expected value to be instance of Applitools::Connectivity::Proxy,' \
+          ' got #{value.class}'
+      end
+      @proxy = value
     end
 
     def match_window(session, data)
@@ -86,7 +94,7 @@ module Applitools::Connectivity
     end
 
     def request(url, method, options = {})
-      Faraday::Connection.new(url, ssl: { ca_file: SSL_CERT }, proxy: @proxy || nil).send(method) do |req|
+      Faraday::Connection.new(url, ssl: { ca_file: SSL_CERT }, proxy: @proxy.to_hash || nil).send(method) do |req|
         req.options.timeout = DEFAULT_TIMEOUT
         req.headers = DEFAULT_HEADERS.merge(options[:headers] || {})
         req.headers['Content-Type'] = options[:content_type] if options.key?(:content_type)
