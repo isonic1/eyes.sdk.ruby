@@ -31,6 +31,8 @@ module Applitools::Selenium
       current_position
     end
 
+    alias force_offset state
+
     def restore_state(value)
       self.position = value
     end

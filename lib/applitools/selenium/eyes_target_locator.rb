@@ -145,11 +145,12 @@ module Applitools::Selenium
         raise Applitools::EyesNoSuchFrame.new "No frame with name or id #{name_or_id} exists!" if frames.empty?
       end
       logger.info 'Done! Making preparations...'
-      on_will_switch.will_switch_to_frame(:frame, frames.first).last
+      on_will_switch.will_switch_to_frame(:frame, frames.first)
       logger.info 'Done! Switching to frame...'
       __getobj__.frame frames.first
 
       logger.info 'Done!'
+      logger.info 'ZZ'
       driver
     end
 
@@ -181,7 +182,16 @@ module Applitools::Selenium
       logger.info 'EyesTargetLocator.frames(:frames_path => a_chain)'
       frames_path.each do |frame_name_or_id|
         logger.info 'Switching to frame...'
-        frame(name_or_id: frame_name_or_id)
+        logger.info frame_name_or_id
+        case frame_name_or_id
+          when String
+            frame(name_or_id: frame_name_or_id)
+          when Applitools::Selenium::Element
+            frame(frame_element: frame_name_or_id.reference)
+          else
+            Applitools::ArgumentGuard.raise_argument_error Applitools::EyesNoSuchFrame.new frame_name_or_id
+        end
+
         logger.info 'Done!'
       end
       logger.info 'Done switching into nested frames!'

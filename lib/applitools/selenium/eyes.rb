@@ -217,6 +217,156 @@ module Applitools::Selenium
       Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(driver)
     end
 
+    def check(name, target)
+      Applitools::ArgumentGuard.is_a? target, 'target', Applitools::Selenium::Target
+      original_overflow = nil
+      original_position_provider = position_provider
+
+      eyes_element = nil
+
+      self.eyes_screenshot_factory = lambda do |image|
+        Applitools::Selenium::EyesWebDriverScreenshot.new(
+            image, driver: driver, force_offset: position_provider.force_offset
+        )
+      end
+
+      check_in_frame target_frames: target.frames do
+        begin
+          eyes_element = target.region_to_check.call(driver)
+
+          region_visibility_strategy.move_to_region original_position_provider,
+            Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+
+          check_window = false
+          if (!target.frames.empty?) && eyes_element.is_a?(Applitools::Region)
+            #check_current_frame
+            region_provider = region_provider_for_frame
+
+          elsif eyes_element.is_a? Applitools::Selenium::Element
+            #check_element
+            region_provider = Applitools::Selenium::RegionProvider.new(
+                region_for_element(eyes_element),
+                target.coordinate_type
+            )
+          else
+            #check_window
+            region_provider = Applitools::Selenium::RegionProvider.new(
+              region_for_element(eyes_element),
+              target.coordinate_type
+            )
+            check_window = true
+          end
+
+          if target.options[:stitch_content]
+            check_window ? self.force_full_page_screenshot = true : self.check_frame_or_element = true
+            if eyes_element.is_a? Applitools::Selenium::Element
+              self.position_provider = Applitools::Selenium::ElementPositionProvider.new driver, eyes_element
+
+              original_overflow = eyes_element.overflow
+              eyes_element.overflow = 'hidden'
+            end
+
+            self.region_to_check = region_provider
+
+            region_provider = Object.new.tap do |prov|
+              prov.instance_eval do
+                define_singleton_method :region do
+                  Applitools::Region::EMPTY
+                end
+
+                define_singleton_method :coordinate_type do
+                  nil
+                end
+              end
+            end
+          end
+
+          check_window_base region_provider, name, false, USE_DEFAULT_MATCH_TIMEOUT
+        ensure
+          eyes_element.overflow = original_overflow unless original_overflow.nil?
+          self.check_frame_or_element = false
+          self.force_full_page_screenshot = false
+          self.position_provider = original_position_provider
+          self.region_to_check = nil
+          region_visibility_strategy.return_to_original_position position_provider
+        end
+      end
+    end
+
+    def check_in_frame(options)
+      frames = options.delete :target_frames
+
+      Applitools::ArgumentGuard.is_a? options, 'options', Hash
+      Applitools::ArgumentGuard.is_a? frames, 'target_frames: []', Array
+
+      return yield if block_given? && frames.empty?
+
+      original_frame_chain = driver.frame_chain
+      logger.info 'Switching to target frame according to frames path...'
+      driver.switch_to.frames(frames_path: frames)
+      logger.info 'Done!'
+
+      yield if block_given?
+
+
+      logger.info 'Switching back into top level frame...'
+      driver.switch_to.default_content()
+      unless original_frame_chain
+        logger.info 'Switching back into original frame...'
+        driver.switch_to.frames frame_chain: original_frame_chain
+      end
+    end
+
+    def region_for_element(element)
+      return element if element.is_a? Applitools::Region
+
+      p = element.location
+      d = element.size
+
+      border_left_width = element.border_left_width
+      border_top_width = element.border_top_width
+      border_right_width = element.border_right_width
+      border_bottom_width = element.border_bottom_width
+
+      Applitools::Region.new(
+          p.x + border_left_width,
+          p.y + border_top_width,
+          d.width - border_left_width - border_right_width,
+          d.height - border_top_width - border_bottom_width
+      )
+    end
+
+    def region_provider_for_frame()
+      Object.new.tap do |provider|
+        current_frame_size = lambda do
+          frame_region = Applitools::Region.from_location_size(
+              Applitools::Location.new(0, 0), driver.frame_chain!.current_frame.size
+          )
+          begin
+            frame_region.intersect Applitools::Region.from_location_size(
+                Applitools::Location.new(0, 0),
+                Applitools::Utils::EyesSeleniumUtils.entire_page_size(driver)
+            )
+            frame_region
+          ensure
+            frame_region
+          end
+        end
+
+        provider.instance_eval do
+          define_singleton_method :region do
+            current_frame_size.call
+          end
+          define_singleton_method :coordinate_type do
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+          end
+        end
+      end
+    end
+
+    private :check_in_frame
+    private :region_for_element
+
     # Takes a snapshot of the application under test and matches a region of
     # a specific element with the expected region output.
     # @param [Applitools::Selenium::Element] element Represents a region to check.
@@ -397,12 +547,15 @@ module Applitools::Selenium
           options[:name_or_id] ||
           options[:frame_element] ||
           options[:frame_chain] ||
-          options[:frames_path]
+          options[:frames_path] ||
+          options[:target_frames]
         raise Applitools::EyesIllegalArgument.new 'You must pass :index or :name_or_id or :frame_element option' /
           'or :frame_chain option or :frames_path option'
       end
 
-      if (needed_keys = (options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path])).length == 1
+      if (needed_keys = (
+          options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path, :target_frames])
+          ).length == 1
         frame_key = needed_keys.first
       else
         raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' /
