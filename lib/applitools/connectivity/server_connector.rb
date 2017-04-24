@@ -94,7 +94,11 @@ module Applitools::Connectivity
     end
 
     def request(url, method, options = {})
-      Faraday::Connection.new(url, ssl: { ca_file: SSL_CERT }, proxy: @proxy.to_hash || nil).send(method) do |req|
+      Faraday::Connection.new(
+        url,
+        ssl: { ca_file: SSL_CERT },
+        proxy: @proxy.nil? ? nil : @proxy.to_hash
+      ).send(method) do |req|
         req.options.timeout = DEFAULT_TIMEOUT
         req.headers = DEFAULT_HEADERS.merge(options[:headers] || {})
         req.headers['Content-Type'] = options[:content_type] if options.key?(:content_type)
