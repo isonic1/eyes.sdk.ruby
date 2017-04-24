@@ -912,8 +912,11 @@ module Applitools::Selenium
     end
 
     def inferred_environment
+      return @inferred_environment unless @inferred_environment.nil?
+
       user_agent = driver.user_agent
       return "useragent: #{user_agent}" if user_agent && !user_agent.empty?
+
       nil
     end
 

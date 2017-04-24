@@ -32,9 +32,10 @@ module Applitools
 
     attr_accessor :app_name, :baseline_name, :branch_name, :parent_branch_name, :batch, :agent_id, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
-      :scale_ratio, :host_os, :host_app, :base_line_name, :position_provider, :viewport_size, :verbose_results
+      :scale_ratio, :host_os, :host_app, :base_line_name, :position_provider, :viewport_size, :verbose_results,
+      :inferred_environment
 
-    abstract_attr_accessor :base_agent_id, :inferred_environment
+    abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
     abstract_method :title, true
     abstract_method :set_viewport_size, true
@@ -53,6 +54,7 @@ module Applitools
       @user_inputs = UserInputArray.new
       self.app_output_provider = Object.new
       self.verbose_results = false
+      @inferred_environment = nil
 
       get_app_output_method = ->(r, s) { get_app_output_with_screenshot r, s }
 
