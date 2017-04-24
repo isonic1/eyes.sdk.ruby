@@ -65,6 +65,14 @@ module Applitools
       @default_match_settings = { match_level: MATCH_LEVEL[:strict], exact: nil }
     end
 
+    def batch
+      if @batch.nil?
+        logger.info 'No batch set'
+        self.batch = BatchInfo.new
+      end
+      @batch
+    end
+
     def full_agent_id
       if !agent_id.nil? && !agent_id.empty?
         "#{agent_id} [#{base_agent_id}]"
@@ -396,13 +404,8 @@ module Applitools
         self.viewport_size = get_viewport_size
       end
 
-      if batch.nil?
-        logger.info 'No batch set'
-        test_batch = BatchInfo.new
-      else
-        logger.info "Batch is #{batch}"
-        test_batch = batch
-      end
+      logger.info "Batch is #{batch}"
+      test_batch = batch
 
       app_env = app_environment
 
