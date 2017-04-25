@@ -49,16 +49,17 @@ module Applitools::Connectivity
       # Notice that this does not include the screenshot.
       json_data = Oj.dump(Applitools::Utils.camelcase_hash_keys(data.to_hash)).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
+      #Applitools::EyesLogger.debug json_data
       Applitools::EyesLogger.debug 'Sending match data...'
       res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
-      raise Applitools::EyesError.new("Request failed: #{res.status}") unless res.success?
+      raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       Applitools::MatchResult.new Oj.load(res.body)
     end
 
     def start_session(session_start_info)
       res = post(endpoint_url, body: Oj.dump(startInfo:
                                                  Applitools::Utils.camelcase_hash_keys(session_start_info.to_hash)))
-      raise Applitools::EyesError.new("Request failed: #{res.status}") unless res.success?
+      raise Applitools::EyesError.new("Request failed: #{res.status} #{res.body}") unless res.success?
 
       response = Oj.load(res.body)
       Applitools::Session.new(response['id'], response['url'], res.status == HTTP_STATUS_CODES[:created])

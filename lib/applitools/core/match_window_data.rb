@@ -19,7 +19,7 @@ module Applitools
     alias ignoreMismatch ignore_mismatch
 
     def to_hash
-      ary = [:userInputs, :appOutput, :tag, :ignoreMismatch].map do |field|
+      ary = [:userInputs, :appOutput, :tag, :ignoreMismatch, :options].map do |field|
         result = send(field)
         result = result.to_hash if result.respond_to? :to_hash
         [field, result] if [String, Symbol, Hash, Array, FalseClass, TrueClass].include? result.class

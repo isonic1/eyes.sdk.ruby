@@ -25,6 +25,7 @@ module Applitools::Selenium
     end
 
     def return_to_original_position(position_provider)
+      return if original_position.nil?
       logger.info 'Returning to original position...'
       position_provider.restore_state original_position
       logger.info 'Done!'
