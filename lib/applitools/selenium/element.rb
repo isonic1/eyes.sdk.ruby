@@ -177,10 +177,10 @@ module Applitools::Selenium
 
     def to_hash
       {
-        left: location.x,
-        top: location.y,
-        width: size.width,
-        height: size.height
+        left: location.x.to_i,
+        top: location.y.to_i,
+        width: size.width.to_i,
+        height: size.height.to_i
       }
     end
 

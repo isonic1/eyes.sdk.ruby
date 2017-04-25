@@ -11,7 +11,7 @@ module Applitools
         end
       end
 
-      attr_accessor  :element, :frames, :region_to_check, :coordinate_type, :options, :ignore
+      attr_accessor  :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions
 
       def initialize()
         self.frames = []
@@ -20,14 +20,18 @@ module Applitools
       end
 
       def ignore(*args)
-        if args.first.is_a? Applitools::Selenium::Element
-          self.ignore << proc do
-            args.first
+        if(args.first)
+          if args.first.is_a? Applitools::Selenium::Element
+            self.ignored_regions << proc do
+              args.first
+            end
+          else
+            self.ignored_regions << proc do |driver|
+              driver.find_element *args
+            end
           end
         else
-          self.ignore << proc do |driver|
-            driver.find_element *args
-          end
+          reset_ignore
         end
         self
       end
@@ -64,6 +68,7 @@ module Applitools
         end
         self.coordinate_type = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
         options[:timeout] = nil
+        reset_ignore
         self
       end
 
@@ -72,9 +77,13 @@ module Applitools
       def reset_for_fullscreen
         self.coordinate_type = nil
         self.region_to_check = proc { Applitools::Region::EMPTY }
-        self.ignore = []
+        reset_ignore
         options[:stitch_content] = false
         options[:timeout] = nil
+      end
+
+      def reset_ignore
+        self.ignored_regions = []
       end
     end
   end

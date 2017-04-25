@@ -6,6 +6,18 @@ module Applitools
 
     attr_reader :logger, :running_session, :default_retry_timeout, :app_output_provider
 
+    class << self
+      def convert_coordinates(regions, screenshot)
+        regions.map() do |r|
+          screenshot.convert_region_location(
+            Applitools::Region.from_location_size(r.location, r.size),
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
+          )
+        end
+      end
+    end
+
     def initialize(logger, running_session, retry_timeout, app_output_provider)
       @logger = logger
       @running_session = running_session
@@ -31,7 +43,7 @@ module Applitools
       should_match_window_run_once_on_timeout = options[:should_match_window_run_once_on_timeout]
       ignore_mismatch = options[:ignore_mismatch]
       retry_timeout = options[:retry_timeout]
-      ignore = options[:ignore]
+      ignore = options[:ignore] || []
 
       retry_timeout = default_retry_timeout if retry_timeout < 0
 
@@ -42,24 +54,24 @@ module Applitools
         sleep retry_timeout if should_match_window_run_once_on_timeout
         app_output = app_output_provider.app_output region_provider, last_screenshot
         match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag,
-          ignore_mismatch: ignore_mismatch, ignore: ignore
+          ignore_mismatch: ignore_mismatch, ignore: self.class.convert_coordinates(ignore, app_output.screenshot)
       else
         app_output = app_output_provider.app_output region_provider, last_screenshot
         start = Time.now
-        match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: ignore
+        match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: self.class.convert_coordinates(ignore, app_output.screenshot)
         retry_time = Time.now - start
 
         while retry_time < retry_timeout && !match_result.as_expected?
           sleep MATCH_INTERVAL
           app_output = app_output_provider.app_output region_provider, last_screenshot
-          match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: ignore
+          match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: self.class.convert_coordinates(ignore, app_output.screenshot)
           retry_time = Time.now - start
         end
 
         unless match_result.as_expected?
           app_output = app_output_provider.app_output region_provider, last_screenshot
           match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag,
-            ignore_mismatch: ignore_mismatch, ignore: ignore
+            ignore_mismatch: ignore_mismatch, ignore: self.class.convert_coordinates(ignore, app_output.screenshot)
         end
       end
 

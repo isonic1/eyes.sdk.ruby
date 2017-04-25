@@ -281,7 +281,7 @@ module Applitools::Selenium
             end
           end
 
-          check_window_base region_provider, name, false, USE_DEFAULT_MATCH_TIMEOUT
+          check_window_base region_provider, name, false, target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT, ignore: target.ignored_regions.map {|i| i.call(driver)}
         ensure
           eyes_element.overflow = original_overflow unless original_overflow.nil?
           self.check_frame_or_element = false

@@ -150,7 +150,6 @@ module Applitools::Selenium
       __getobj__.frame frames.first
 
       logger.info 'Done!'
-      logger.info 'ZZ'
       driver
     end
 
