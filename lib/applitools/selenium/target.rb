@@ -72,6 +72,11 @@ module Applitools
         self
       end
 
+      def trim
+        options[:trim] = true
+        self
+      end
+
       private
 
       def reset_for_fullscreen
@@ -80,6 +85,7 @@ module Applitools
         reset_ignore
         options[:stitch_content] = false
         options[:timeout] = nil
+        options[:trim] = false
       end
 
       def reset_ignore

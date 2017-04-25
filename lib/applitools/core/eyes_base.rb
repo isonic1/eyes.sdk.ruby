@@ -208,7 +208,8 @@ module Applitools
         should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
         ignore_mismatch: ignore_mismatch,
         retry_timeout: retry_timeout,
-        ignore: options[:ignore]
+        ignore: options[:ignore],
+        trim: options[:trim]
       )
       logger.info 'match_window done!'
 

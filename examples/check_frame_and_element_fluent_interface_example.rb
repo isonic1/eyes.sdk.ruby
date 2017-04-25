@@ -28,7 +28,7 @@ RSpec.describe 'Check frame and element example', :type => :feature, :js => true
     eyes.check('', target)
     target = target.region(:id, 'inner-frame-div').fully
     eyes.check('Inner frame div', target)
-    target = Applitools::Selenium::Target.window().region(:id, 'overflowing-div-image').fully.timeout(15)
+    target = Applitools::Selenium::Target.window().region(:id, 'overflowing-div-image').fully.trim
     eyes.check('minions', target)
     eyes.close true
   end
