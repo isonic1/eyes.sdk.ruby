@@ -175,6 +175,15 @@ module Applitools::Selenium
       driver.execute_script format(JS_SCROLL_TO_FORMATTED_STR, location.x, location.y), self
     end
 
+    def to_hash
+      {
+        left: location.x,
+        top: location.y,
+        width: size.width,
+        height: size.height
+      }
+    end
+
     private
 
     attr_reader :driver

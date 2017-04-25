@@ -172,7 +172,7 @@ module Applitools
       raise e
     end
 
-    def check_window_base(region_provider, tag, ignore_mismatch, retry_timeout)
+    def check_window_base(region_provider, tag, ignore_mismatch, retry_timeout, options = {})
       if disabled?
         logger.info "#{__method__} Ignored"
         result = Applitools::MatchResults.new
@@ -207,7 +207,8 @@ module Applitools
         tag: tag,
         should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
         ignore_mismatch: ignore_mismatch,
-        retry_timeout: retry_timeout
+        retry_timeout: retry_timeout,
+        ignore: options[:ignore]
       )
       logger.info 'match_window done!'
 
