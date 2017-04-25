@@ -92,7 +92,7 @@ module Applitools
       tag = options[:tag]
       ignore_mismatch = options[:ignore_mismatch]
       data = Applitools::MatchWindowData.new user_inputs, app_output, tag, ignore_mismatch,
-        tag: tag, user_inputs: user_inputs, ignore_mismatch: ignore_mismatch, ignore_match: false,
+        tag: tag, user_inputs: user_inputs.to_hash, ignore_mismatch: ignore_mismatch, ignore_match: false,
         force_mistmatch: false, force_match: false,
         image_match_settings: {
           ignore: options[:ignore]
