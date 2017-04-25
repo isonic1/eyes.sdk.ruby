@@ -13,7 +13,7 @@ module Applitools
             Applitools::Region.from_location_size(r.location, r.size),
             Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
             Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
-          )
+          ).to_hash
         end
       end
     end
