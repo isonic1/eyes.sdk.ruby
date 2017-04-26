@@ -58,6 +58,13 @@ module Applitools::Images
       abort_if_not_closed
     end
 
+    def check(name, target, options)
+      Applitools::ArgumentGuard.not_nil(name, 'name')
+      options = {ignore_mismatch: false }.merge options
+      mr = check_window_base target.region_provider, name, options[:ignore_mismatch], Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options
+      mr.as_expected?
+    end
+
     # Matches the input image with the next expected image. Takes a hash as an argument. Returns +boolean+
     # as result of matching.
     # @param [Hash] options

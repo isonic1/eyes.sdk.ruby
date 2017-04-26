@@ -6,6 +6,14 @@ RSpec.shared_examples 'responds to method' do |methods|
   end
 end
 
+RSpec.shared_examples 'responds to class method' do |methods|
+  methods.each do |m|
+    it ":#{m}" do
+      expect(described_class).to respond_to m
+    end
+  end
+end
+
 RSpec.shared_examples 'has private method' do |methods|
   methods.each do |m|
     it ":#{m}" do
