@@ -209,7 +209,9 @@ module Applitools
         ignore_mismatch: ignore_mismatch,
         retry_timeout: retry_timeout,
         ignore: options[:ignore],
-        trim: options[:trim]
+        trim: options[:trim],
+        match_level: options[:match_level],
+        exact: options[:exact]
       )
       logger.info 'match_window done!'
 

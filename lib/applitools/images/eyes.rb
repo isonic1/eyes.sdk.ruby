@@ -58,11 +58,48 @@ module Applitools::Images
       abort_if_not_closed
     end
 
-    def check(name, target, options)
+    def check(name, target)
       Applitools::ArgumentGuard.not_nil(name, 'name')
-      options = {ignore_mismatch: false }.merge options
-      mr = check_window_base target.region_provider, name, options[:ignore_mismatch], Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options
+      region_provider = get_region_provider(target)
+
+      image = target.image
+      self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
+      self.screenshot = EyesImagesScreenshot.new image
+
+      mr = check_window_base region_provider, name, false, target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+        ignore: target.ignored_regions,
+        trim: target.options[:trim],
+        match_level: default_match_settings[:match_level],
+        exact: default_match_settings[:exact]
       mr.as_expected?
+    end
+
+    def get_region_provider(target)
+      if (region_to_check = target.region_to_check).nil?
+        Object.new.tap do |prov|
+          prov.instance_eval do
+            define_singleton_method :region do
+              Applitools::Region::EMPTY
+            end
+
+            define_singleton_method :coordinate_type do
+              nil
+            end
+          end
+        end
+      else
+        Object.new.tap do |prov|
+          prov.instance_eval do
+            define_singleton_method :region do
+              region_to_check
+            end
+
+            define_singleton_method :coordinate_type do
+              Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+            end
+          end
+        end
+      end
     end
 
     # Matches the input image with the next expected image. Takes a hash as an argument. Returns +boolean+

@@ -29,29 +29,38 @@ module Applitools::Images
       end
     end
 
-    attr_accessor :image, :options, :ignore_regions, :region_to_check
+    attr_accessor :image, :options, :ignored_regions, :region_to_check
 
     def initialize(image)
       Applitools::ArgumentGuard.not_nil(image, 'image')
       Applitools::ArgumentGuard.is_a? image, 'image', Applitools::Screenshot
       self.image = image
+      self.ignored_regions = []
+      self.options = {
+        trim: false
+      }
     end
 
-    def ignore
+    def ignore(region)
+      Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
+      ignored_regions << region
       self
     end
 
     def region(region)
+      Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
       self.region_to_check = region
       self
     end
 
     def trim
+      options[:trim] = true
       self
     end
 
-    def region_provider
-
+    def timeout(value)
+      options[:timeout] = value
+      self
     end
   end
 end

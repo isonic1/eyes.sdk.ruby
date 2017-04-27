@@ -284,7 +284,9 @@ module Applitools::Selenium
           check_window_base(
             region_provider, name, false, target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT,
             ignore: target.ignored_regions.map {|i| i.call(driver)},
-            trim: target.options[:trim]
+            trim: target.options[:trim],
+            match_level: default_match_settings[:match_level],
+            exact: default_match_settings[:exact]
           )
         ensure
           eyes_element.overflow = original_overflow unless original_overflow.nil?
