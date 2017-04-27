@@ -2,6 +2,15 @@ require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
 
 module Applitools
+  MATCH_LEVEL = {
+    none: 'None',
+    layout: 'Layout',
+    layout2: 'Layout2',
+    content: 'Content',
+    strict: 'Strict',
+    exact: 'Exact'
+  }.freeze
+
   class EyesBase
     extend Forwardable
     extend Applitools::Helpers
@@ -11,15 +20,6 @@ module Applitools
 
     SCREENSHOT_AS_IS = Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is].freeze
     CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
-
-    MATCH_LEVEL = {
-      none: 'None',
-      layout: 'Layout',
-      layout2: 'Layout2',
-      content: 'Content',
-      strict: 'Strict',
-      exact: 'Exact'
-    }.freeze
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
     def_delegators 'Applitools::Connectivity::ServerConnector', :api_key, :api_key=, :server_url, :server_url=,
@@ -64,7 +64,7 @@ module Applitools
         end
       end
 
-      @default_match_settings = { match_level: MATCH_LEVEL[:strict], exact: nil }
+      @default_match_settings = { match_level: Applitools::MATCH_LEVEL[:strict], exact: nil }
     end
 
     def batch
