@@ -1,6 +1,6 @@
 module Applitools::Selenium
   class RegionProvider
-    #он нам нужен в селениум?
+    # Do we need it under Selenium module?
     attr_reader :region, :coordinate_type
     def initialize(region, coordinate_type)
       @region = region

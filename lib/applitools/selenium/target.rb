@@ -3,40 +3,40 @@ module Applitools
     class Target
       class << self
         def window
-          self.new()
+          new
         end
 
         def region(element)
-          self.new().region(element)
+          new.region(element)
         end
       end
 
-      attr_accessor  :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions
+      attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions
 
-      def initialize()
+      def initialize
         self.frames = []
         self.options = {}
         reset_for_fullscreen
       end
 
       def ignore(*args)
-        if(args.first)
-          if args.first.is_a? Applitools::Selenium::Element
-            self.ignored_regions << proc do
-              args.first
-            end
-          else
-            self.ignored_regions << proc do |driver|
-              driver.find_element *args
-            end
-          end
+        if args.first
+          ignored_regions << if args.first.is_a? Applitools::Selenium::Element
+                               proc do
+                                 args.first
+                               end
+                             else
+                               proc do |driver|
+                                 driver.find_element(*args)
+                               end
+                             end
         else
           reset_ignore
         end
         self
       end
 
-      def float(*args)
+      def float(*_)
         self
       end
 
@@ -57,15 +57,15 @@ module Applitools
       end
 
       def region(*args)
-        if args.first.is_a? Applitools::Selenium::Element
-          self.region_to_check = proc do
-            args.first
-          end
-        else
-          self.region_to_check = proc do |driver|
-            driver.find_element *args
-          end
-        end
+        self.region_to_check = if args.first.is_a? Applitools::Selenium::Element
+                                 proc do
+                                   args.first
+                                 end
+                               else
+                                 proc do |driver|
+                                   driver.find_element(*args)
+                                 end
+                               end
         self.coordinate_type = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
         options[:timeout] = nil
         reset_ignore
@@ -94,4 +94,3 @@ module Applitools
     end
   end
 end
-

@@ -66,11 +66,14 @@ module Applitools::Images
       self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
       self.screenshot = EyesImagesScreenshot.new image
 
-      mr = check_window_base region_provider, name, false, target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+      mr = check_window_base(
+        region_provider, name, false,
+        target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
         ignore: target.ignored_regions,
         trim: target.options[:trim],
         match_level: default_match_settings[:match_level],
         exact: default_match_settings[:exact]
+      )
       mr.as_expected?
     end
 

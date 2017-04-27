@@ -20,15 +20,15 @@ RSpec.describe 'Check frame and element example', :type => :feature, :js => true
               viewport_size: { width: 800, height: 600 }
 
     visit 'https://astappev.github.io/test-html-pages/'
-    target = Applitools::Selenium::Target.window().fully.ignore(:name, 'frame1')
+    target = Applitools::Selenium::Target.window.fully.ignore(:name, 'frame1')
     eyes.check('Whole page', target)
-    target = target.region(eyes.driver.find_element :id, 'overflowing-div').fully
+    target = target.region(eyes.driver.find_element(:id, 'overflowing-div')).fully
     eyes.check 'Overflowed region', target
     target = target.frame('frame1').fully.ignore(:id, 'inner-frame-div')
     eyes.check('', target)
     target = target.region(:id, 'inner-frame-div').fully
     eyes.check('Inner frame div', target)
-    target = Applitools::Selenium::Target.window().region(:id, 'overflowing-div-image').fully.trim
+    target = Applitools::Selenium::Target.window.region(:id, 'overflowing-div-image').fully.trim
     eyes.check('minions', target)
     eyes.close true
   end
