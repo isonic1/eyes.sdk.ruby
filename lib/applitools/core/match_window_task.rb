@@ -45,6 +45,8 @@ module Applitools
       retry_timeout = options[:retry_timeout]
       ignore = options[:ignore] || []
       trim = options[:trim] || false
+      match_level = options[:match_level]
+      exact = options[:exact]
 
       retry_timeout = default_retry_timeout if retry_timeout < 0
 
@@ -55,24 +57,24 @@ module Applitools
         sleep retry_timeout if should_match_window_run_once_on_timeout
         app_output = app_output_provider.app_output region_provider, last_screenshot
         match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag,
-          ignore_mismatch: ignore_mismatch, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim
+          ignore_mismatch: ignore_mismatch, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim, match_level: match_level, exact: exact
       else
         app_output = app_output_provider.app_output region_provider, last_screenshot
         start = Time.now
-        match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim
+        match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim, match_level: match_level, exact: exact
         retry_time = Time.now - start
 
         while retry_time < retry_timeout && !match_result.as_expected?
           sleep MATCH_INTERVAL
           app_output = app_output_provider.app_output region_provider, last_screenshot
-          match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim
+          match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag, ignore_mismatch: true, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim, match_level: match_level, exact: exact
           retry_time = Time.now - start
         end
 
         unless match_result.as_expected?
           app_output = app_output_provider.app_output region_provider, last_screenshot
           match_result = perform_match user_inputs: user_inputs, app_output: app_output, tag: tag,
-            ignore_mismatch: ignore_mismatch, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim
+            ignore_mismatch: ignore_mismatch, ignore: self.class.convert_coordinates(ignore, app_output.screenshot), trim: trim, match_level: match_level, exact: exact
         end
       end
 
@@ -95,7 +97,10 @@ module Applitools
         tag: tag, user_inputs: user_inputs.to_hash, ignore_mismatch: ignore_mismatch, ignore_match: false,
         force_mistmatch: false, force_match: false,
         image_match_settings: {
-          ignore: options[:ignore]
+          matchLevel: options[:match_level],
+          ignore: options[:ignore],
+          ignoreCaret: options[:ignore_caret].nil? ? true : options[:ignore_caret],
+          exact: options[:exact]
         },
         trim: {
           enabled: options[:trim]
