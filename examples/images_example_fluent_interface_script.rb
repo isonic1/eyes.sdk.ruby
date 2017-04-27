@@ -10,7 +10,7 @@ viber_home_image_bytes = File.read('./images/viber-home.png', mode: 'rb')
 viber_home_image = Applitools::Screenshot.from_datastream viber_home_image_bytes
 
 eyes.test(app_name: 'Eyes.Java', test_name: 'home1') do
-  target = Applitools::Images::Target.path('./images/viber-home.png').ignore(Applitools::Region.new 10,10, 30, 30)
+  target = Applitools::Images::Target.path('./images/viber-home.png').ignore(Applitools::Region.new(10, 10, 30, 30))
   eyes.check('entire image', target)
   target = target.region(Applitools::Region.new(1773, 372, 180, 220))
   eyes.check('Bada region', target)

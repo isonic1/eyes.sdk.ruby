@@ -183,12 +183,12 @@ module Applitools::Selenium
         logger.info 'Switching to frame...'
         logger.info frame_name_or_id
         case frame_name_or_id
-          when String
-            frame(name_or_id: frame_name_or_id)
-          when Applitools::Selenium::Element
-            frame(frame_element: frame_name_or_id.reference)
-          else
-            Applitools::ArgumentGuard.raise_argument_error Applitools::EyesNoSuchFrame.new frame_name_or_id
+        when String
+          frame(name_or_id: frame_name_or_id)
+        when Applitools::Selenium::Element
+          frame(frame_element: frame_name_or_id.reference)
+        else
+          Applitools::ArgumentGuard.raise_argument_error Applitools::EyesNoSuchFrame.new frame_name_or_id
         end
 
         logger.info 'Done!'

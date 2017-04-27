@@ -12,7 +12,7 @@ begin
   eyes.test(app_name: 'Ruby SDK', test_name: 'Applitools website test', viewport_size: { width: 900, height: 600 },
             driver: web_driver) do |driver|
     driver.get 'http://www.applitools.com'
-    target = Applitools::Selenium::Target.window()
+    target = Applitools::Selenium::Target.window
     eyes.check('initial', target)
     target = target.region(driver.find_element(:css, 'a.logo'))
     eyes.check('pricing element', target)

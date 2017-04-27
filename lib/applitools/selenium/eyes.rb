@@ -226,30 +226,29 @@ module Applitools::Selenium
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::EyesWebDriverScreenshot.new(
-            image, driver: driver, force_offset: position_provider.force_offset
+          image, driver: driver, force_offset: position_provider.force_offset
         )
       end
 
       check_in_frame target_frames: target.frames do
         begin
           eyes_element = target.region_to_check.call(driver)
-
           region_visibility_strategy.move_to_region original_position_provider,
             Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
 
           check_window = false
-          if (!target.frames.empty?) && eyes_element.is_a?(Applitools::Region)
-            #check_current_frame
+          if !target.frames.empty? && eyes_element.is_a?(Applitools::Region)
+            # check_current_frame
             region_provider = region_provider_for_frame
 
           elsif eyes_element.is_a? Applitools::Selenium::Element
-            #check_element
+            # check_element
             region_provider = Applitools::Selenium::RegionProvider.new(
-                region_for_element(eyes_element),
-                target.coordinate_type
+              region_for_element(eyes_element),
+              target.coordinate_type
             )
           else
-            #check_window
+            # check_window
             region_provider = Applitools::Selenium::RegionProvider.new(
               region_for_element(eyes_element),
               target.coordinate_type
@@ -268,22 +267,15 @@ module Applitools::Selenium
 
             self.region_to_check = region_provider
 
-            region_provider = Object.new.tap do |prov|
-              prov.instance_eval do
-                define_singleton_method :region do
-                  Applitools::Region::EMPTY
-                end
-
-                define_singleton_method :coordinate_type do
-                  nil
-                end
-              end
-            end
+            region_provider = Applitools::Selenium::RegionProvider.new(
+              Applitools::Region::EMPTY,
+              nil
+            )
           end
 
           check_window_base(
             region_provider, name, false, target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT,
-            ignore: target.ignored_regions.map {|i| i.call(driver)},
+            ignore: target.ignored_regions.map { |i| i.call(driver) },
             trim: target.options[:trim],
             match_level: default_match_settings[:match_level],
             exact: default_match_settings[:exact]
@@ -314,13 +306,11 @@ module Applitools::Selenium
 
       yield if block_given?
 
-
       logger.info 'Switching back into top level frame...'
-      driver.switch_to.default_content()
-      unless original_frame_chain
-        logger.info 'Switching back into original frame...'
-        driver.switch_to.frames frame_chain: original_frame_chain
-      end
+      driver.switch_to.default_content
+      return unless original_frame_chain
+      logger.info 'Switching back into original frame...'
+      driver.switch_to.frames frame_chain: original_frame_chain
     end
 
     def region_for_element(element)
@@ -335,23 +325,23 @@ module Applitools::Selenium
       border_bottom_width = element.border_bottom_width
 
       Applitools::Region.new(
-          p.x + border_left_width,
-          p.y + border_top_width,
-          d.width - border_left_width - border_right_width,
-          d.height - border_top_width - border_bottom_width
+        p.x + border_left_width,
+        p.y + border_top_width,
+        d.width - border_left_width - border_right_width,
+        d.height - border_top_width - border_bottom_width
       )
     end
 
-    def region_provider_for_frame()
+    def region_provider_for_frame
       Object.new.tap do |provider|
         current_frame_size = lambda do
           frame_region = Applitools::Region.from_location_size(
-              Applitools::Location.new(0, 0), driver.frame_chain!.current_frame.size
+            Applitools::Location.new(0, 0), driver.frame_chain!.current_frame.size
           )
           begin
             frame_region.intersect Applitools::Region.from_location_size(
-                Applitools::Location.new(0, 0),
-                Applitools::Utils::EyesSeleniumUtils.entire_page_size(driver)
+              Applitools::Location.new(0, 0),
+              Applitools::Utils::EyesSeleniumUtils.entire_page_size(driver)
             )
             frame_region
           ensure
@@ -559,9 +549,11 @@ module Applitools::Selenium
           'or :frame_chain option or :frames_path option'
       end
 
-      if (needed_keys = (
-          options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path, :target_frames])
-          ).length == 1
+      needed_keys = (
+        options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path, :target_frames]
+      )
+
+      if needed_keys.length == 1
         frame_key = needed_keys.first
       else
         raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' /

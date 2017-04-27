@@ -24,8 +24,21 @@ module Applitools::Images
         new screenshot
       end
 
-      def any
-
+      def any(screenshot)
+        case screenshot
+        when Applitools::Screenshot
+          screenshot(screenshot)
+        when ChunkyPNG::Image
+          image(screenshot)
+        when String
+          begin
+            blob(screenshot)
+          rescue ChunkyPNG::SignatureMismatch
+            path(screenshot)
+          end
+        else
+          raise Applitools::EyesIllegalArgument.new "Passed screenshot is not image type (#{screenshot.class})"
+        end
       end
     end
 
@@ -41,25 +54,33 @@ module Applitools::Images
       }
     end
 
-    def ignore(region)
-      Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
-      ignored_regions << region
+    def ignore(region = nil)
+      if region
+        Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
+        ignored_regions << region
+      else
+        self.ignored_regions = []
+      end
       self
     end
 
-    def region(region)
-      Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
-      self.region_to_check = region
+    def region(region = nil)
+      if region
+        Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
+        self.region_to_check = region
+      else
+        self.region_to_check = nil
+      end
       self
     end
 
-    def trim
-      options[:trim] = true
+    def trim(value = true)
+      options[:trim] = value ? true : false
       self
     end
 
-    def timeout(value)
-      options[:timeout] = value
+    def timeout(value = nil)
+      options[:timeout] = value ? value : nil
       self
     end
   end
