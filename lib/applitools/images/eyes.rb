@@ -149,7 +149,7 @@ module Applitools::Images
         end
       end
       mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-        Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options
+        Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options.merge(match_level: default_match_settings[:match_level])
       mr.as_expected?
     end
 
@@ -197,7 +197,7 @@ module Applitools::Images
         end
       end
       mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-        Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options
+        Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options.merge(match_level: default_match_settings[:match_level])
       mr.as_expected?
     end
 

@@ -199,7 +199,7 @@ module Applitools::Selenium
         )
       end
 
-      check_window_base region_provider, tag, false, match_timeout
+      check_window_base region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
     end
 
     # @!visibility private
@@ -865,7 +865,7 @@ module Applitools::Selenium
         )
       end
 
-      check_window_base region_provider, tag, false, match_timeout
+      check_window_base region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
     end
 
     def app_environment
@@ -947,7 +947,9 @@ module Applitools::Selenium
         Applitools::Selenium::EyesWebDriverScreenshot.new(image, driver: driver)
       end
 
-      result = check_window_base region_provider, tag, false, match_timeout
+      result = check_window_base(
+        region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
+      )
 
       logger.info 'Done! trying to scroll back to original position...'
       region_visibility_strategy.return_to_original_position position_provider
@@ -1042,7 +1044,9 @@ module Applitools::Selenium
           )
         end
 
-        check_window_base base_check_region_provider, tag, false, match_timeout
+        check_window_base(
+          base_check_region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
+        )
       ensure
         eyes_element.overflow = original_overflow unless original_overflow.nil?
         self.check_frame_or_element = false
