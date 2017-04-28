@@ -656,8 +656,15 @@ module Applitools::Selenium
                                   wait_before_screenshots: wait_before_screenshots,
                                   eyes_screenshot_factory: eyes_screenshot_factory
 
-          driver.switch_to.frame original_frame unless driver.frame_chain.empty?
-          Applitools::Selenium::EyesWebDriverScreenshot.new full_page_image, driver: driver
+          unless driver.frame_chain.empty?
+            logger.info 'Switching back to original frame...'
+            driver.switch_to.frame original_frame
+            logger.info 'Done switching!'
+          end
+          logger.info 'Creating EyesWebDriver screenshot instance..'
+          ewd_screenshot = Applitools::Selenium::EyesWebDriverScreenshot.new full_page_image, driver: driver
+          logger.info 'Done creating EyesWebDriver screenshot instance!'
+          ewd_screenshot
         else
           logger.info 'Screenshot requested...'
           image = image_provider.take_screenshot

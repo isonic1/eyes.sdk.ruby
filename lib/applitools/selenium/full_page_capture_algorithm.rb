@@ -149,15 +149,20 @@ module Applitools::Selenium
 
       logger.info "Extracted entire size: #{entire_size}"
       logger.info "Actual stitched size: #{stitched_image.width} x #{stitched_image.height}"
-      logger.info "Actual stitched size: #{actual_image_width} x #{actual_image_height}"
+      logger.info "Calculated stitched size: #{actual_image_width} x #{actual_image_height}"
 
       if actual_image_width < stitched_image.width || actual_image_height < stitched_image.height
         logger.info 'Trimming unnecessary margins...'
-        stitched_image.crop!(0, 0, actual_image_width, actual_image_height)
+        stitched_image.crop!(0, 0,
+                             [actual_image_width, stitched_image.width].min,
+                             [actual_image_height, stitched_image.height].min)
         logger.info 'Done!'
       end
 
-      Applitools::Screenshot.from_any_image(stitched_image.to_blob)
+      logger.info 'Converting to screenshot...'
+      result_screenshot = Applitools::Screenshot.from_any_image(stitched_image.to_blob)
+      logger.info 'Done converting!'
+      result_screenshot
     end
   end
 end
