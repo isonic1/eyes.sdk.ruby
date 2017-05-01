@@ -112,9 +112,7 @@ module Applitools
         end
       end
 
-      elapsed_time = (Time.now - elapsed_time_start) / 1000
-
-      logger.info "Completed in #{format('%.2f', elapsed_time)} seconds"
+      logger.info "Completed in #{format('%.2f', Time.now - elapsed_time_start)} seconds"
 
       match_result.screenshot = app_output.screenshot
       match_result
