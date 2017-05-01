@@ -10,6 +10,15 @@ module Applitools::EyesLogger
   extend Forwardable
   extend self
 
+  # noinspection SpellCheckingInspection
+  def self.add_thread_id_to_log_handler!(log_handler)
+    original_formatter = Logger::Formatter.new
+    log_handler.formatter = proc do |severity, datetime, progname, msg|
+      updated_progname = "#{progname.to_s} (#{Thread.current.object_id.to_s})"
+      original_formatter.call(severity, datetime, updated_progname, msg.dump)
+    end
+  end
+
   MANDATORY_METHODS = [:debug, :info, :close].freeze
   OPTIONAL_METHODS = [:warn, :error, :fatal].freeze
 
@@ -20,6 +29,7 @@ module Applitools::EyesLogger
   def log_handler=(log_handler)
     raise Applitools::EyesError.new('log_handler must implement Logger!') unless valid?(log_handler)
 
+    Applitools::EyesLogger.add_thread_id_to_log_handler! log_handler
     @log_handler = log_handler
   end
 
