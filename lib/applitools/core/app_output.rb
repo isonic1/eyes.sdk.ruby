@@ -10,7 +10,7 @@ module Applitools
     def to_hash
       {
         title: title,
-        screenshot64: ''
+        screenshot64: nil
       }
     end
   end
