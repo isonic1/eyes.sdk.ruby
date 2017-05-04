@@ -2,7 +2,7 @@ require 'yaml'
 
 module Applitools
   class TestResults
-    attr_accessor :is_new, :url
+    attr_accessor :is_new, :url, :screenshot
     attr_reader :steps, :matches, :mismatches, :missing, :original_results
 
     def initialize(results = {})
@@ -41,6 +41,8 @@ module Applitools
     end
 
     alias is_passed passed?
+
+    alias as_expected? passed?
 
     def to_s(advanced = false)
       is_new_str = ''

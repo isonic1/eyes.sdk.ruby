@@ -172,7 +172,7 @@ module Applitools
       raise e
     end
 
-    def check_window_base(region_provider, tag, ignore_mismatch, retry_timeout, options = {})
+    def check_window_base(region_provider, retry_timeout, match_window_data)
       if disabled?
         logger.info "#{__method__} Ignored"
         result = Applitools::MatchResults.new
@@ -183,7 +183,7 @@ module Applitools
       raise Applitools::EyesError.new 'Eyes not open' unless open?
       Applitools::ArgumentGuard.not_nil region_provider, 'region_provider'
 
-      logger.info "check_window_base(#{region_provider}, #{tag}, #{ignore_mismatch}, #{retry_timeout})"
+      logger.info "check_window_base(#{region_provider}, #{match_window_data.tag}, #{match_window_data.ignore_mismatch}, #{retry_timeout})"
 
       tag = '' if tag.nil?
 
@@ -200,18 +200,11 @@ module Applitools
       end
 
       logger.info 'Calling match_window...'
-      result = @match_window_task.match_window(
-        user_inputs: user_inputs,
+      result = @match_window_task.match_window(match_window_data,
         last_screenshot: last_screenshot,
         region_provider: region_provider,
-        tag: tag,
         should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
-        ignore_mismatch: ignore_mismatch,
         retry_timeout: retry_timeout,
-        ignore: options[:ignore],
-        trim: options[:trim],
-        match_level: options[:match_level],
-        exact: options[:exact]
       )
       logger.info 'match_window done!'
 
@@ -219,7 +212,7 @@ module Applitools
         clear_user_inputs
         self.last_screenshot = result.screenshot
       else
-        unless ignore_mismatch
+        unless match_window_data.ignore_mismatch
           clear_user_inputs
           self.last_screenshot = result.screenshot
         end
@@ -227,6 +220,67 @@ module Applitools
         self.should_match_window_run_once_on_timeout = true
 
         logger.info "Mistmatch! #{tag}" unless running_session.new_session?
+
+        if failure_reports == :immediate
+          raise Applitools::TestFailedException.new "Mistmatch found in #{session_start_info.scenario_id_or_name}" \
+              " of #{session_start_info.app_id_or_name}"
+        end
+      end
+
+      logger.info 'Done!'
+      result
+    end
+
+
+    def check_single_base(region_provider, retry_timeout, match_window_data)
+      if disabled?
+        logger.info "#{__method__} Ignored"
+        result = Applitools::MatchResults.new
+        result.as_expected = true
+        return result
+      end
+
+      raise Applitools::EyesError.new 'Eyes not open' unless open?
+      Applitools::ArgumentGuard.not_nil region_provider, 'region_provider'
+
+      logger.info "check_single_base(#{region_provider}, #{match_window_data.tag}, #{match_window_data.ignore_mismatch}, #{retry_timeout})"
+
+      tag = '' if tag.nil?
+
+      session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
+         scenario_id_or_name: test_name, batch_info: batch,
+         env_name: baseline_name, environment: app_environment,
+         default_match_settings: default_match_settings,
+         branch_name: branch_name, parent_branch_name: parent_branch_name
+
+      match_window_data.start_info = session_start_info
+      match_window_task = Applitools::MatchSingleTask.new(
+          logger,
+          match_timeout,
+          app_output_provider
+      )
+
+      logger.info 'Calling match_window...'
+      result = match_window_task.match_window(match_window_data,
+                                               last_screenshot: last_screenshot,
+                                               region_provider: region_provider,
+                                               should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
+                                               retry_timeout: retry_timeout,
+      )
+      logger.info 'match_window done!'
+
+      if result.as_expected?
+        clear_user_inputs
+        self.last_screenshot = result.screenshot
+      else
+        unless match_window_data.ignore_mismatch
+          clear_user_inputs
+          self.last_screenshot = result.screenshot
+        end
+
+        self.should_match_window_run_once_on_timeout = true
+
+        logger.info "Mistmatch! #{tag}"
 
         if failure_reports == :immediate
           raise Applitools::TestFailedException.new "Mistmatch found in #{session_start_info.scenario_id_or_name}" \

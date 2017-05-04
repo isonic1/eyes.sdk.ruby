@@ -62,17 +62,38 @@ module Applitools::Images
       Applitools::ArgumentGuard.not_nil(name, 'name')
       region_provider = get_region_provider(target)
 
+      match_window_data = Applitools::MatchWindowData.new
+      match_window_data.tag = name
+      match_window_data.read_target(target, nil)
+
       image = target.image
       self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
       self.screenshot = EyesImagesScreenshot.new image
 
       mr = check_window_base(
-        region_provider, name, false,
+        region_provider,
         target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
-        ignore: target.ignored_regions,
-        trim: target.options[:trim],
-        match_level: default_match_settings[:match_level],
-        exact: default_match_settings[:exact]
+        match_window_data
+      )
+      mr.as_expected?
+    end
+
+    def check_single(name, target)
+      Applitools::ArgumentGuard.not_nil(name, 'name')
+      region_provider = get_region_provider(target)
+
+      match_window_data = Applitools::MatchSingleCheckData.new
+      match_window_data.tag = name
+      match_window_data.read_target(target, nil)
+
+      image = target.image
+      self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
+      self.screenshot = EyesImagesScreenshot.new image
+
+      mr = check_single_base(
+          region_provider,
+          target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+          match_window_data
       )
       mr.as_expected?
     end

@@ -10,6 +10,7 @@ module Applitools::Connectivity
 
     DEFAULT_SERVER_URL = 'https://eyessdk.applitools.com'.freeze
 
+
     SSL_CERT = File.join(File.dirname(File.expand_path(__FILE__)), '../../../certs/cacert.pem').to_s.freeze
     DEFAULT_TIMEOUT = 300
 
@@ -31,6 +32,7 @@ module Applitools::Connectivity
           " (#{@server_url.class} is passed)"
       end
       @endpoint_url = URI.join(@server_url, API_SESSIONS_RUNNING).to_s
+      @single_check_endpoint_url = 'https://testeyesapi.applitools.com/api/sessions/'
     end
 
     def set_proxy(uri, user = nil, password = nil)
@@ -54,6 +56,17 @@ module Applitools::Connectivity
       res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       Applitools::MatchResult.new Oj.load(res.body)
+    end
+
+    def match_single_window(data)
+      # Notice that this does not include the screenshot.
+      json_data = Oj.dump(data.to_hash).force_encoding('BINARY')
+      body = [json_data.length].pack('L>') + json_data + data.screenshot
+      # Applitools::EyesLogger.debug json_data
+      Applitools::EyesLogger.debug 'Sending match data...'
+      res = long_post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
+      raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers} #{res.body}") unless res.success?
+      Applitools::TestResults.new Oj.load(res.body)
     end
 
     def start_session(session_start_info)

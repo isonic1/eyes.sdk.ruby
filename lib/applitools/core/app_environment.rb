@@ -11,10 +11,10 @@ module Applitools
 
     def to_hash
       {
-        os: @os,
-        hosting_app: @hosting_app,
-        display_size: @display_size.to_hash,
-        inferred: @inferred
+        'os' => @os,
+        'hostingApp' => @hosting_app,
+        'displaySize' => @display_size.to_hash,
+        'inferred' => @inferred
       }
     end
 

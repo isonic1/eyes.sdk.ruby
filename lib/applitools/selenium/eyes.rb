@@ -232,6 +232,9 @@ module Applitools::Selenium
 
       check_in_frame target_frames: target.frames do
         begin
+          match_data = Applitools::MatchWindowData.new
+          match_data.tag = name
+          match_data.read_target(target, driver)
           eyes_element = target.region_to_check.call(driver)
           region_visibility_strategy.move_to_region original_position_provider,
             Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
@@ -274,11 +277,7 @@ module Applitools::Selenium
           end
 
           check_window_base(
-            region_provider, name, false, target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT,
-            ignore: target.ignored_regions.map { |i| i.call(driver) },
-            trim: target.options[:trim],
-            match_level: default_match_settings[:match_level],
-            exact: default_match_settings[:exact]
+            region_provider, target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT, match_data
           )
         ensure
           eyes_element.overflow = original_overflow unless original_overflow.nil?
