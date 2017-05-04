@@ -78,7 +78,8 @@ module Applitools::Images
       mr.as_expected?
     end
 
-    def check_single(name, target)
+    def check_single(name, target, options = {})
+      open_base(options) unless options.empty?
       Applitools::ArgumentGuard.not_nil(name, 'name')
       region_provider = get_region_provider(target)
 
@@ -95,7 +96,7 @@ module Applitools::Images
           target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
           match_window_data
       )
-      mr.as_expected?
+      mr
     end
 
     def get_region_provider(target)
