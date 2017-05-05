@@ -16,9 +16,9 @@ module Applitools
     end
 
     def passed?
-      return !(mismatches > 0) && !(missing > 0) unless new?
-      false
+      !new? && original_results['isDifferent']
     end
+
 
     def failed?
       return (mismatches > 0) || (missing > 0) unless new?
@@ -26,7 +26,11 @@ module Applitools
     end
 
     def new?
-      is_new
+      original_results['isNew'] && !aborted?
+    end
+
+    def aborted?
+      original_results['isAborted']
     end
 
     def ==(other)
