@@ -199,7 +199,13 @@ module Applitools::Selenium
         )
       end
 
-      check_window_base region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
+      match_data = Applitools::MatchWindowData.new.tap do |d|
+        d.tag = tag
+        d.ignore_mismatch = false
+        d.match_level = default_match_settings[:match_level]
+      end
+
+      check_window_base region_provider, match_timeout, match_data
     end
 
     # @!visibility private
@@ -864,7 +870,13 @@ module Applitools::Selenium
         )
       end
 
-      check_window_base region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
+      match_data = Applitools::MatchWindowData.new.tap do |d|
+        d.tag = tag
+        d.ignore_mismatch = false
+        d.match_level = default_match_settings[:match_level]
+      end
+
+      check_window_base region_provider, match_timeout, match_data
     end
 
     def app_environment
@@ -946,8 +958,14 @@ module Applitools::Selenium
         Applitools::Selenium::EyesWebDriverScreenshot.new(image, driver: driver)
       end
 
+      match_data = Applitools::MatchWindowData.new.tap do |d|
+        d.tag = tag
+        d.ignore_mismatch = false
+        d.match_level = default_match_settings[:match_level]
+      end
+
       result = check_window_base(
-        region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
+        region_provider, match_timeout, match_data
       )
 
       logger.info 'Done! trying to scroll back to original position...'
@@ -1043,8 +1061,14 @@ module Applitools::Selenium
           )
         end
 
+        match_data = Applitools::MatchWindowData.new.tap do |d|
+          d.tag = tag
+          d.ignore_mismatch = false
+          d.match_level = default_match_settings[:match_level]
+        end
+
         check_window_base(
-          base_check_region_provider, tag, false, match_timeout, match_level: default_match_settings[:match_level]
+          base_check_region_provider, match_timeout, match_data
         )
       ensure
         eyes_element.overflow = original_overflow unless original_overflow.nil?

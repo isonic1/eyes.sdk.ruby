@@ -289,7 +289,7 @@ module Applitools
       end
 
       logger.info 'Done!'
-      result
+      result.original_results
     end
 
     # Closes eyes

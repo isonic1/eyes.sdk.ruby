@@ -146,6 +146,10 @@ module Applitools::Images
     #   eyes.check_image(image: my_image, tag: 'My Test', ignore_mismatch: true)
     def check_image(options)
       options = { tag: nil, ignore_mismatch: false }.merge options
+      match_data = Applitools::MatchWindowData.new
+      match_data.tag = options[:tag]
+      match_data.ignore_mismatch = options[:ignore_mismatch]
+      match_data.match_level = default_match_settings[:match_level]
 
       if disabled?
         logger.info "check_image(image, #{options[:tag]}, #{options[:ignore_mismatch]}): Ignored"
@@ -170,8 +174,7 @@ module Applitools::Images
           nil
         end
       end
-      mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-        Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options.merge(match_level: default_match_settings[:match_level])
+      mr = check_window_base region_provider, Applitools::EyesBase::USE_DEFAULT_TIMEOUT, match_data
       mr.as_expected?
     end
 
@@ -192,6 +195,10 @@ module Applitools::Images
     #   eyes.check_region(image_bytes: string_represents_image, tag: 'My Test', region: my_region)
     def check_region(options)
       options = { tag: nil, ignore_mismatch: false }.merge options
+      match_data = Applitools::MatchWindowData.new
+      match_data.tag = options[:tag]
+      match_data.ignore_mismatch = options[:ignore_mismatch]
+      match_data.match_level = default_match_settings[:match_level]
 
       if disabled?
         logger.info "check_region(image, #{options[:tag]}, #{options[:ignore_mismatch]}): Ignored"
@@ -218,8 +225,9 @@ module Applitools::Images
           Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
         end
       end
-      mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-        Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options.merge(match_level: default_match_settings[:match_level])
+      # mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
+      #   Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options.merge(match_level: default_match_settings[:match_level])
+      mr = check_window_base region_provider, Applitools::EyesBase::USE_DEFAULT_TIMEOUT, match_data
       mr.as_expected?
     end
 
