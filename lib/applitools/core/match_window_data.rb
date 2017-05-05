@@ -107,6 +107,10 @@ module Applitools
       end
     end
 
+    def match_level=(value)
+      current_data['Options']['MatchLevel'] = value
+    end
+
     def read_target(target, driver)
       #options
       %w(trim).each do |field|
