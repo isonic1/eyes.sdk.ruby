@@ -255,7 +255,8 @@ module Applitools
          branch_name: branch_name, parent_branch_name: parent_branch_name
 
       match_window_data.start_info = session_start_info
-      match_window_data.update_baseline_if_different = save_new_tests | save_failed_tests
+      match_window_data.update_baseline_if_new = save_new_tests
+      match_window_data.update_baseline_if_different = save_failed_tests
       match_window_task = Applitools::MatchSingleTask.new(
           logger,
           match_timeout,

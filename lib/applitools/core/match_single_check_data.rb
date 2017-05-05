@@ -55,7 +55,8 @@ module Applitools
                 'Elapsed' => 0
             },
             'Tag' => nil,
-            'updateBaselineIfDifferent' => false
+            'updateBaselineIfDifferent' => false,
+            'updateBaselineIfNew' => false
         }
       end
     end
@@ -77,6 +78,10 @@ module Applitools
 
     def update_baseline_if_different=(value)
       current_data['updateBaselineIfDifferent'] = value ? true : false
+    end
+
+    def update_baseline_if_new=(value)
+      current_data['updateBaselineIfNew'] = value ? true : false
     end
   end
 end
