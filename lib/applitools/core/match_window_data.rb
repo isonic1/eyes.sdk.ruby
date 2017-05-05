@@ -36,9 +36,6 @@ module Applitools
             'IgnoreMismatch' => false,
             'Trim' => {
               'Enabled' => false,
-              'ForegroundIntensity' => 0,
-              'MinEdgeLength' => 0
-
             }
           },
           'Id' => nil,
