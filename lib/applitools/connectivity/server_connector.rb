@@ -55,7 +55,6 @@ module Applitools::Connectivity
       #Applitools::EyesLogger.debug json_data
       res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
-      Applitools::EyesLogger.debug Oj.load(res.body).inspect
       Applitools::MatchResult.new Oj.load(res.body)
     end
 
