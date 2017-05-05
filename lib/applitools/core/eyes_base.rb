@@ -54,6 +54,7 @@ module Applitools
       @user_inputs = UserInputArray.new
       self.app_output_provider = Object.new
       self.verbose_results = false
+      self.failed = false
       @inferred_environment = nil
 
       get_app_output_method = ->(r, s) { get_app_output_with_screenshot r, s }
@@ -218,7 +219,7 @@ module Applitools
         end
 
         self.should_match_window_run_once_on_timeout = true
-
+        self.failed = true
         logger.info "Mistmatch! #{tag}" unless running_session.new_session?
 
         if failure_reports == :immediate
@@ -321,7 +322,7 @@ module Applitools
 
       logger.info 'Ending server session...'
 
-      save = is_new_session && save_new_tests || !is_new_session && save_failed_tests
+      save = is_new_session && save_new_tests || !is_new_session && failed && save_failed_tests
 
       logger.info "Automatically save test? #{save}"
 
@@ -359,7 +360,7 @@ module Applitools
     private
 
     attr_accessor :running_session, :last_screenshot, :current_app_name, :test_name, :session_type,
-      :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider
+      :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider, :failed
 
     attr_reader :user_inputs
 
