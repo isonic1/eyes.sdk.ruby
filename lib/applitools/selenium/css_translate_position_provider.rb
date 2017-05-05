@@ -6,10 +6,12 @@ module Applitools::Selenium
 
     attr_accessor :last_state_position
 
-    def initialize(executor, disable_horizontal = false, disable_vertical = false)
+    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width: nil, max_height: nil)
       self.executor = executor
       self.disable_horizontal = disable_horizontal
       self.disable_vertical = disable_vertical
+      self.max_width = max_width
+      self.max_height = max_height
     end
 
     def current_position
@@ -48,16 +50,19 @@ module Applitools::Selenium
 
     def entire_size
       viewport_size = Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(executor)
-      e_size = Applitools::Utils::EyesSeleniumUtils.current_frame_content_entire_size(executor)
-      logger.info "Entire size: #{e_size}"
-      e_size.width = viewport_size.width if disable_horizontal
-      e_size.height = viewport_size.height if disable_vertical
-      e_size
+      result = Applitools::Utils::EyesSeleniumUtils.current_frame_content_entire_size(executor)
+      logger.info "Entire size: #{result}"
+      result.width = viewport_size.width if disable_horizontal
+      result.height = viewport_size.height if disable_vertical
+      result.width = max_width unless max_width.nil?
+      result.height = max_height unless max_height.nil?
+      logger.info "Actual size to scroll: #{result}"
+      result
     end
 
     private
 
-    attr_accessor :executor, :disable_horizontal, :disable_vertical
+    attr_accessor :executor, :disable_horizontal, :disable_vertical, :max_width, :max_height
 
     def get_position_from_transform(transform)
       regexp = /^translate\(\s*(\-?)(\d+)px,\s*(\-?)(\d+)px\s*\)/

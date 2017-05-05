@@ -71,10 +71,13 @@ module Applitools::Selenium
     #   When :CSS - SDK will use CSS transitions to perform scrolling, otherwise it will use Javascript
     #   window.scroll_to() function for scrolling purposes
     #   @return [boolean] stitch_mode (:CSS or :SCROLL)
+    # @!attribute [Applitools::RectangleSize] explicit_entire_size
+    #   May be set to an Applitools::RectangleSize instance or +nil+ (default).
+    #   @return [Applitools::RectangleSize] explicit_entire_size
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
-      :disable_vertical_scrolling
+      :disable_vertical_scrolling, :explicit_entire_size
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -97,6 +100,7 @@ module Applitools::Selenium
       self.debug_screenshot = false
       self.disable_horizontal_scrolling = false
       self.disable_vertical_scrolling = false
+      self.explicit_entire_size = nil
     end
 
     # Starts a test
@@ -140,7 +144,7 @@ module Applitools::Selenium
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
 
       self.position_provider = self.class.position_provider(
-        stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling
+        stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
       )
 
       self.eyes_screenshot_factory = lambda do |image|
@@ -157,7 +161,7 @@ module Applitools::Selenium
       @stitch_mode = value.to_s.upcase == STICH_MODE[:css].to_s ? STICH_MODE[:css] : STICH_MODE[:scroll]
       unless driver.nil?
         self.position_provider = self.class.position_provider(
-          stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling
+          stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
         )
       end
       if stitch_mode == STICH_MODE[:css]
@@ -1107,12 +1111,19 @@ module Applitools::Selenium
     end
 
     class << self
-      def position_provider(stitch_mode, driver, disable_horizontal = false, disable_vertical = false)
+      def position_provider(stitch_mode, driver, disable_horizontal=false, disable_vertical=false, explicit_entire_size=nil)
+        max_width, max_height = nil, nil
+        unless explicit_entire_size.nil?
+          max_width = explicit_entire_size.width
+          max_height = explicit_entire_size.height
+        end
         case stitch_mode
         when :SCROLL
-          Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical)
+          Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical,
+                                                           max_width: max_width, max_height: max_height)
         when :CSS
-          Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical)
+          Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical,
+                                                                 max_width: max_width, max_height: max_height)
         end
       end
     end

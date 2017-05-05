@@ -5,10 +5,12 @@ module Applitools::Selenium
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
-    def initialize(executor, disable_horizontal = false, disable_vertical = false)
+    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width: nil, max_height: nil)
       self.executor = executor
       self.disable_horizontal = disable_horizontal
       self.disable_vertical = disable_vertical
+      self.max_width = max_width
+      self.max_height = max_height
     end
 
     # The scroll position of the current frame
@@ -43,6 +45,9 @@ module Applitools::Selenium
       logger.info "Entire size: #{result}"
       result.width = viewport_size.width if disable_horizontal
       result.height = viewport_size.height if disable_vertical
+      result.width = max_width unless max_width.nil?
+      result.height = max_height unless max_height.nil?
+      logger.info "Actual size to scroll: #{result}"
       result
     end
 
@@ -52,6 +57,6 @@ module Applitools::Selenium
 
     private
 
-    attr_accessor :executor, :disable_horizontal, :disable_vertical
+    attr_accessor :executor, :disable_horizontal, :disable_vertical, :max_width, :max_height
   end
 end
