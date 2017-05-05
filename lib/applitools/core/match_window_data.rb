@@ -74,6 +74,7 @@ module Applitools
 
     def ignore_mismatch=(value)
       current_data['IgnoreMismatch'] = value ? true : false
+      current_data['Options']['IgnoreMismatch'] = current_data['IgnoreMismatch']
     end
 
     def tag=(value)
