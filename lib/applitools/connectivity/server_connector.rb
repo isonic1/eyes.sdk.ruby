@@ -15,6 +15,7 @@ module Applitools::Connectivity
     DEFAULT_TIMEOUT = 300
 
     API_SESSIONS_RUNNING = '/api/sessions/running/'.freeze
+    API_SINGLE_TEST = '/api/sessions/'.freeze
 
     HTTP_STATUS_CODES = {
       created: 201,
@@ -32,7 +33,7 @@ module Applitools::Connectivity
           " (#{@server_url.class} is passed)"
       end
       @endpoint_url = URI.join(@server_url, API_SESSIONS_RUNNING).to_s
-      @single_check_endpoint_url = 'https://testeyesapi.applitools.com/api/sessions/'
+      @single_check_endpoint_url = URI.join(@server_url, API_SINGLE_TEST).to_s
     end
 
     def set_proxy(uri, user = nil, password = nil)
