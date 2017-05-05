@@ -268,7 +268,10 @@ module Applitools
                                                region_provider: region_provider,
                                                should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
                                                retry_timeout: retry_timeout,
-      )
+      ) do |match_results|
+        results = match_results.original_results
+        (!results['isAborted'] and results['isNew'] && save_new_tests) || !(results['isDifferent'] | results['isNew'])
+      end
       logger.info 'match_window done!'
 
       if result.as_expected?
