@@ -50,7 +50,13 @@ module Applitools
         match_result = perform_match(match_window_data)
         retry_time = Time.now - start
 
-        while retry_time < retry_timeout && !match_result.as_expected?
+        if block_given?
+          block_retry = yield(match_result)
+        else
+          block_retry = false
+        end
+
+        while retry_time < retry_timeout && !(block_retry || match_result.as_expected?)
           sleep MATCH_INTERVAL
           app_output = app_output_provider.app_output(region_provider, last_screenshot)
           match_window_data.app_output = app_output
@@ -60,7 +66,7 @@ module Applitools
           retry_time = Time.now - start
         end
 
-        unless match_result.as_expected?
+        unless block_retry || match_result.as_expected?
           app_output = app_output_provider.app_output(region_provider, last_screenshot)
           match_window_data.app_output = app_output
           match_window_data.convert_ignored_regions_coordinates

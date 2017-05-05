@@ -255,7 +255,8 @@ module Applitools
          branch_name: branch_name, parent_branch_name: parent_branch_name
 
       match_window_data.start_info = session_start_info
-      match_window_data.update_baseline_if_different = save_new_tests | save_failed_tests
+      match_window_data.update_baseline_if_new = save_new_tests
+      match_window_data.update_baseline_if_different = save_failed_tests
       match_window_task = Applitools::MatchSingleTask.new(
           logger,
           match_timeout,
@@ -268,7 +269,10 @@ module Applitools
                                                region_provider: region_provider,
                                                should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
                                                retry_timeout: retry_timeout,
-      )
+      ) do |match_results|
+        results = match_results.original_results
+        (!results['isAborted'] and results['isNew'] && save_new_tests) || !(results['isDifferent'] | results['isNew'])
+      end
       logger.info 'match_window done!'
 
       if result.as_expected?
