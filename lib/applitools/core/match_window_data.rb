@@ -106,7 +106,7 @@ module Applitools
     end
 
     def match_level=(value)
-      current_data['Options']['MatchLevel'] = value
+      current_data['Options']['ImageMatchSettings']['MatchLevel'] = value
     end
 
     def read_target(target, driver)
