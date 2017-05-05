@@ -54,7 +54,8 @@ module Applitools
                 'IsPrimary' => false,
                 'Elapsed' => 0
             },
-            'Tag' => nil
+            'Tag' => nil,
+            'updateBaselineIfDifferent' => false
         }
       end
     end
@@ -72,6 +73,10 @@ module Applitools
       current_data['startInfo']['defaultMatchSettings'] = hash_value[:default_match_settings]
       current_data['startInfo']['branchName'] = hash_value[:branch_name]
       current_data['startInfo']['parentBranchName'] = hash_value[:parent_branch_name]
+    end
+
+    def update_baseline_if_different=(value)
+      current_data['updateBaselineIfDifferent'] = value ? true : false
     end
   end
 end
