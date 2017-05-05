@@ -64,6 +64,7 @@ module Applitools::Images
 
       match_window_data = Applitools::MatchWindowData.new
       match_window_data.tag = name
+      match_window_data.match_level = default_match_settings[:match_level]
       match_window_data.read_target(target, nil)
 
       image = target.image
