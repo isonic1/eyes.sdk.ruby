@@ -271,7 +271,12 @@ module Applitools
                                                retry_timeout: retry_timeout,
       ) do |match_results|
         results = match_results.original_results
-        (!results['isAborted'] and results['isNew'] && save_new_tests) || !(results['isDifferent'] | results['isNew'])
+        not_aborted = !results['isAborted']
+        new_and_saved = results['isNew'] && save_new_tests
+        different_and_saved = results['isDifferent'] && save_failed_tests
+        not_a_mismatch = !results['isDifferent'] && !results['isNew']
+
+        not_aborted && (new_and_saved || different_and_saved || not_a_mismatch)
       end
       logger.info 'match_window done!'
 

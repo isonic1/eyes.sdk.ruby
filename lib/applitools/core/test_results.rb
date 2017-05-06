@@ -16,17 +16,15 @@ module Applitools
     end
 
     def passed?
-      return !(mismatches > 0) && !(missing > 0) unless new?
-      false
+      !(original_results['isAborted'] || original_results['isDifferent'] || original_results['isNew'])
     end
 
     def failed?
-      return (mismatches > 0) || (missing > 0) unless new?
-      false
+      original_results['isDifferent'] && !(original_results['isAborted'] || original_results['isNew'])
     end
 
     def new?
-      is_new
+      original_results['isNew']
     end
 
     def ==(other)
