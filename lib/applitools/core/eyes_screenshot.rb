@@ -21,6 +21,13 @@ module Applitools
     abstract_method :location_in_screenshot, false
     abstract_method :intersected_region, false
 
+    def sub_screenshots(regions, coordinate_type)
+      Applitools::ArgumentGuard.is_a? regions, 'regions', Enumerable
+      regions.map do |region|
+        sub_screenshot(region, coordinate_type, false, true)
+      end
+    end
+
     def convert_region_location(region, from, to)
       Applitools::ArgumentGuard.not_nil region, 'region'
       Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region

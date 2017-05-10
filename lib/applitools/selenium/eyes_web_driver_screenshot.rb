@@ -235,7 +235,7 @@ module Applitools::Selenium
       location
     end
 
-    def sub_screenshot(region, coordinate_type, throw_if_clipped = false)
+    def sub_screenshot(region, coordinate_type, throw_if_clipped = false, force_nil_if_clipped = false)
       logger.info "get_subscreenshot(#{region}, #{coordinate_type}, #{throw_if_clipped})"
       Applitools::ArgumentGuard.not_nil region, 'region'
       Applitools::ArgumentGuard.not_nil coordinate_type, 'coordinate_type'
@@ -248,6 +248,7 @@ module Applitools::Selenium
         Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
 
       if as_is_subscreenshot_region.empty? || (throw_if_clipped && !as_is_subscreenshot_region.size == region.size)
+        return nil if force_nil_if_clipped
         raise Applitools::OutOfBoundsException.new "Region #{region} (#{coordinate_type}) is out" \
           " of screenshot bounds [#{frame_window}]"
       end
