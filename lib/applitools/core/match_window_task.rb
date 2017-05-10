@@ -6,12 +6,14 @@ module Applitools
 
     attr_reader :logger, :running_session, :default_retry_timeout, :app_output_provider
 
-    def initialize(logger, running_session, retry_timeout, app_output_provider)
+    def initialize(logger, running_session, retry_timeout, app_output_provider, server_connector)
+      Applitools::ArgumentGuard.is_a? server_connector, 'server_connector', Applitools::Connectivity::ServerConnector
       @logger = logger
       @running_session = running_session
       # @driver = driver
       @default_retry_timeout = retry_timeout
       @app_output_provider = app_output_provider
+      self.server_connector = server_connector
 
       ArgumentGuard.not_nil logger, 'logger'
       ArgumentGuard.not_nil running_session, 'running_session'
@@ -83,9 +85,11 @@ module Applitools
 
     private
 
+    attr_accessor :server_connector
+
     def perform_match(match_window_data)
       Applitools::ArgumentGuard.is_a? match_window_data, 'match_window_data', Applitools::MatchWindowData
-      Applitools::Connectivity::ServerConnector.match_window running_session, match_window_data
+      server_connector.match_window running_session, match_window_data
     end
   end
 end

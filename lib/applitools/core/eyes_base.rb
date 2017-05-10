@@ -22,7 +22,7 @@ module Applitools
     CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
-    def_delegators 'Applitools::Connectivity::ServerConnector', :api_key, :api_key=, :server_url, :server_url=,
+    def_delegators '@server_connector', :api_key, :api_key=, :server_url, :server_url=,
       :set_proxy, :proxy, :proxy=
 
     # @!attribute [rw] verbose_results
@@ -42,7 +42,7 @@ module Applitools
     abstract_method :get_viewport_size, true
 
     def initialize(server_url = nil)
-      Applitools::Connectivity::ServerConnector.server_url = server_url
+      self.server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
       self.disabled = false
       @viewport_size = nil
       self.match_timeout = DEFAULT_MATCH_TIMEOUT
@@ -124,7 +124,7 @@ module Applitools
       end
 
       logger.info 'Aborting server session...'
-      Applitools::Connectivity::ServerConnector.stop_session(running_session, true, false)
+      server_connector.stop_session(running_session, true, false)
       logger.info '---Test aborted'
 
     rescue Applitools::EyesError => e
@@ -196,7 +196,8 @@ module Applitools
           logger,
           running_session,
           match_timeout,
-          app_output_provider
+          app_output_provider,
+          server_connector
         )
       end
 
@@ -260,7 +261,8 @@ module Applitools
       match_window_task = Applitools::MatchSingleTask.new(
           logger,
           match_timeout,
-          app_output_provider
+          app_output_provider,
+          server_connector
       )
 
       logger.info 'Calling match_window...'
@@ -336,7 +338,7 @@ module Applitools
 
       logger.info "Automatically save test? #{save}"
 
-      results = Applitools::Connectivity::ServerConnector.stop_session running_session, false, save
+      results = server_connector.stop_session running_session, false, save
 
       results.is_new = is_new_session
       results.url = session_results_url
@@ -370,7 +372,8 @@ module Applitools
     private
 
     attr_accessor :running_session, :last_screenshot, :current_app_name, :test_name, :session_type,
-      :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider, :failed
+      :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider,
+      :failed, :server_connector
 
     attr_reader :user_inputs
 
@@ -489,7 +492,7 @@ module Applitools
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name
 
       logger.info 'Starting server session...'
-      self.running_session = Applitools::Connectivity::ServerConnector.start_session session_start_info
+      self.running_session = server_connector.start_session session_start_info
 
       logger.info "Server session ID is #{running_session.id}"
       test_info = "'#{test_name}' of '#{app_name}' #{app_env}"
