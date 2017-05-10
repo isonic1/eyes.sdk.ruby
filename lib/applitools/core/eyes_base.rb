@@ -184,7 +184,10 @@ module Applitools
       raise Applitools::EyesError.new 'Eyes not open' unless open?
       Applitools::ArgumentGuard.not_nil region_provider, 'region_provider'
 
-      logger.info "check_window_base(#{region_provider}, #{match_window_data.tag}, #{match_window_data.ignore_mismatch}, #{retry_timeout})"
+      logger.info(
+        "check_window_base(#{region_provider}, #{match_window_data.tag}, #{match_window_data.ignore_mismatch}," \
+        " #{retry_timeout})"
+      )
 
       tag = '' if tag.nil?
 
@@ -202,11 +205,12 @@ module Applitools
       end
 
       logger.info 'Calling match_window...'
-      result = @match_window_task.match_window(match_window_data,
+      result = @match_window_task.match_window(
+        match_window_data,
         last_screenshot: last_screenshot,
         region_provider: region_provider,
         should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
-        retry_timeout: retry_timeout,
+        retry_timeout: retry_timeout
       )
       logger.info 'match_window done!'
 
@@ -233,7 +237,6 @@ module Applitools
       result
     end
 
-
     def check_single_base(region_provider, retry_timeout, match_window_data)
       if disabled?
         logger.info "#{__method__} Ignored"
@@ -245,7 +248,10 @@ module Applitools
       raise Applitools::EyesError.new 'Eyes not open' unless open?
       Applitools::ArgumentGuard.not_nil region_provider, 'region_provider'
 
-      logger.info "check_single_base(#{region_provider}, #{match_window_data.tag}, #{match_window_data.ignore_mismatch}, #{retry_timeout})"
+      logger.info(
+        "check_single_base(#{region_provider}, #{match_window_data.tag}, #{match_window_data.ignore_mismatch}," \
+        " #{retry_timeout})"
+      )
 
       tag = '' if tag.nil?
 
@@ -259,18 +265,19 @@ module Applitools
       match_window_data.update_baseline_if_new = save_new_tests
       match_window_data.update_baseline_if_different = save_failed_tests
       match_window_task = Applitools::MatchSingleTask.new(
-          logger,
-          match_timeout,
-          app_output_provider,
-          server_connector
+        logger,
+        match_timeout,
+        app_output_provider,
+        server_connector
       )
 
       logger.info 'Calling match_window...'
-      result = match_window_task.match_window(match_window_data,
-                                               last_screenshot: last_screenshot,
-                                               region_provider: region_provider,
-                                               should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
-                                               retry_timeout: retry_timeout,
+      result = match_window_task.match_window(
+        match_window_data,
+        last_screenshot: last_screenshot,
+        region_provider: region_provider,
+        should_match_window_run_once_on_timeout: should_match_window_run_once_on_timeout,
+        retry_timeout: retry_timeout
       ) do |match_results|
         results = match_results.original_results
         not_aborted = !results['isAborted']

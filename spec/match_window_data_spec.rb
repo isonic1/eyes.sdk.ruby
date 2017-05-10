@@ -10,14 +10,14 @@ RSpec.describe Applitools::MatchWindowData do
 
     it 'has required keys' do
       expect(subject.keys).to contain_exactly(
-                                'AppOutput',
-                                'Id',
-                                'IgnoreMismatch',
-                                'MismatchWait',
-                                'Options',
-                                'Tag',
-                                'UserInputs'
-                              )
+        'AppOutput',
+        'Id',
+        'IgnoreMismatch',
+        'MismatchWait',
+        'Options',
+        'Tag',
+        'UserInputs'
+      )
     end
 
     it 'default values' do
@@ -30,12 +30,12 @@ RSpec.describe Applitools::MatchWindowData do
       it 'has required keys' do
         expect(subject).to be_a Hash
         expect(subject.keys).to contain_exactly(
-                                  'Elapsed',
-                                  'IsPrimary',
-                                  'Screenshot64',
-                                  'ScreenshotUrl',
-                                  'Title'
-                                )
+          'Elapsed',
+          'IsPrimary',
+          'Screenshot64',
+          'ScreenshotUrl',
+          'Title'
+        )
       end
 
       it 'has default values' do
@@ -46,19 +46,19 @@ RSpec.describe Applitools::MatchWindowData do
 
     describe '[\'options\']' do
       subject { default_data['Options'] }
-      it  'has required keys' do
+      it 'has required keys' do
         expect(subject).to be_a Hash
         expect(subject.keys).to contain_exactly(
-                                             'Name',
-                                             'UserInputs',
-                                             'ImageMatchSettings',
-                                             'IgnoreExpectedOutputSettings',
-                                             'ForceMatch',
-                                             'ForceMismatch',
-                                             'IgnoreMatch',
-                                             'IgnoreMismatch',
-                                             'Trim'
-                                           )
+          'Name',
+          'UserInputs',
+          'ImageMatchSettings',
+          'IgnoreExpectedOutputSettings',
+          'ForceMatch',
+          'ForceMismatch',
+          'IgnoreMatch',
+          'IgnoreMismatch',
+          'Trim'
+        )
       end
 
       it 'has default values' do
@@ -77,10 +77,10 @@ RSpec.describe Applitools::MatchWindowData do
         it 'has requirede keys' do
           expect(subject).to be_a Hash
           expect(subject.keys).to contain_exactly(
-                                      'Enabled',
-                                      'ForegroundIntensity',
-                                      'MinEdgeLength'
-                                  )
+            'Enabled',
+            'ForegroundIntensity',
+            'MinEdgeLength'
+          )
         end
 
         it 'has default values' do
@@ -95,12 +95,12 @@ RSpec.describe Applitools::MatchWindowData do
         it 'has requirede keys' do
           expect(subject).to be_a Hash
           expect(subject.keys).to contain_exactly(
-                                    'Exact',
-                                    'IgnoreCaret',
-                                    'MatchLevel',
-                                    'SplitBottomHeight',
-                                    'SplitTopHeight'
-                                  )
+            'Exact',
+            'IgnoreCaret',
+            'MatchLevel',
+            'SplitBottomHeight',
+            'SplitTopHeight'
+          )
         end
 
         it 'has default values' do
@@ -115,11 +115,11 @@ RSpec.describe Applitools::MatchWindowData do
           it 'has requirede keys' do
             expect(subject).to be_a Hash
             expect(subject.keys).to contain_exactly(
-                                      'MatchThreshold',
-                                      'MinDiffHeight',
-                                      'MinDiffIntensity',
-                                      'MinDiffWidth'
-                                    )
+              'MatchThreshold',
+              'MinDiffHeight',
+              'MinDiffIntensity',
+              'MinDiffWidth'
+            )
           end
 
           it 'has default values' do

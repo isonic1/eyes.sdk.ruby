@@ -97,9 +97,9 @@ module Applitools::Images
       self.screenshot = EyesImagesScreenshot.new image
 
       mr = check_single_base(
-          region_provider,
-          target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
-          match_window_data
+        region_provider,
+        target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+        match_window_data
       )
       mr
     end

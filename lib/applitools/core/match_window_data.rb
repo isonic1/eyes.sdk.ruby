@@ -35,7 +35,7 @@ module Applitools
             'IgnoreMatch' => false,
             'IgnoreMismatch' => false,
             'Trim' => {
-              'Enabled' => false,
+              'Enabled' => false
             }
           },
           'Id' => nil,
@@ -51,11 +51,11 @@ module Applitools
         }
       end
 
-      def valid_region(r)
+      def valid_region(_r)
         true
       end
 
-      def valid_input(i)
+      def valid_input(_i)
         true
       end
     end
@@ -111,34 +111,30 @@ module Applitools
     end
 
     def read_target(target, driver)
-      #options
+      # options
       %w(trim).each do |field|
         send("#{field}=", target.options[field.to_sym])
       end
-      #ignored regions
+      # ignored regions
       target.ignored_regions.each do |r|
         case r
-          when Proc
-            region = r.call(driver)
-            @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
-            @need_convert_ignored_regions_coordinates = true
-          when Applitools::Region
-            @ignored_regions << r
-            @need_convert_ignored_regions_coordinates = true
+        when Proc
+          region = r.call(driver)
+          @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
+          @need_convert_ignored_regions_coordinates = true
+        when Applitools::Region
+          @ignored_regions << r
+          @need_convert_ignored_regions_coordinates = true
         end
       end
     end
 
     def ignore_mismatch
-     current_data['IgnoreMismatch']
+      current_data['IgnoreMismatch']
     end
 
     def tag
       current_data['Tag']
-    end
-
-    def screenshot
-      app_output.screenshot.image.to_blob
     end
 
     def trim=(value)
@@ -154,7 +150,9 @@ module Applitools
     end
 
     def to_hash
-      raise Applitools::EyesError.new 'You should convert coordinates for ignored_regions!' if @need_convert_ignored_regions_coordinates
+      raise Applitools::EyesError.new(
+        'You should convert coordinates for ignored_regions!'
+      ) if @need_convert_ignored_regions_coordinates
       current_data.dup
     end
 

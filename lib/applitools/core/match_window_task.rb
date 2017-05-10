@@ -52,11 +52,11 @@ module Applitools
         match_result = perform_match(match_window_data)
         retry_time = Time.now - start
 
-        if block_given?
-          block_retry = yield(match_result)
-        else
-          block_retry = false
-        end
+        block_retry = if block_given?
+                        yield(match_result)
+                      else
+                        false
+                      end
 
         while retry_time < retry_timeout && !(block_retry || match_result.as_expected?)
           sleep MATCH_INTERVAL
