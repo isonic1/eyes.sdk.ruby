@@ -1066,10 +1066,10 @@ module Applitools::Selenium
           )
         end
 
-        match_data = Applitools::MatchWindowData.new.tap do |d|
-          d.tag = tag
-          d.ignore_mismatch = false
-          d.match_level = default_match_settings[:match_level]
+        match_data = Applitools::MatchWindowData.new.tap do |data|
+          data.tag = tag
+          data.ignore_mismatch = false
+          data.match_level = default_match_settings[:match_level]
         end
 
         check_window_base(
@@ -1111,8 +1111,11 @@ module Applitools::Selenium
     end
 
     class << self
-      def position_provider(stitch_mode, driver, disable_horizontal=false, disable_vertical=false, explicit_entire_size=nil)
-        max_width, max_height = nil, nil
+      def position_provider(stitch_mode, driver, disable_horizontal = false, disable_vertical = false,
+        explicit_entire_size = nil)
+
+        max_width = nil
+        max_height = nil
         unless explicit_entire_size.nil?
           max_width = explicit_entire_size.width
           max_height = explicit_entire_size.height
@@ -1120,10 +1123,10 @@ module Applitools::Selenium
         case stitch_mode
         when :SCROLL
           Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical,
-                                                           max_width: max_width, max_height: max_height)
+            max_width: max_width, max_height: max_height)
         when :CSS
           Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical,
-                                                                 max_width: max_width, max_height: max_height)
+            max_width: max_width, max_height: max_height)
         end
       end
     end

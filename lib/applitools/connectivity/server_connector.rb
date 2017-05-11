@@ -5,11 +5,8 @@ Oj.default_options = { :mode => :compat }
 require 'uri'
 
 module Applitools::Connectivity
-  module ServerConnector
-    extend self
-
+  class ServerConnector
     DEFAULT_SERVER_URL = 'https://eyessdk.applitools.com'.freeze
-
 
     SSL_CERT = File.join(File.dirname(File.expand_path(__FILE__)), '../../../certs/cacert.pem').to_s.freeze
     DEFAULT_TIMEOUT = 300
@@ -25,6 +22,10 @@ module Applitools::Connectivity
     attr_accessor :server_url, :api_key
     attr_reader :endpoint_url
     attr_reader :proxy
+
+    def initialize(url = nil)
+      self.server_url = url
+    end
 
     def server_url=(url)
       @server_url = url.nil? ? DEFAULT_SERVER_URL : url
@@ -53,7 +54,7 @@ module Applitools::Connectivity
       json_data = Oj.dump(Applitools::Utils.camelcase_hash_keys(data.to_hash)).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       Applitools::EyesLogger.debug 'Sending match data...'
-      #Applitools::EyesLogger.debug json_data
+      # Applitools::EyesLogger.debug json_data
       res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       Applitools::MatchResult.new Oj.load(res.body)
@@ -139,7 +140,5 @@ module Applitools::Connectivity
         delay = [MAX_LONG_REQUEST_DELAY, (delay * LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR).round].min
       end
     end
-
-    include Applitools::MethodTracer
   end
 end

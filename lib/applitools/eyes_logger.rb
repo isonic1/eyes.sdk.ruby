@@ -14,7 +14,7 @@ module Applitools::EyesLogger
   def self.add_thread_id_to_log_handler!(log_handler)
     original_formatter = Logger::Formatter.new
     log_handler.formatter = proc do |severity, datetime, progname, msg|
-      updated_progname = "#{progname.to_s} (#{Thread.current.object_id.to_s})"
+      updated_progname = "#{progname} (#{Thread.current.object_id})"
       original_formatter.call(severity, datetime, updated_progname, msg.dump)
     end
   end

@@ -154,8 +154,8 @@ module Applitools::Selenium
       if actual_image_width < stitched_image.width || actual_image_height < stitched_image.height
         logger.info 'Trimming unnecessary margins...'
         stitched_image.crop!(0, 0,
-                             [actual_image_width, stitched_image.width].min,
-                             [actual_image_height, stitched_image.height].min)
+          [actual_image_width, stitched_image.width].min,
+          [actual_image_height, stitched_image.height].min)
         logger.info 'Done!'
       end
 

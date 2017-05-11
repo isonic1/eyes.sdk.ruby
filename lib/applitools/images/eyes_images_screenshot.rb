@@ -73,13 +73,14 @@ module Applitools::Images
       convert_location location, CONTEXT_RELATIVE, SCREENSHOT_AS_IS
     end
 
-    def sub_screenshot(region, coordinates_type, throw_if_clipped)
+    def sub_screenshot(region, coordinates_type, throw_if_clipped = false, force_nil_if_clipped = false)
       Applitools::ArgumentGuard.not_nil region, 'region'
       Applitools::ArgumentGuard.not_nil coordinates_type, 'coordinates_type'
 
       sub_screen_region = intersected_region region, coordinates_type, SCREENSHOT_AS_IS
 
       if sub_screen_region.empty? || (throw_if_clipped && !region.size_equals?(sub_screen_region))
+        return nil if force_nil_if_clipped
         Applitools::OutOfBoundsException.new "Region #{sub_screen_region} (#{coordinates_type}) is out of " \
           " screenshot bounds #{bounds}"
       end
