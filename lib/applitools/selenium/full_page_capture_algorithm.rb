@@ -160,7 +160,7 @@ module Applitools::Selenium
       end
 
       logger.info 'Converting to screenshot...'
-      result_screenshot = Applitools::Screenshot.from_any_image(stitched_image.to_blob)
+      result_screenshot = Applitools::Screenshot.from_any_image(stitched_image)
       logger.info 'Done converting!'
       result_screenshot
     end
