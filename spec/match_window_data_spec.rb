@@ -163,6 +163,3 @@ RSpec.describe Applitools::MatchWindowData do
     end
   end
 end
-
-RSpec.describe Applitools::MatchWindowData do
-end
