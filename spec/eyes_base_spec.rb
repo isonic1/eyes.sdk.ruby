@@ -68,7 +68,7 @@ describe Applitools::EyesBase do
     # :close_response_time
   ]
 
-  it_should_behave_like 'proxy method', Applitools::Connectivity::ServerConnector, [
+  it_should_behave_like 'proxy to object method', :server_connector, [
     :api_key,
     :api_key=,
     :server_url,
@@ -98,8 +98,8 @@ describe Applitools::EyesBase do
     context do
       before do
         expect(subject).to receive(:disabled?).and_return false
-        expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return true
-        Applitools::Connectivity::ServerConnector.server_url = nil
+        allow_any_instance_of(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return true
+        subject.server_url = nil
         subject.send(:running_session=, Applitools::Session.new('id', 'url', true))
       end
 
@@ -183,15 +183,29 @@ describe Applitools::EyesBase do
     it_behaves_like 'can be disabled', :close, [false]
 
     let(:success_old_results) do
-      Applitools::TestResults.new 'steps' => 5, 'matches' => 5, 'mismatches' => 0, 'missing' => 0
+      Applitools::TestResults.new(
+        'steps' => 5,
+        'matches' => 5,
+        'mismatches' => 0,
+        'missing' => 0,
+        'isNew' => false,
+        'isDifferent' => false
+      )
     end
 
     let(:failed_old_results) do
-      Applitools::TestResults.new 'steps' => 5, 'matches' => 1, 'mismatches' => 2, 'missing' => 2
+      Applitools::TestResults.new(
+        'steps' => 5,
+        'matches' => 1,
+        'mismatches' => 2,
+        'missing' => 2,
+        'isNew' => false,
+        'isDifferent' => true
+      )
     end
 
     let(:new_results) do
-      new = Applitools::TestResults.new
+      new = Applitools::TestResults.new('isNew' => true, 'isDifferent' => false)
       new.is_new = true
       new.url = 'http://see.results.url'
       new
@@ -207,19 +221,25 @@ describe Applitools::EyesBase do
     end
 
     it 'drops running session' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(success_old_results)
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+      expect(obj).to receive(:stop_session).and_return(success_old_results)
       subject.close(false)
       expect(subject.instance_variable_get(:@running_session)).to be_nil
     end
 
     it 'drops current_app_name' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(success_old_results)
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+      expect(obj).to receive(:stop_session).and_return(success_old_results)
       subject.close(false)
       expect(subject.instance_variable_get(:@current_app_name)).to be_nil
     end
 
     it 'clears user inputs' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(success_old_results)
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+      expect(obj).to receive(:stop_session).and_return(success_old_results)
       expect(subject).to receive :clear_user_inputs
       subject.close(true)
     end
@@ -237,18 +257,24 @@ describe Applitools::EyesBase do
     end
 
     it 'calls Applitools::Connectivity::ServerConnector.stop_session' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(success_old_results)
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+      expect(obj).to receive(:stop_session).and_return(success_old_results)
       subject.close(true)
     end
 
     it 'sets new flag for results' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(success_old_results)
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+      expect(obj).to receive(:stop_session).and_return(success_old_results)
       result = subject.close(false)
       expect(result.new?).to eq false
     end
 
     it 'sets server_url for results' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(success_old_results)
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+      expect(obj).to receive(:stop_session).and_return(success_old_results)
       result = subject.close(false)
       expect(result.url).to eq :session_url
     end
@@ -270,14 +296,18 @@ describe Applitools::EyesBase do
 
       it 'failed test close(true)' do
         expect(subject).to receive(:open?).and_return(true).at_least 1
-        expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(failed_old_results)
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+        expect(obj).to receive(:stop_session).and_return(failed_old_results)
         expect { subject.close(true) }.to raise_error Applitools::TestFailedError
       end
 
       it 'new test close(true)' do
         expect(subject).to receive(:open?).and_return(true).at_least 1
         expect(subject).to receive(:running_session).and_return(r_session_new).at_least 1
-        expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(new_results)
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+        expect(obj).to receive(:stop_session).and_return(new_results)
         expect { subject.close(true) }.to raise_error Applitools::TestFailedError
       end
     end
@@ -299,13 +329,19 @@ describe Applitools::EyesBase do
 
       it 'failed test close(false)' do
         expect(subject).to receive(:open?).and_return(true).at_least 1
-        expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(failed_old_results)
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+        expect(obj).to receive(:stop_session).and_return(failed_old_results)
         subject.close(false)
       end
       it 'new test close (false)' do
         expect(subject).to receive(:open?).and_return(true).at_least 1
         expect(subject).to receive(:running_session).and_return(r_session_new).at_least 1
-        expect(Applitools::Connectivity::ServerConnector).to receive(:stop_session).and_return(new_results)
+
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+
+        expect(obj).to receive(:stop_session).and_return(new_results)
         subject.close(false)
       end
     end
@@ -316,7 +352,10 @@ describe Applitools::EyesBase do
       expect { subject.start_session }.to raise_error NoMethodError
     end
     it 'calls ServerConnector.start_session' do
-      expect(Applitools::Connectivity::ServerConnector).to receive(:start_session).and_return(
+      obj = Object.new
+      expect(subject).to receive(:server_connector).and_return obj
+
+      expect(obj).to receive(:start_session).and_return(
         Applitools::Session.new(:session_id, :session_url, true)
       )
       expect(subject).to receive(:viewport_size).and_return nil
@@ -328,6 +367,6 @@ describe Applitools::EyesBase do
   end
 
   context 'match_window_base' do
-    it_behaves_like 'can be disabled', :check_window_base, [nil, nil, nil, nil]
+    it_behaves_like 'can be disabled', :check_window_base, [nil, nil, nil]
   end
 end

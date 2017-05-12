@@ -1,6 +1,37 @@
 require 'spec_helper'
 
 RSpec.describe Applitools::MatchWindowData do
+  let(:app_output) do
+    Object.new.tap do |o|
+      o.instance_eval do
+        define_singleton_method :to_hash do
+          :app_output
+        end
+      end
+    end
+  end
+  subject { Applitools::MatchWindowData.new }
+  it_should_behave_like 'responds to method', [
+    :app_output,
+    :app_output=,
+    :user_inputs,
+    :user_inputs=,
+    :tag,
+    :tag=,
+    :options,
+    :options=,
+    :ignore_mismatch,
+    :ignore_mismatch=,
+    :to_s,
+    :to_hash
+  ]
+
+  it 'returns data as hash' do
+    result = subject.to_hash
+    expect(result).to be_kind_of Hash
+    expect(result.keys).to include('UserInputs', 'AppOutput', 'Tag', 'IgnoreMismatch')
+  end
+
   describe ':default_data' do
     let(:default_data) { described_class.default_data }
     subject { default_data }
@@ -77,29 +108,26 @@ RSpec.describe Applitools::MatchWindowData do
         it 'has requirede keys' do
           expect(subject).to be_a Hash
           expect(subject.keys).to contain_exactly(
-            'Enabled',
-            'ForegroundIntensity',
-            'MinEdgeLength'
+            'Enabled'
           )
         end
 
         it 'has default values' do
           expect(subject['Enabled']).to eq false
-          expect(subject['ForegroundIntensity']).to be_zero
-          expect(subject['MinEdgeLength']).to be_zero
         end
       end
 
       describe '[\'ImageMatchSettings\']' do
         subject { default_data['Options']['ImageMatchSettings'] }
-        it 'has requirede keys' do
+        it 'has required keys' do
           expect(subject).to be_a Hash
           expect(subject.keys).to contain_exactly(
             'Exact',
             'IgnoreCaret',
             'MatchLevel',
             'SplitBottomHeight',
-            'SplitTopHeight'
+            'SplitTopHeight',
+            'Ignore'
           )
         end
 
@@ -108,6 +136,8 @@ RSpec.describe Applitools::MatchWindowData do
           expect(subject['MatchLevel']).to eq 'None'
           expect(subject['SplitBottomHeight']).to be_zero
           expect(subject['SplitTopHeight']).to be_zero
+          expect(subject['Ignore']).to be_kind_of Array
+          expect(subject['Ignore']).to be_empty
         end
 
         describe '[\'Exact\']' do
@@ -135,47 +165,4 @@ RSpec.describe Applitools::MatchWindowData do
 end
 
 RSpec.describe Applitools::MatchWindowData do
-  let(:app_output) do
-    Object.new.tap do |o|
-      o.instance_eval do
-        define_singleton_method :to_hash do
-          :app_output
-        end
-      end
-    end
-  end
-  subject { Applitools::MatchWindowData.new(:user_inputs, app_output, :tag, :ignore_mismatch) }
-  it_should_behave_like 'responds to method', [
-    :app_output,
-    :app_output=,
-    :user_inputs,
-    :user_inputs=,
-    :tag,
-    :tag=,
-    :options,
-    :options=,
-    :ignore_mismatch,
-    :ignore_mismatch=,
-    :appOutput,
-    :userInputs,
-    :ignoreMismatch,
-    :to_s,
-    :to_hash
-  ]
-
-  it 'tries convert using to_hash' do
-    expect(app_output).to receive(:to_hash)
-    subject.to_hash
-  end
-
-  it 'returns data as hash' do
-    result = subject.to_hash
-    expect(result.keys).to include(:userInputs, :appOutput, :tag, :ignoreMismatch)
-    expect(result).to a_hash_including(
-      :userInputs => :user_inputs,
-      :appOutput => :app_output,
-      :tag => :tag,
-      :ignoreMismatch => :ignore_mismatch
-    )
-  end
 end

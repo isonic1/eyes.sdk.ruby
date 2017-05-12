@@ -110,6 +110,10 @@ module Applitools
       current_data['Options']['ImageMatchSettings']['MatchLevel'] = value
     end
 
+    def match_level
+      current_data['Options']['ImageMatchSettings']['MatchLevel']
+    end
+
     def read_target(target, driver)
       # options
       %w(trim).each do |field|

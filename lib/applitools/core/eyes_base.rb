@@ -22,7 +22,7 @@ module Applitools
     CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
-    def_delegators '@server_connector', :api_key, :api_key=, :server_url, :server_url=,
+    def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
       :set_proxy, :proxy, :proxy=
 
     # @!attribute [rw] verbose_results
