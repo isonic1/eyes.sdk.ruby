@@ -90,7 +90,7 @@ describe Applitools::Connectivity::ServerConnector do
       end.and_return(foo)
 
       subject.set_proxy('http://localhost')
-      subject.post('http://google.com')
+      subject.send 'post', 'http://google.com'
     end
   end
 end
