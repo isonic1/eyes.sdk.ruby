@@ -43,10 +43,10 @@ module Applitools::Selenium
       viewport_size = Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(executor)
       result = Applitools::Utils::EyesSeleniumUtils.entire_page_size(executor)
       logger.info "Entire size: #{result}"
-      result.width = viewport_size.width if disable_horizontal
-      result.height = viewport_size.height if disable_vertical
       result.width = max_width unless max_width.nil?
       result.height = max_height unless max_height.nil?
+      result.width = viewport_size.width if disable_horizontal
+      result.height = viewport_size.height if disable_vertical
       logger.info "Actual size to scroll: #{result}"
       result
     end
