@@ -1,30 +1,180 @@
 require 'spec_helper'
 
+RSpec.shared_examples 'implements long queries flow' do |method|
+  let(:stubs) { Faraday::Adapter::Test::Stubs.new }
+
+  let(:connection) do
+    Faraday.new() do |builder|
+      builder.adapter :test, stubs
+    end
+  end
+
+  let(:http_method) { method.to_s.split(/long_/).last.to_sym }
+
+  let(:a_result) { Faraday::Response.new }
+  let(:a_200_result) { a_result.dup.finish(status: 200, response_headers: {}, body: 'Status: 200(For tests)') }
+  let(:a_gone_result) { a_result.dup.finish(status: 410, response_headers: {}, body: '') }
+  let(:a_completed_result) { a_result.dup.finish(status: 201, response_headers: {}, body: 'COMPLETED!') }
+  let(:a_strange_result) { a_result.dup.finish(status: 255, response_headers: {}, body: 'STRANGE') }
+
+  it 'sets \'Eyes-Date\' header' do
+    expect(subject).to receive(:request) do |_url, _method, options|
+      expect(options[:headers]).to include('Eyes-Date')
+      expect(DateTime.parse(options[:headers]['Eyes-Date']).strftime('%a, %d %b %Y %H:%M:%S GMT')).to eql(options[:headers]['Eyes-Date'])
+    end.and_return(a_200_result)
+    subject.send(method, 'http://google.com')
+  end
+
+  it 'sets \'Eyes-Ecpect\' header' do
+    expect(subject).to receive(:request) do |_url, _method, options|
+      expect(options[:headers]).to include('Eyes-Expect')
+      expect(options[:headers]['Eyes-Expect']).to eql('202+location')
+    end.and_return(a_200_result)
+    subject.send(method, 'http://google.com')
+  end
+
+  describe 'on sucess:' do
+    before do
+      allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
+    end
+
+    it 'returns the result' do
+      stubs.send(http_method,'/?apiKey') { |env| [ 200, {}, 'simple_success' ]}
+      expect(subject.send(method, 'doesn\'t_matter').body).to eq('simple_success')
+    end
+  end
+
+  describe 'on long task:' do
+    it 'uses \'location\' header as a pull url' do
+      allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
+      stubs.send(http_method,'/?apiKey') { |env| [ 202, {location: 'http://domain.com/pull'}, 'task is being processed' ]}
+      expect(subject).to receive(:request).once.ordered.with('doesn\'t_matter', any_args).and_call_original
+      expect(subject).to receive(:request).once.ordered.with('http://domain.com/pull', any_args).and_return(a_strange_result)
+      begin
+        subject.send(method, 'doesn\'t_matter')
+      rescue Applitools::EyesError => e
+        true
+      end
+    end
+
+    describe 'pull' do
+      before do
+        allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
+        stubs.send(http_method,'/?apiKey') { |env| [ 202, {location: 'http://domain.com/pull'}, 'task is being processed' ]}
+        expect(subject).to receive(:request).once.ordered.with('doesn\'t_matter', any_args).and_call_original
+      end
+
+      # it 'performs next pull on 200', pending: true do
+      #   expect(subject).to receive(:request).at_least(:twice).ordered.with("http://domain.com/pull", http_method).and_return(a_200_result)
+      #   expect(subject).to receive(:request).ordered do |*args|
+      #     raise Applitools::EyesError.new('JOPA')
+      #   end
+      #   subject.send(method, 'doesn\'t_matter')
+      # end
+
+      it 'raises an error on 410 response' do
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", http_method).and_return(a_gone_result)
+        expect {subject.send(method, 'doesn\'t_matter') }.to raise_error Applitools::EyesError
+      end
+      it 'performs \'delete\' request on 201' do
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", http_method).and_return(a_completed_result)
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :delete).and_return(a_200_result)
+        res = subject.send(method, 'doesn\'t_matter')
+        expect(res.body).to eq 'Status: 200(For tests)'
+      end
+      it 'raises an exception if flow fails' do
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", http_method).and_return(a_strange_result)
+        expect { subject.send(method, 'doesn\'t_matter') }.to raise_error Applitools::EyesError
+      end
+    end
+  end
+end
+
 describe Applitools::Connectivity::ServerConnector do
+  describe 'long methods' do
+    it_behaves_like 'implements long queries flow', :long_post
+    it_behaves_like 'implements long queries flow', :long_get
+  end
+  describe 'request' do
+    let(:req) do
+      r = double
+      allow(r).to receive(:options).and_return(opts)
+      allow(r).to receive(:headers=)
+      allow(r).to receive(:params=)
+      allow(r).to receive(:body=)
+      r
+    end
+
+    let(:opts) do
+      r = double
+      allow(r).to receive(:timeout=)
+      r
+    end
+    before { allow_any_instance_of(Faraday::Connection).to receive(:get).and_yield(req) }
+
+    it 'passes options[:headers] as headers' do
+      expect(req).to receive(:headers=) do |value|
+        expect(value).to include(a: :b, c: :d)
+      end
+      subject.send(:request, 'http://google.com', :get, headers: {a: :b, c: :d})
+    end
+    it 'sets content-type from options[:content_type]' do
+      @hash = {}
+      expect(req).to receive(:headers).and_return(@hash)
+      subject.send(:request, 'http://google.com', :get, content_type: 'TestContentType')
+      expect(@hash).to include('Content-Type' => 'TestContentType')
+    end
+    it 'passes default_headers' do
+      @hash = {}
+      allow(req).to receive(:headers=) do |v|
+        @hash = v
+      end
+      allow(req).to receive(:headers).and_return(@hash)
+      subject.send(:request, 'http://google.com', :get)
+      expect(@hash).to include(Applitools::Connectivity::ServerConnector::DEFAULT_HEADERS)
+    end
+    it 'passes an api_key as a param' do
+      @hash = {}
+      allow(req).to receive(:params=) do |v|
+        @hash = v
+      end
+      allow(req).to receive(:params).and_return(@hash)
+      subject.api_key = 'API_KEY'
+      subject.send(:request, 'http://google.com', :get)
+      expect(@hash).to include(apiKey: 'API_KEY')
+    end
+    it 'sets body from options[:body]' do
+      @body = nil
+      expect(req).to receive(:body=) do |val|
+        @body = val
+      end
+      subject.send(:request, 'http://google.com', :get, body: 'TestBODY')
+      expect(@body).to eq 'TestBODY'
+    end
+
+  end
   describe 'responds to' do
-    it 'api_key' do
-      expect(subject).to respond_to :api_key, :api_key=
-    end
-    it 'server_url' do
-      expect(subject).to respond_to :server_url, :server_url=
-    end
-    it 'proxy_settings' do
-      expect(subject).to respond_to :proxy, :proxy=
-    end
-    it 'set_proxy' do
-      expect(subject).to respond_to :set_proxy
-      expect(subject).to receive :proxy=
-      subject.set_proxy nil
-    end
-    it 'start_session' do
-      expect(subject).to respond_to :start_session
-    end
-    it 'stop_session' do
-      expect(subject).to respond_to :stop_session
-    end
-    it 'match_window' do
-      expect(subject).to respond_to :match_window
-    end
+    it_behaves_like 'responds to method', [
+      :api_key,
+      :api_key=,
+      :server_url,
+      :server_url=,
+      :proxy=,
+      :set_proxy,
+      :start_session,
+      :stop_session,
+      :match_window,
+      :match_single_window
+    ]
+
+    it_behaves_like 'has private method', [
+      :long_get,
+      :long_delete,
+      :long_post,
+      :get,
+      :post,
+      :delete
+    ]
 
     describe 'checks proxy value' do
       it 'allows to set nil proxy' do

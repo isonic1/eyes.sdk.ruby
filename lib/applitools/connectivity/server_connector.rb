@@ -16,7 +16,8 @@ module Applitools::Connectivity
 
     HTTP_STATUS_CODES = {
       created: 201,
-      accepted: 202
+      accepted: 202,
+      ok: 200
     }.freeze
 
     attr_accessor :server_url, :api_key
@@ -125,20 +126,26 @@ module Applitools::Connectivity
 
     def long_request(url, method, options = {})
       delay = LONG_REQUEST_DELAY
-      (options[:headers] ||= {})['Eyes-Expect'] = '202-accepted'
+      options = { headers: {
+          'Eyes-Expect' => '202+location',
+          'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
+      }}.merge! options
+      res = request(url, method, options)
+      return res if res.status == HTTP_STATUS_CODES[:ok]
 
-      loop do
-        # Date should be in RFC 1123 format.
-        options[:headers]['Eyes-Date'] = Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
-
-        res = request(url, method, options)
-        return res unless res.status == HTTP_STATUS_CODES[:accepted]
-
-        Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
-        sleep delay
-
+      if res.status == HTTP_STATUS_CODES[:accepted]
+        second_step_url = res.headers[:location]
         delay = [MAX_LONG_REQUEST_DELAY, (delay * LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR).round].min
+        begin
+          Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
+          sleep delay
+          res = request(second_step_url, method)
+        end while res.status == HTTP_STATUS_CODES[:ok]
       end
+
+      raise Applitools::EyesError.new('The server task has gone.') if res.status == 410
+      return request(second_step_url, :delete) if res.status == 201
+      raise Applitools::EyesError.new('Unknown error processing long request')
     end
   end
 end
