@@ -13,8 +13,6 @@ begin
     driver: web_driver) do |driver|
     driver.get 'http://www.applitools.com'
     eyes.check_window('initial')
-    pricing = driver.find_element(:css, '.pricing a')
-    eyes.check_region(pricing, 'pricing element')
   end
 ensure
   web_driver.quit

@@ -7,6 +7,9 @@ module Applitools::Selenium
 
     attr_accessor :element, :location, :size
 
+    # Initialize class instance.
+    #
+    # @param [Applitools::Selenium::Element] element The target element.
     def initialize(element)
       raise Applitools::EyesIllegalArgument.new 'Passed element is not Applitools::Selenium::Element instance!' unless
           element.is_a? Applitools::Selenium::Element
