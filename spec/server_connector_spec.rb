@@ -4,7 +4,7 @@ RSpec.shared_examples 'implements long queries flow' do |method|
   let(:stubs) { Faraday::Adapter::Test::Stubs.new }
 
   let(:connection) do
-    Faraday.new() do |builder|
+    Faraday.new do |builder|
       builder.adapter :test, stubs
     end
   end
@@ -17,16 +17,14 @@ RSpec.shared_examples 'implements long queries flow' do |method|
   let(:a_completed_result) { a_result.dup.finish(status: 201, response_headers: {}, body: 'COMPLETED!') }
   let(:a_strange_result) { a_result.dup.finish(status: 255, response_headers: {}, body: 'STRANGE') }
 
-  before do
-
-  end
-
   it 'sets \'Eyes-Date\' header' do
     expect(subject).to receive(:request) do |_url, _method, options|
       expect(options[:headers]).to include('Eyes-Date')
-      expect(DateTime.parse(options[:headers]['Eyes-Date']).strftime('%a, %d %b %Y %H:%M:%S GMT')).to eql(options[:headers]['Eyes-Date'])
+      expect(DateTime.parse(options[:headers]['Eyes-Date']).strftime('%a, %d %b %Y %H:%M:%S GMT')).to(
+        eql(options[:headers]['Eyes-Date'])
+      )
     end.and_return(a_200_result)
-    subject.send(method, 'http://google.com')
+    subject.send(method, 'http://google.com', {}, 0)
   end
 
   it 'sets \'Eyes-Ecpect\' header' do
@@ -34,7 +32,7 @@ RSpec.shared_examples 'implements long queries flow' do |method|
       expect(options[:headers]).to include('Eyes-Expect')
       expect(options[:headers]['Eyes-Expect']).to eql('202+location')
     end.and_return(a_200_result)
-    subject.send(method, 'http://google.com')
+    subject.send(method, 'http://google.com', {}, 0)
   end
 
   describe 'on sucess:' do
@@ -43,20 +41,24 @@ RSpec.shared_examples 'implements long queries flow' do |method|
     end
 
     it 'returns the result' do
-      stubs.send(http_method,'/?apiKey') { |env| [ 200, {}, 'simple_success' ]}
-      expect(subject.send(method, 'doesn\'t_matter').body).to eq('simple_success')
+      stubs.send(http_method, '/?apiKey') { |_env| [200, {}, 'simple_success'] }
+      expect(subject.send(method, 'doesn\'t_matter', {}, 0).body).to eq('simple_success')
     end
   end
 
   describe 'on long task:' do
     it 'uses \'location\' header as a pull url' do
       allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
-      stubs.send(http_method,'/?apiKey') { |env| [ 202, {location: 'http://domain.com/pull'}, 'task is being processed' ]}
+      stubs.send(http_method, '/?apiKey') do |_env|
+        [202, { location: 'http://domain.com/pull' }, 'task is being processed']
+      end
       expect(subject).to receive(:request).once.ordered.with('doesn\'t_matter', any_args).and_call_original
-      expect(subject).to receive(:request).once.ordered.with('http://domain.com/pull', any_args).and_return(a_strange_result)
+      expect(subject).to(
+        receive(:request).once.ordered.with('http://domain.com/pull', any_args).and_return(a_strange_result)
+      )
       begin
-        subject.send(method, 'doesn\'t_matter')
-      rescue Applitools::EyesError => e
+        subject.send(method, 'doesn\'t_matter', {}, 0)
+      rescue Applitools::EyesError
         true
       end
     end
@@ -64,31 +66,31 @@ RSpec.shared_examples 'implements long queries flow' do |method|
     describe 'pull' do
       before do
         allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
-        stubs.send(http_method,'/?apiKey') { |env| [ 202, {location: 'http://domain.com/pull'}, 'task is being processed' ]}
+        stubs.send(http_method, '/?apiKey') do |_env|
+          [202, { location: 'http://domain.com/pull' }, 'task is being processed']
+        end
         expect(subject).to receive(:request).once.ordered.with('doesn\'t_matter', any_args).and_call_original
       end
 
-      # it 'performs next pull on 200', pending: true do
-      #   expect(subject).to receive(:request).at_least(:twice).ordered.with("http://domain.com/pull", http_method).and_return(a_200_result)
-      #   expect(subject).to receive(:request).ordered do |*args|
-      #     raise Applitools::EyesError.new('JOPA')
-      #   end
-      #   subject.send(method, 'doesn\'t_matter')
-      # end
-
       it 'raises an error on 410 response' do
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :get).and_return(a_gone_result)
-        expect {subject.send(method, 'doesn\'t_matter') }.to raise_error Applitools::EyesError
+        expect(subject).to receive(:request).once.ordered.with('http://domain.com/pull', :get).and_return(a_gone_result)
+        expect { subject.send(method, 'doesn\'t_matter', {}, 0) }.to raise_error Applitools::EyesError
       end
       it 'performs \'delete\' request on 201' do
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :get).and_return(a_completed_result)
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :delete).and_return(a_200_result)
-        res = subject.send(method, 'doesn\'t_matter')
+        expect(subject).to(
+          receive(:request).once.ordered.with('http://domain.com/pull', :get).and_return(a_completed_result)
+        )
+        expect(subject).to(
+          receive(:request).once.ordered.with('http://domain.com/pull', :delete).and_return(a_200_result)
+        )
+        res = subject.send(method, 'doesn\'t_matter', {}, 0)
         expect(res.body).to eq 'Status: 200(For tests)'
       end
       it 'raises an exception if flow fails' do
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :get).and_return(a_strange_result)
-        expect { subject.send(method, 'doesn\'t_matter') }.to raise_error Applitools::EyesError
+        expect(subject).to(
+          receive(:request).once.ordered.with('http://domain.com/pull', :get).and_return(a_strange_result)
+        )
+        expect { subject.send(method, 'doesn\'t_matter', {}, 0) }.to raise_error Applitools::EyesError
       end
     end
   end
@@ -119,9 +121,9 @@ describe Applitools::Connectivity::ServerConnector do
 
     it 'passes options[:headers] as headers' do
       expect(req).to receive(:headers=) do |value|
-        expect(value).to include(a: :b, c: :d)
+        expect(value).to include(:a => :b, :c => :d)
       end
-      subject.send(:request, 'http://google.com', :get, headers: {a: :b, c: :d})
+      subject.send(:request, 'http://google.com', :get, headers: { :a => :b, :c => :d })
     end
     it 'sets content-type from options[:content_type]' do
       @hash = {}
@@ -156,7 +158,6 @@ describe Applitools::Connectivity::ServerConnector do
       subject.send(:request, 'http://google.com', :get, body: 'TestBODY')
       expect(@body).to eq 'TestBODY'
     end
-
   end
   describe 'responds to' do
     it_behaves_like 'responds to method', [

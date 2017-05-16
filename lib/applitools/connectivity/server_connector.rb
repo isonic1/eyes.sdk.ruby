@@ -106,8 +106,8 @@ module Applitools::Connectivity
         request(url, method, options)
       end
 
-      define_method "long_#{method}" do |url, options = {}|
-        long_request(url, method, options)
+      define_method "long_#{method}" do |url, options = {}, request_delay = LONG_REQUEST_DELAY|
+        long_request(url, method, request_delay, options)
       end
     end
 
@@ -125,23 +125,24 @@ module Applitools::Connectivity
       end
     end
 
-    def long_request(url, method, options = {})
-      delay = LONG_REQUEST_DELAY
+    def long_request(url, method, request_delay, options = {})
+      delay = request_delay
       options = { headers: {
-          'Eyes-Expect' => '202+location',
-          'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
-      }}.merge! options
+        'Eyes-Expect' => '202+location',
+        'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
+      } }.merge! options
       res = request(url, method, options)
       return res if res.status == HTTP_STATUS_CODES[:ok]
 
       if res.status == HTTP_STATUS_CODES[:accepted]
         second_step_url = res.headers[:location]
         delay = [MAX_LONG_REQUEST_DELAY, (delay * LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR).round].min
-        begin
+        loop do
           Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
           sleep delay
           res = request(second_step_url, :get)
-        end while res.status == HTTP_STATUS_CODES[:ok]
+          break unless res.status == HTTP_STATUS_CODES[:ok]
+        end
       end
 
       raise Applitools::EyesError.new('The server task has gone.') if res.status == HTTP_STATUS_CODES[:gone]
