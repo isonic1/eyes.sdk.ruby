@@ -154,9 +154,11 @@ module Applitools
     end
 
     def to_hash
-      raise Applitools::EyesError.new(
-        'You should convert coordinates for ignored_regions!'
-      ) if @need_convert_ignored_regions_coordinates
+      if @need_convert_ignored_regions_coordinates
+        raise Applitools::EyesError.new(
+          'You should convert coordinates for ignored_regions!'
+        )
+      end
       current_data.dup
     end
 
