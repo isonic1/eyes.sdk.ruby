@@ -5,7 +5,7 @@ module Applitools::Selenium
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
-    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width: nil, max_height: nil)
+    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width = nil, max_height = nil)
       self.executor = executor
       self.disable_horizontal = disable_horizontal
       self.disable_vertical = disable_vertical

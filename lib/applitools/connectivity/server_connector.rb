@@ -109,6 +109,8 @@ module Applitools::Connectivity
       define_method "long_#{method}" do |url, options = {}, request_delay = LONG_REQUEST_DELAY|
         long_request(url, method, request_delay, options)
       end
+
+      private method, "long_#{method}"
     end
 
     def request(url, method, options = {})
