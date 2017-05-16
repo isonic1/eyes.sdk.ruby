@@ -17,6 +17,10 @@ RSpec.shared_examples 'implements long queries flow' do |method|
   let(:a_completed_result) { a_result.dup.finish(status: 201, response_headers: {}, body: 'COMPLETED!') }
   let(:a_strange_result) { a_result.dup.finish(status: 255, response_headers: {}, body: 'STRANGE') }
 
+  before do
+
+  end
+
   it 'sets \'Eyes-Date\' header' do
     expect(subject).to receive(:request) do |_url, _method, options|
       expect(options[:headers]).to include('Eyes-Date')
@@ -73,17 +77,17 @@ RSpec.shared_examples 'implements long queries flow' do |method|
       # end
 
       it 'raises an error on 410 response' do
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", http_method).and_return(a_gone_result)
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :get).and_return(a_gone_result)
         expect {subject.send(method, 'doesn\'t_matter') }.to raise_error Applitools::EyesError
       end
       it 'performs \'delete\' request on 201' do
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", http_method).and_return(a_completed_result)
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :get).and_return(a_completed_result)
         expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :delete).and_return(a_200_result)
         res = subject.send(method, 'doesn\'t_matter')
         expect(res.body).to eq 'Status: 200(For tests)'
       end
       it 'raises an exception if flow fails' do
-        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", http_method).and_return(a_strange_result)
+        expect(subject).to receive(:request).once.ordered.with("http://domain.com/pull", :get).and_return(a_strange_result)
         expect { subject.send(method, 'doesn\'t_matter') }.to raise_error Applitools::EyesError
       end
     end
@@ -94,6 +98,7 @@ describe Applitools::Connectivity::ServerConnector do
   describe 'long methods' do
     it_behaves_like 'implements long queries flow', :long_post
     it_behaves_like 'implements long queries flow', :long_get
+    it_behaves_like 'implements long queries flow', :long_delete
   end
   describe 'request' do
     let(:req) do

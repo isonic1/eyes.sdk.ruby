@@ -17,7 +17,8 @@ module Applitools::Connectivity
     HTTP_STATUS_CODES = {
       created: 201,
       accepted: 202,
-      ok: 200
+      ok: 200,
+      gone: 410
     }.freeze
 
     attr_accessor :server_url, :api_key
@@ -56,7 +57,7 @@ module Applitools::Connectivity
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       Applitools::EyesLogger.debug 'Sending match data...'
       # Applitools::EyesLogger.debug json_data
-      res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
+      res = long_post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       Applitools::MatchResult.new Oj.load(res.body)
     end
@@ -67,7 +68,7 @@ module Applitools::Connectivity
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       # Applitools::EyesLogger.debug json_data
       Applitools::EyesLogger.debug 'Sending match data...'
-      res = post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
+      res = long_post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers} #{res.body}") unless res.success?
       Applitools::TestResults.new Oj.load(res.body)
     end
@@ -139,12 +140,12 @@ module Applitools::Connectivity
         begin
           Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
           sleep delay
-          res = request(second_step_url, method)
+          res = request(second_step_url, :get)
         end while res.status == HTTP_STATUS_CODES[:ok]
       end
 
-      raise Applitools::EyesError.new('The server task has gone.') if res.status == 410
-      return request(second_step_url, :delete) if res.status == 201
+      raise Applitools::EyesError.new('The server task has gone.') if res.status == HTTP_STATUS_CODES[:gone]
+      return request(second_step_url, :delete) if res.status == HTTP_STATUS_CODES[:created]
       raise Applitools::EyesError.new('Unknown error processing long request')
     end
   end
