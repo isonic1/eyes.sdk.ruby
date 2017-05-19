@@ -10,7 +10,7 @@ module Applitools::Selenium
     # @param [Applitools::Selenium::Driver] executor The instance that of the driver.
     # @param [Boolean] disable_horizontal Whether to disable horizontal movement or not.
     # @param [Boolean] disable_vertical Whether to disable vertical movement or not.
-    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width: nil, max_height: nil)
+    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width = nil, max_height = nil)
       self.executor = executor
       self.disable_horizontal = disable_horizontal
       self.disable_vertical = disable_vertical

@@ -16,7 +16,9 @@ module Applitools::Connectivity
 
     HTTP_STATUS_CODES = {
       created: 201,
-      accepted: 202
+      accepted: 202,
+      ok: 200,
+      gone: 410
     }.freeze
 
     attr_accessor :server_url, :api_key
@@ -55,18 +57,34 @@ module Applitools::Connectivity
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       Applitools::EyesLogger.debug 'Sending match data...'
       # Applitools::EyesLogger.debug json_data
-      res = post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
+      res = long_post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       Applitools::MatchResult.new Oj.load(res.body)
     end
+
+    RETRY_DELAY = 0.5
+    RETRY_STEP_FACTOR = 1.5
+    RETRY_MAX_DELAY = 5
 
     def match_single_window(data)
       # Notice that this does not include the screenshot.
       json_data = Oj.dump(data.to_hash).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       # Applitools::EyesLogger.debug json_data
-      Applitools::EyesLogger.debug 'Sending match data...'
-      res = post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
+      begin
+        Applitools::EyesLogger.debug 'Sending match data...'
+        res = long_post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
+      rescue Errno::EWOULDBLOCK,  Faraday::ConnectionFailed
+        @delays ||= request_delay(RETRY_DELAY, RETRY_STEP_FACTOR, RETRY_MAX_DELAY)
+        begin
+          sleep @delays.next
+        rescue StopIteration
+          raise Applitools::UnknownNetworkStackError.new('Unknown network stack error')
+        end
+        res = match_single_window(data)
+      ensure
+        @delays = nil
+      end
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers} #{res.body}") unless res.success?
       Applitools::TestResults.new Oj.load(res.body)
     end
@@ -104,8 +122,21 @@ module Applitools::Connectivity
         request(url, method, options)
       end
 
-      define_method "long_#{method}" do |url, options = {}|
-        long_request(url, method, options)
+      define_method "long_#{method}" do |url, options = {}, request_delay = LONG_REQUEST_DELAY|
+        long_request(url, method, request_delay, options)
+      end
+
+      private method, "long_#{method}"
+    end
+
+    def request_delay(first_delay, step_factor, max_delay)
+      Enumerator.new do |y|
+        delay = first_delay
+        loop do
+          y << delay
+          delay *= step_factor
+          break if delay > max_delay
+        end
       end
     end
 
@@ -123,22 +154,29 @@ module Applitools::Connectivity
       end
     end
 
-    def long_request(url, method, options = {})
-      delay = LONG_REQUEST_DELAY
-      (options[:headers] ||= {})['Eyes-Expect'] = '202-accepted'
+    def long_request(url, method, request_delay, options = {})
+      delay = request_delay
+      options = { headers: {
+        'Eyes-Expect' => '202+location',
+        'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
+      } }.merge! options
+      res = request(url, method, options)
+      return res if res.status == HTTP_STATUS_CODES[:ok]
 
-      loop do
-        # Date should be in RFC 1123 format.
-        options[:headers]['Eyes-Date'] = Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
-
-        res = request(url, method, options)
-        return res unless res.status == HTTP_STATUS_CODES[:accepted]
-
-        Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
-        sleep delay
-
+      if res.status == HTTP_STATUS_CODES[:accepted]
+        second_step_url = res.headers[:location]
         delay = [MAX_LONG_REQUEST_DELAY, (delay * LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR).round].min
+        loop do
+          Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
+          sleep delay
+          res = request(second_step_url, :get)
+          break unless res.status == HTTP_STATUS_CODES[:ok]
+        end
       end
+
+      raise Applitools::EyesError.new('The server task has gone.') if res.status == HTTP_STATUS_CODES[:gone]
+      return request(second_step_url, :delete) if res.status == HTTP_STATUS_CODES[:created]
+      raise Applitools::EyesError.new('Unknown error processing long request')
     end
   end
 end

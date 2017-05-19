@@ -29,6 +29,8 @@ module Applitools
   class EyesNotOpenException < EyesError; end
   # @!visibility private
   class EyesCoordinateTypeConversionException < EyesError; end
+  # @!visibility private
+  class UnknownNetworkStackError < EyesError; end
 
   # @!visibility private
   class AbstractMethodCalled < EyesError

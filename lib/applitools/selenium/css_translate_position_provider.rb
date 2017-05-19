@@ -13,7 +13,7 @@ module Applitools::Selenium
     # @param [Boolean] disable_vertical Whether to disable vertical movement or not.
     # @param [Integer] max_width The max width.
     # @param [Integer] max_height The max height.
-    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width: nil, max_height: nil)
+    def initialize(executor, disable_horizontal = false, disable_vertical = false, max_width = nil, max_height = nil)
       self.executor = executor
       self.disable_horizontal = disable_horizontal
       self.disable_vertical = disable_vertical
