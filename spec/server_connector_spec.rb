@@ -11,12 +11,6 @@ RSpec.shared_examples 'implements long queries flow' do |method|
 
   let(:http_method) { method.to_s.split(/long_/).last.to_sym }
 
-  let(:a_result) { Faraday::Response.new }
-  let(:a_200_result) { a_result.dup.finish(status: 200, response_headers: {}, body: 'Status: 200(For tests)') }
-  let(:a_gone_result) { a_result.dup.finish(status: 410, response_headers: {}, body: '') }
-  let(:a_completed_result) { a_result.dup.finish(status: 201, response_headers: {}, body: 'COMPLETED!') }
-  let(:a_strange_result) { a_result.dup.finish(status: 255, response_headers: {}, body: 'STRANGE') }
-
   it 'sets \'Eyes-Date\' header' do
     expect(subject).to receive(:request) do |_url, _method, options|
       expect(options[:headers]).to include('Eyes-Date')
@@ -97,11 +91,60 @@ RSpec.shared_examples 'implements long queries flow' do |method|
 end
 
 describe Applitools::Connectivity::ServerConnector do
+  let(:a_result) { Faraday::Response.new }
+  let(:a_200_result) { a_result.dup.finish(status: 200, response_headers: {}, body: 'Status: 200(For tests)') }
+  let(:a_gone_result) { a_result.dup.finish(status: 410, response_headers: {}, body: '') }
+  let(:a_completed_result) { a_result.dup.finish(status: 201, response_headers: {}, body: 'COMPLETED!') }
+  let(:a_strange_result) { a_result.dup.finish(status: 255, response_headers: {}, body: 'STRANGE') }
+  let(:an_internal_server_error) do
+    a_result.dup.finish(status: 500, response_headers: {}, body: 'Status: 500(For tests)')
+  end
+
   describe 'long methods' do
     it_behaves_like 'implements long queries flow', :long_post
     it_behaves_like 'implements long queries flow', :long_get
     it_behaves_like 'implements long queries flow', :long_delete
   end
+
+  describe 'match_single_window' do
+    before do
+      Applitools::Connectivity::ServerConnector.class_eval do
+        public :request_delay, :request
+      end
+      allow_any_instance_of(Applitools::MatchWindowData).to receive('screenshot').and_return ''
+    end
+
+    let(:data) { Applitools::MatchSingleCheckData.new }
+
+    it 'increases retry delay' do
+      delays = subject.send(:request_delay, 1, 2, 5).map(&:to_i)
+      expect(delays).to contain_exactly 1, 2, 4
+    end
+
+    it 'calls itself on exception' do
+      allow(subject).to receive('long_request') do
+        raise Errno::EWOULDBLOCK.new 'message'
+      end
+      allow(subject).to receive('request_delay').and_return([0].to_enum)
+      expect(subject).to receive('match_single_window').at_least(:twice).with(data).and_call_original
+      expect { subject.match_single_window data }.to raise_error Applitools::UnknownNetworkStackError
+    end
+
+    it 'bubbles up Applitools::EyesError exception' do
+      allow(subject).to receive('long_request').and_return an_internal_server_error
+      expect { subject.match_single_window Applitools::MatchSingleCheckData.new }.to raise_error Applitools::EyesError
+    end
+
+    it 'resets @delays' do
+      allow(subject).to receive('long_request') do
+        raise Errno::EWOULDBLOCK.new 'message'
+      end
+      allow(subject).to receive('request_delay').and_return([0, 0, 0].to_enum)
+      expect { subject.match_single_window data }.to raise_error Applitools::UnknownNetworkStackError
+      expect(subject.instance_variable_get(:@delays)).to be nil
+    end
+  end
+
   describe 'request' do
     let(:req) do
       r = double

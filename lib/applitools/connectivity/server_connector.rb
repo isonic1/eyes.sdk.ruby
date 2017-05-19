@@ -62,13 +62,29 @@ module Applitools::Connectivity
       Applitools::MatchResult.new Oj.load(res.body)
     end
 
+    RETRY_DELAY = 0.5
+    RETRY_STEP_FACTOR = 1.5
+    RETRY_MAX_DELAY = 5
+
     def match_single_window(data)
       # Notice that this does not include the screenshot.
       json_data = Oj.dump(data.to_hash).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       # Applitools::EyesLogger.debug json_data
-      Applitools::EyesLogger.debug 'Sending match data...'
-      res = long_post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
+      begin
+        Applitools::EyesLogger.debug 'Sending match data...'
+        res = long_post(@single_check_endpoint_url, content_type: 'application/octet-stream', body: body)
+      rescue Errno::EWOULDBLOCK,  Faraday::ConnectionFailed
+        @delays ||= request_delay(RETRY_DELAY, RETRY_STEP_FACTOR, RETRY_MAX_DELAY)
+        begin
+          sleep @delays.next
+        rescue StopIteration
+          raise Applitools::UnknownNetworkStackError.new('Unknown network stack error')
+        end
+        res = match_single_window(data)
+      ensure
+        @delays = nil
+      end
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers} #{res.body}") unless res.success?
       Applitools::TestResults.new Oj.load(res.body)
     end
@@ -111,6 +127,17 @@ module Applitools::Connectivity
       end
 
       private method, "long_#{method}"
+    end
+
+    def request_delay(first_delay, step_factor, max_delay)
+      Enumerator.new do |y|
+        delay = first_delay
+        loop do
+          y << delay
+          delay *= step_factor
+          break if delay > max_delay
+        end
+      end
     end
 
     def request(url, method, options = {})
