@@ -1174,10 +1174,10 @@ module Applitools::Selenium
         case stitch_mode
         when :SCROLL
           Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical,
-            max_width: max_width, max_height: max_height)
+            max_width, max_height)
         when :CSS
           Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical,
-            max_width: max_width, max_height: max_height)
+            max_width, max_height)
         end
       end
     end
