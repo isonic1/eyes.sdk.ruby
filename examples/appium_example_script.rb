@@ -9,7 +9,7 @@ def android_caps
   {
     deviceName: 'Samsung Galaxy S4 Emulator',
     platformName: 'Android',
-    platformVersion: 4.4,
+    platformVersion: 6.0,
     app: ENV['ANDROID_NOTES_LIST_APP'],
     appPackage: 'com.example.android.notepad',
     appActivity: '.NotesList',

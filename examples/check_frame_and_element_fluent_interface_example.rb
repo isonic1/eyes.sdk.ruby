@@ -24,7 +24,7 @@ RSpec.describe 'Check frame and element example', :type => :feature, :js => true
     eyes.check('Whole page', target)
     target = Applitools::Selenium::Target.region(eyes.driver.find_element(:id, 'overflowing-div')).fully
     eyes.check 'Overflowed region', target
-    target = Applitools::Selenium::Target.frame('frame1').fully.ignore(:id, 'inner-frame-div')
+    target = Applitools::Selenium::Target.window.frame('frame1').fully.ignore(:id, 'inner-frame-div')
     eyes.check('', target)
     target = target.region(:id, 'inner-frame-div').fully  # Region in frame..
     eyes.check('Inner frame div', target)
