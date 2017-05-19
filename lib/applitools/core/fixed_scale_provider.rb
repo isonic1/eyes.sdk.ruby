@@ -8,7 +8,7 @@ module Applitools
     end
 
     def scale_image(image)
-      Applitools::Utils::ImageUtils.scale!(image, scale_method, scale_ratio)
+      Applitools::Utils::ImageUtils.scale!(image, scale_ratio)
     end
   end
 end
