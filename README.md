@@ -38,10 +38,10 @@ https://applitools.com/resources/tutorial/selenium/ruby-watir#step-2
 - Ruby Capybara example:
 https://applitools.com/resources/tutorial/selenium/ruby-rspec-capybara#step-2
         
-- Ruby Native Appium example:
+- Ruby Appium Native example:
 https://applitools.com/resources/tutorial/appium/native_ruby#step-2
 
-- Ruby Web Appium example:
+- Ruby Appium Web example:
 https://applitools.com/resources/tutorial/appium/ruby#step-2
 
 - Ruby Screenshot example:
