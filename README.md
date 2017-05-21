@@ -27,7 +27,7 @@ gem install eyes_selenium
 ```
 
 ## Usage
-Please check the applitools website for usage instructions: http://www.applitools.com
+Please check the applitools website for usage instructions: https://applitools.com/resources/tutorial
 
 ## Contributing
 
