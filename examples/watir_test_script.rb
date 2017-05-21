@@ -16,9 +16,7 @@ begin
     driver: browser.driver) do |driver|
     driver.get 'http://www.applitools.com'
     eyes.check_window('initial')
-    eyes.check_region(:css, '.pricing', tag: 'Pricing button')
-    driver.find_element(:css, '.pricing a').click
-    eyes.check_window('pricing page')
+    eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
   end
 ensure
   browser.quit

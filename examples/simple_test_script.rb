@@ -13,6 +13,7 @@ begin
     driver: web_driver) do |driver|
     driver.get 'http://www.applitools.com'
     eyes.check_window('initial')
+    eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
   end
 ensure
   web_driver.quit
