@@ -27,7 +27,19 @@ gem install eyes_selenium
 ```
 
 ## Usage
-Please check the applitools website for usage instructions: https://applitools.com/resources/tutorial
+Please check the applitools website for usage instructions:
+
+    - Selenium Ruby example:
+        https://applitools.com/resources/tutorial/selenium/ruby#step-2
+        
+    - Ruby Watir example:
+        https://applitools.com/resources/tutorial/selenium/ruby-watir#step-2
+        
+    - Ruby Capybara example:
+        https://applitools.com/resources/tutorial/selenium/ruby-rspec-capybara#step-2
+        
+    - Ruby Appium example:
+        https://applitools.com/resources/tutorial/appium/native_ruby#step-2
 
 ## Contributing
 
