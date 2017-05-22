@@ -57,7 +57,8 @@ describe Applitools::EyesBase do
     :cut_provider,
     :cut_provider=,
     :default_match_settings,
-    :default_match_settings=
+    :default_match_settings=,
+    :add_property
   ]
 
   it_should_behave_like 'has private method', [
@@ -91,6 +92,26 @@ describe Applitools::EyesBase do
     expect(subject.send(:save_new_tests)).to eq true
     expect(subject.send(:save_failed_tests)).to eq false
     expect(subject.send(:match_timeout)).to eq Applitools::EyesBase::DEFAULT_MATCH_TIMEOUT
+  end
+
+  context 'add_property' do
+    it 'add_property adds a hash to properties array' do
+      expect(subject.instance_variable_get(:@properties)).to be_a Array
+      expect(subject.instance_variable_get(:@properties)).to be_empty
+      subject.add_property :a, :b
+      expect(subject.instance_variable_get(:@properties).first).to be_a Hash
+      expect(subject.instance_variable_get(:@properties).first).to include :a => :b
+    end
+    it 'passes properties array to start_session' do
+      allow(subject).to receive(:get_viewport_size).and_return({})
+      allow(subject).to receive(:base_agent_id).and_return({})
+      expect(Applitools::SessionStartInfo).to receive(:new) do |*args|
+        expect(args.first).to be_a Hash
+        expect(args.first).to include :properties
+        expect(args.first[:properties]).to eq subject.send(:properties)
+      end.and_return nil
+      subject.send(:start_session)
+    end
   end
 
   context 'abort_if_not_closed' do

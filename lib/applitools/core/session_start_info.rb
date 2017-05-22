@@ -13,6 +13,7 @@ module Applitools
       @default_match_settings = options[:default_match_settings]
       @branch_name = options[:branch_name]
       @parent_branch_name = options[:parent_branch_name]
+      @properties = options[:properties]
     end
 
     def to_hash
@@ -26,7 +27,8 @@ module Applitools
         environment: @environment.to_hash,
         default_match_settings: @default_match_settings,
         branch_name: @branch_name,
-        parent_branch_name: @parent_branch_name
+        parent_branch_name: @parent_branch_name,
+        properties: @properties
       }
     end
   end
