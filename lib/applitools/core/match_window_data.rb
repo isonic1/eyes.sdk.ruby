@@ -116,7 +116,7 @@ module Applitools
 
     def read_target(target, driver)
       # options
-      %w(trim).each do |field|
+      target_options_to_read.each do |field|
         send("#{field}=", target.options[field.to_sym])
       end
       # ignored regions
@@ -133,6 +133,12 @@ module Applitools
       end
     end
 
+    def target_options_to_read
+      %w(trim ignore_caret)
+    end
+
+    private :target_options_to_read
+
     def ignore_mismatch
       current_data['IgnoreMismatch']
     end
@@ -143,6 +149,10 @@ module Applitools
 
     def trim=(value)
       current_data['Options']['Trim']['Enabled'] = value ? true : false
+    end
+
+    def ignore_caret=(value)
+      current_data['Options']['ImageMatchSettings']['IgnoreCaret'] = value
     end
 
     def convert_ignored_regions_coordinates
