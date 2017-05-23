@@ -100,7 +100,7 @@ describe Applitools::EyesBase do
       expect(subject.instance_variable_get(:@properties)).to be_empty
       subject.add_property :a, :b
       expect(subject.instance_variable_get(:@properties).first).to be_a Hash
-      expect(subject.instance_variable_get(:@properties).first).to include :name =>:a, :value => :b
+      expect(subject.instance_variable_get(:@properties).first).to include :name => :a, :value => :b
     end
     it 'passes properties array to start_session' do
       allow(subject).to receive(:get_viewport_size).and_return({})

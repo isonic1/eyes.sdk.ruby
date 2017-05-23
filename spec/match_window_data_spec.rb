@@ -23,7 +23,7 @@ RSpec.describe Applitools::MatchWindowData do
     :ignore_mismatch,
     :ignore_mismatch=,
     :to_s,
-    :to_hash,
+    :to_hash
   ]
 
   it 'returns data as hash' do
@@ -33,7 +33,7 @@ RSpec.describe Applitools::MatchWindowData do
   end
 
   context 'read_target' do
-    let(:options) { {test_method: false} }
+    let(:options) { { test_method: false } }
     let(:target) do
       double.tap do |t|
         allow(t).to receive(:options).and_return options

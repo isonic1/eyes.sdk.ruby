@@ -5,7 +5,7 @@ RSpec.shared_examples 'has chain methods' do |methods|
     end
 
     it "#{method} returns self" do
-      if methods[method].kind_of? Array
+      if methods[method].is_a? Array
         expect(subject.send(method, *methods[method]).object_id).to eq subject.object_id
       else
         expect(subject.send(method).object_id).to eq subject.object_id

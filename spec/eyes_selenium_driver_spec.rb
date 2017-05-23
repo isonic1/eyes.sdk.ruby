@@ -3,10 +3,6 @@ require 'spec_helper'
 RSpec.describe Applitools::Selenium::Driver do
   subject { described_class.new Applitools::Selenium::Eyes.new, {} }
   describe 'landscape_orientation?' do
-
-    before do
-    end
-
     it 'handles NameError' do
       allow(subject).to receive_message_chain(:driver, :orientation) do
         raise NameError
