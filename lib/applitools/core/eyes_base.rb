@@ -110,9 +110,7 @@ module Applitools
     end
 
     def add_property(name, value)
-      prop = {}
-      prop[name] = value
-      properties << prop
+      @properties << {name: name, value: value}
     end
 
     def abort_if_not_closed
