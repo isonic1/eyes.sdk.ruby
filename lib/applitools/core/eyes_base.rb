@@ -56,6 +56,7 @@ module Applitools
       self.verbose_results = false
       self.failed = false
       @inferred_environment = nil
+      @properties = []
 
       get_app_output_method = ->(r, s) { get_app_output_with_screenshot r, s }
 
@@ -106,6 +107,12 @@ module Applitools
 
     def app_name
       !current_app_name.nil? && !current_app_name.empty? ? current_app_name : @app_name
+    end
+
+    def add_property(name, value)
+      prop = {}
+      prop[name] = value
+      properties << prop
     end
 
     def abort_if_not_closed
@@ -382,7 +389,7 @@ module Applitools
       :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider,
       :failed, :server_connector
 
-    attr_reader :user_inputs
+    attr_reader :user_inputs, :properties
 
     private :full_agent_id, :full_agent_id=
 
@@ -496,7 +503,8 @@ module Applitools
                                                 scenario_id_or_name: test_name, batch_info: test_batch,
                                                 env_name: baseline_name, environment: app_env,
                                                 default_match_settings: default_match_settings,
-                                                branch_name: branch_name, parent_branch_name: parent_branch_name
+                                                branch_name: branch_name, parent_branch_name: parent_branch_name,
+                                                properties: properties
 
       logger.info 'Starting server session...'
       self.running_session = server_connector.start_session session_start_info
