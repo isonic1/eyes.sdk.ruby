@@ -264,7 +264,7 @@ module Applitools
          scenario_id_or_name: test_name, batch_info: batch,
          env_name: baseline_name, environment: app_environment,
          default_match_settings: default_match_settings,
-         branch_name: branch_name, parent_branch_name: parent_branch_name
+         branch_name: branch_name, parent_branch_name: parent_branch_name, properties: properties
 
       match_window_data.start_info = session_start_info
       match_window_data.update_baseline_if_new = save_new_tests

@@ -14,7 +14,8 @@ module Applitools
             'environment' => {},
             'defaultMatchSettings' => nil,
             'branchName' => nil,
-            'parentBranchName' => nil
+            'parentBranchName' => nil,
+            'properties' => nil
           },
           'IgnoreMismatch' => false,
           'MismatchWait' => 0,
@@ -74,6 +75,7 @@ module Applitools
       current_data['startInfo']['defaultMatchSettings'] = hash_value[:default_match_settings]
       current_data['startInfo']['branchName'] = hash_value[:branch_name]
       current_data['startInfo']['parentBranchName'] = hash_value[:parent_branch_name]
+      current_data['startInfo']['properties'] = hash_value[:properties]
     end
 
     def update_baseline_if_different=(value)
