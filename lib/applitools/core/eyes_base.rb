@@ -33,7 +33,7 @@ module Applitools
     attr_accessor :app_name, :baseline_name, :branch_name, :parent_branch_name, :batch, :agent_id, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :host_os, :host_app, :base_line_name, :position_provider, :viewport_size, :verbose_results,
-      :inferred_environment
+      :inferred_environment, :remove_session_if_matching
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -49,6 +49,7 @@ module Applitools
       self.running_session = nil
       self.save_new_tests = true
       self.save_failed_tests = false
+      self.remove_session_if_matching = false
       self.agent_id = nil
       self.last_screenshot = nil
       @user_inputs = UserInputArray.new
@@ -269,6 +270,7 @@ module Applitools
       match_window_data.start_info = session_start_info
       match_window_data.update_baseline_if_new = save_new_tests
       match_window_data.update_baseline_if_different = save_failed_tests
+      match_window_data.remove_session_if_matching = remove_session_if_matching
       match_window_task = Applitools::MatchSingleTask.new(
         logger,
         match_timeout,

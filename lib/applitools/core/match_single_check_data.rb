@@ -57,7 +57,8 @@ module Applitools
           },
           'Tag' => nil,
           'updateBaselineIfDifferent' => false,
-          'updateBaselineIfNew' => false
+          'updateBaselineIfNew' => false,
+          'removeSessionIfMatching' => false
         }
       end
     end
@@ -84,6 +85,10 @@ module Applitools
 
     def update_baseline_if_new=(value)
       current_data['updateBaselineIfNew'] = value ? true : false
+    end
+
+    def remove_session_if_matching=(value)
+      current_data['removeSessionIfMatching'] = value ? true : false
     end
   end
 end
