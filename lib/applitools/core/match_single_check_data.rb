@@ -90,5 +90,9 @@ module Applitools
     def remove_session_if_matching=(value)
       current_data['removeSessionIfMatching'] = value ? true : false
     end
+
+    def agent_id
+      current_data['startInfo']['agentId']
+    end
   end
 end

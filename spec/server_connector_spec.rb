@@ -106,7 +106,7 @@ describe Applitools::Connectivity::ServerConnector do
     it_behaves_like 'implements long queries flow', :long_delete
   end
 
-  describe 'match_single_window' do
+  describe 'match_single_window_data' do
     before do
       Applitools::Connectivity::ServerConnector.class_eval do
         public :request_delay, :request
@@ -126,13 +126,15 @@ describe Applitools::Connectivity::ServerConnector do
         raise Errno::EWOULDBLOCK.new 'message'
       end
       allow(subject).to receive('request_delay').and_return([0].to_enum)
-      expect(subject).to receive('match_single_window').at_least(:twice).with(data).and_call_original
-      expect { subject.match_single_window data }.to raise_error Applitools::UnknownNetworkStackError
+      expect(subject).to receive('match_single_window_data').at_least(:twice).with(data).and_call_original
+      expect { subject.match_single_window_data data }.to raise_error Applitools::UnknownNetworkStackError
     end
 
     it 'bubbles up Applitools::EyesError exception' do
       allow(subject).to receive('long_request').and_return an_internal_server_error
-      expect { subject.match_single_window Applitools::MatchSingleCheckData.new }.to raise_error Applitools::EyesError
+      expect { subject.match_single_window_data Applitools::MatchSingleCheckData.new }.to(
+        raise_error Applitools::EyesError
+      )
     end
 
     it 'resets @delays' do
@@ -140,7 +142,7 @@ describe Applitools::Connectivity::ServerConnector do
         raise Errno::EWOULDBLOCK.new 'message'
       end
       allow(subject).to receive('request_delay').and_return([0, 0, 0].to_enum)
-      expect { subject.match_single_window data }.to raise_error Applitools::UnknownNetworkStackError
+      expect { subject.match_single_window_data data }.to raise_error Applitools::UnknownNetworkStackError
       expect(subject.instance_variable_get(:@delays)).to be nil
     end
   end
