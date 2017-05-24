@@ -10,7 +10,7 @@ RSpec.describe Applitools::MatchWindowData do
       end
     end
   end
-  subject { Applitools::MatchWindowData.new }
+
   it_should_behave_like 'responds to method', [
     :app_output,
     :app_output=,
@@ -30,6 +30,45 @@ RSpec.describe Applitools::MatchWindowData do
     result = subject.to_hash
     expect(result).to be_kind_of Hash
     expect(result.keys).to include('UserInputs', 'AppOutput', 'Tag', 'IgnoreMismatch')
+  end
+
+  context 'read_target' do
+    let(:options) { { test_method: false } }
+    let(:target) do
+      double.tap do |t|
+        allow(t).to receive(:options).and_return options
+        allow(t).to receive(:ignored_regions).and_return []
+      end
+    end
+
+    it_should_behave_like 'responds to method', [
+      :trim=,
+      :ignore_caret=
+    ]
+
+    it 'iterates over options' do
+      expect(subject.send(:target_options_to_read)).to include('trim', 'ignore_caret')
+    end
+
+    it 'uses field= method to set data' do
+      allow(subject).to receive(:target_options_to_read).and_return %w(test_method)
+
+      expect(subject).to receive(:test_method=)
+      expect(options).to receive('[]').with(:test_method)
+
+      subject.read_target target, nil
+    end
+
+    context 'ignored_regions'
+  end
+
+  context 'ignore_caret=' do
+    it 'sets a value in result hash' do
+      subject.ignore_caret = true
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['IgnoreCaret']).to be true
+      subject.ignore_caret = false
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['IgnoreCaret']).to be false
+    end
   end
 
   describe ':default_data' do

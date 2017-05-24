@@ -111,7 +111,7 @@ module Applitools
     end
 
     def add_property(name, value)
-      @properties << {name: name, value: value}
+      @properties << { name: name, value: value }
     end
 
     def abort_if_not_closed

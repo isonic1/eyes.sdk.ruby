@@ -16,7 +16,7 @@ module Applitools
       # Initialize a Applitools::Selenium::Target instance.
       def initialize
         self.frames = []
-        self.options = {}
+        self.options = { ignore_caret: false }
         reset_for_fullscreen
       end
 
@@ -39,6 +39,11 @@ module Applitools
         else
           reset_ignore
         end
+        self
+      end
+
+      def ignore_caret(value = false)
+        options[:ignore_caret] = value ? true : false
         self
       end
 
