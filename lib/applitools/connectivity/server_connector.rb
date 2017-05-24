@@ -66,7 +66,7 @@ module Applitools::Connectivity
     RETRY_STEP_FACTOR = 1.5
     RETRY_MAX_DELAY = 5
 
-    def match_single_window(data)
+    def match_single_window_data(data)
       # Notice that this does not include the screenshot.
       json_data = Oj.dump(data.to_hash).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
@@ -81,12 +81,16 @@ module Applitools::Connectivity
         rescue StopIteration
           raise Applitools::UnknownNetworkStackError.new('Unknown network stack error')
         end
-        res = match_single_window(data)
+        res = match_single_window_data(data)
       ensure
         @delays = nil
       end
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers} #{res.body}") unless res.success?
-      Applitools::TestResults.new Oj.load(res.body)
+      res
+    end
+
+    def match_single_window(data)
+      Applitools::TestResults.new Oj.load(match_single_window_data(data))
     end
 
     def start_session(session_start_info)
