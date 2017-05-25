@@ -30,7 +30,9 @@ module Applitools
       # @option args [String] :name The name of the region to ignore.
       # @option args [Integer] :id The id of the region to ignore.
       def ignore(*args)
-        unless args.empty?
+        if args.empty?
+          reset_ignore
+        else
           ignored_regions << case args.first
                              when Applitools::Selenium::Element
                                proc { args.first }
@@ -41,8 +43,7 @@ module Applitools
                                  driver.find_element(*args)
                                end
                              end
-        else
-          reset_ignore
+
         end
         self
       end
@@ -68,7 +69,7 @@ module Applitools
                     Applitools::FloatingRegion.for_element driver.find_element(args.shift, args.shift), *args
                   end
                 end
-        self.floating_regions << value
+        floating_regions << value
         self
       end
 

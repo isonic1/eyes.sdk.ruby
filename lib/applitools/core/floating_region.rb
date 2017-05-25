@@ -2,7 +2,7 @@ require_relative 'region'
 module Applitools
   class FloatingRegion < Region
     class << self
-      def for_element(element,  max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
+      def for_element(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
         Applitools::ArgumentGuard.is_a? element, 'element', Applitools::Selenium::Element
         new element.location.x, element.location.y, element.size.width, element.size.height, max_left_offset,
           max_top_offset, max_right_offset, max_bottom_offset

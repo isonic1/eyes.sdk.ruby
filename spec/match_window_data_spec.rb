@@ -45,11 +45,11 @@ RSpec.describe Applitools::MatchWindowData do
   end
 
   it 'updates ignored regions' do
-    expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Ignore']).to receive(:<<).with(kind_of Hash)
+    expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Ignore']).to receive(:<<).with(kind_of(Hash))
     subject.ignored_regions = [Applitools::Region::EMPTY]
   end
   it 'updates floating regions' do
-    expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Floating']).to receive(:<<).with(kind_of Hash)
+    expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Floating']).to receive(:<<).with(kind_of(Hash))
     subject.floating_regions = [Applitools::FloatingRegion.new(0, 0, 0, 0, 0, 0, 0, 0)]
   end
 
@@ -83,11 +83,13 @@ RSpec.describe Applitools::MatchWindowData do
 
     context 'ignored_regions' do
       before do
-        allow(target).to receive(:ignored_regions).and_return [proc { Applitools::Region::EMPTY }, Applitools::Region::EMPTY ]
+        allow(target).to receive(:ignored_regions).and_return(
+          [proc { Applitools::Region::EMPTY }, Applitools::Region::EMPTY]
+        )
       end
 
       it 'iterates over ignored regions' do
-        expect(subject.instance_variable_get(:@ignored_regions)).to receive(:<<).with(kind_of Applitools::Region).twice
+        expect(subject.instance_variable_get(:@ignored_regions)).to receive(:<<).with(kind_of(Applitools::Region)).twice
         subject.read_target(target, nil)
       end
       it 'sets @need_convert_ignored_regions_coordinates to true' do
@@ -97,13 +99,15 @@ RSpec.describe Applitools::MatchWindowData do
       end
     end
     context 'floating regions' do
-      let(:f_region) { Applitools::FloatingRegion.new 0, 0, 0, 0, 0, 0, 0, 0}
+      let(:f_region) { Applitools::FloatingRegion.new 0, 0, 0, 0, 0, 0, 0, 0 }
       before do
-        allow(target).to receive(:floating_regions).and_return [proc { f_region }, f_region ]
+        allow(target).to receive(:floating_regions).and_return [proc { f_region }, f_region]
       end
 
       it 'iterates over floating regions' do
-        expect(subject.instance_variable_get(:@floating_regions)).to receive(:<<).with(kind_of Applitools::FloatingRegion).twice
+        expect(subject.instance_variable_get(:@floating_regions)).to(
+          receive(:<<).with(kind_of(Applitools::FloatingRegion)).twice
+        )
         subject.read_target(target, nil)
       end
       it 'sets @need_convert_ignored_regions_coordinates to true' do

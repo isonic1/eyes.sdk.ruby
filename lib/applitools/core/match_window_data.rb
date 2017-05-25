@@ -141,17 +141,18 @@ module Applitools
           @need_convert_ignored_regions_coordinates = true
         end
       end
-      #floating regions
+      # floating regions
       target.floating_regions.each do |r|
         case r
-          when Proc
-            region = r.call(driver)
-            raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless region.is_a? Applitools::FloatingRegion
-            @floating_regions << region
-            @need_convert_floating_regions_coordinates = true
-          when Applitools::FloatingRegion
-            @floating_regions << r
-            @need_convert_floating_regions_coordinates = true
+        when Proc
+          region = r.call(driver)
+          raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless
+              region.is_a? Applitools::FloatingRegion
+          @floating_regions << region
+          @need_convert_floating_regions_coordinates = true
+        when Applitools::FloatingRegion
+          @floating_regions << r
+          @need_convert_floating_regions_coordinates = true
         end
       end
     end
@@ -189,7 +190,8 @@ module Applitools
     def convert_floating_regions_coordinates
       return unless @need_convert_floating_regions_coordinates
       self.floating_regions = @floating_regions.map do |r|
-        r.location = app_output.screenshot.convert_location(r.location,
+        r.location = app_output.screenshot.convert_location(
+          r.location,
           Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
           Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
         )
@@ -207,7 +209,7 @@ module Applitools
 
       if @need_convert_floating_regions_coordinates
         raise Applitools::EyesError.new(
-            'You should convert coordinates for floating_regions!'
+          'You should convert coordinates for floating_regions!'
         )
       end
       current_data.dup

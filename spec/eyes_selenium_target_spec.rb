@@ -37,10 +37,10 @@ RSpec.describe Applitools::Selenium::Target do
       end
       it 'accepts :how, :what' do
         allow(Applitools::FloatingRegion).to receive :for_element
-        subject.floating(:css, '.class', 10, 10 ,10, 10)
+        subject.floating(:css, '.class', 10, 10, 10, 10)
       end
       it 'accepts Applitools::Region' do
-        subject.floating(Applitools::Region::EMPTY, 10, 10 ,10, 10)
+        subject.floating(Applitools::Region::EMPTY, 10, 10, 10, 10)
       end
       it 'accepts Applitools::Selenium::Element' do
         subject.floating(Applitools::Selenium::Element.new(driver, Applitools::Region::EMPTY), 10, 10, 10, 10)
