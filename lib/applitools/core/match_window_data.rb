@@ -22,6 +22,7 @@ module Applitools
               'SplitBottomHeight' => 0,
               'IgnoreCaret' => false,
               'Ignore' => [],
+              'Floating' => [],
               'Exact' => {
                 'MinDiffIntensity' => 0,
                 'MinDiffWidth' => 0,
@@ -65,7 +66,9 @@ module Applitools
     def initialize
       @app_output = nil
       @ignored_regions = []
+      @floating_regions = []
       @need_convert_ignored_regions_coordinates = false
+      @need_convert_floating_regions_coordinates = false
     end
 
     def screenshot
@@ -94,6 +97,13 @@ module Applitools
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
         current_data['Options']['ImageMatchSettings']['Ignore'] << r.to_hash if self.class.valid_region(r)
+      end
+    end
+
+    def floating_regions=(value)
+      Applitools::ArgumentGuard.is_a? value, 'value', Array
+      value.each do |r|
+        current_data['Options']['ImageMatchSettings']['Floating'] << r.to_hash
       end
     end
 
@@ -131,6 +141,19 @@ module Applitools
           @need_convert_ignored_regions_coordinates = true
         end
       end
+      #floating regions
+      target.floating_regions.each do |r|
+        case r
+          when Proc
+            region = r.call(driver)
+            raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless region.is_a? Applitools::FloatingRegion
+            @floating_regions << region
+            @need_convert_floating_regions_coordinates = true
+          when Applitools::FloatingRegion
+            @floating_regions << r
+            @need_convert_floating_regions_coordinates = true
+        end
+      end
     end
 
     def target_options_to_read
@@ -163,10 +186,28 @@ module Applitools
       @need_convert_ignored_regions_coordinates = false
     end
 
+    def convert_floating_regions_coordinates
+      return unless @need_convert_floating_regions_coordinates
+      self.floating_regions = @floating_regions.map do |r|
+        r.location = app_output.screenshot.convert_location(r.location,
+          Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
+          Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
+        )
+        r.to_hash
+      end
+      @need_convert_floating_regions_coordinates = false
+    end
+
     def to_hash
       if @need_convert_ignored_regions_coordinates
         raise Applitools::EyesError.new(
           'You should convert coordinates for ignored_regions!'
+        )
+      end
+
+      if @need_convert_floating_regions_coordinates
+        raise Applitools::EyesError.new(
+            'You should convert coordinates for floating_regions!'
         )
       end
       current_data.dup

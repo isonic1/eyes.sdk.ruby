@@ -2,6 +2,10 @@ module Applitools
   module Selenium
     class Target
       class << self
+        def frame(element)
+          new.frame(element)
+        end
+
         def window
           new
         end
@@ -11,7 +15,7 @@ module Applitools
         end
       end
 
-      attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions
+      attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions, :floating_regions
 
       # Initialize a Applitools::Selenium::Target instance.
       def initialize
@@ -26,11 +30,12 @@ module Applitools
       # @option args [String] :name The name of the region to ignore.
       # @option args [Integer] :id The id of the region to ignore.
       def ignore(*args)
-        if args.first
-          ignored_regions << if args.first.is_a? Applitools::Selenium::Element
-                               proc do
-                                 args.first
-                               end
+        unless args.empty?
+          ignored_regions << case args.first
+                             when Applitools::Selenium::Element
+                               proc { args.first }
+                             when Applitools::Region
+                               proc { args.first }
                              else
                                proc do |driver|
                                  driver.find_element(*args)
@@ -47,7 +52,23 @@ module Applitools
         self
       end
 
-      def float(*_)
+      def floating(*args)
+        value = case args.first
+                when Applitools::FloatingRegion
+                  proc { args.first }
+                when Applitools::Selenium::Element
+                  proc { Applitools::FloatingRegion.for_element args.shift, *args }
+                when Applitools::Region
+                  proc do
+                    region = args.shift
+                    Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
+                  end
+                else
+                  proc do |driver|
+                    Applitools::FloatingRegion.for_element driver.find_element(args.shift, args.shift), *args
+                  end
+                end
+        self.floating_regions << value
         self
       end
 
@@ -74,10 +95,11 @@ module Applitools
       # @option args [Integer] :id The id of the region.
       # @return [Applitools::Selenium::Target] Self instance.
       def region(*args)
-        self.region_to_check = if args.first.is_a? Applitools::Selenium::Element
-                                 proc do
-                                   args.first
-                                 end
+        self.region_to_check = case args.first
+                               when Applitools::Selenium::Element
+                                 proc { args.first }
+                               when Applitools::Region
+                                 proc { args.first }
                                else
                                  proc do |driver|
                                    driver.find_element(*args)
@@ -86,6 +108,7 @@ module Applitools
         self.coordinate_type = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
         options[:timeout] = nil
         reset_ignore
+        reset_floating
         self
       end
 
@@ -100,6 +123,7 @@ module Applitools
         self.coordinate_type = nil
         self.region_to_check = proc { Applitools::Region::EMPTY }
         reset_ignore
+        reset_floating
         options[:stitch_content] = false
         options[:timeout] = nil
         options[:trim] = false
@@ -107,6 +131,10 @@ module Applitools
 
       def reset_ignore
         self.ignored_regions = []
+      end
+
+      def reset_floating
+        self.floating_regions = []
       end
     end
   end
