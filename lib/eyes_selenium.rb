@@ -3,12 +3,14 @@ require 'eyes_core'
 module Applitools
   module Selenium
     extend Applitools::RequireUtils
+    def self.load_dir
+      File.dirname(File.expand_path(__FILE__))
+    end
   end
 end
 
 Applitools::Selenium.require_dir 'selenium'
 Applitools::Selenium.require_dir 'poltergeist'
-
 
 if defined? Selenium::WebDriver::Driver
   Selenium::WebDriver::Driver.class_eval do

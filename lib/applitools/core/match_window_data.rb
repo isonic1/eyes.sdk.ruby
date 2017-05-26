@@ -151,30 +151,30 @@ module Applitools
       if target.respond_to? :ignored_regions
         target.ignored_regions.each do |r|
           case r
-            when Proc
-              region = r.call(driver)
-              @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
-              @need_convert_ignored_regions_coordinates = true
-            when Applitools::Region
-              @ignored_regions << r
-              @need_convert_ignored_regions_coordinates = true
+          when Proc
+            region = r.call(driver)
+            @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
+            @need_convert_ignored_regions_coordinates = true
+          when Applitools::Region
+            @ignored_regions << r
+            @need_convert_ignored_regions_coordinates = true
           end
         end
       end
+
       # floating regions
-      if target.respond_to? :floating_regions
-        target.floating_regions.each do |r|
-          case r
-            when Proc
-              region = r.call(driver)
-              raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless
-                  region.is_a? Applitools::FloatingRegion
-              @floating_regions << region
-              @need_convert_floating_regions_coordinates = true
-            when Applitools::FloatingRegion
-              @floating_regions << r
-              @need_convert_floating_regions_coordinates = true
-          end
+      return unless target.respond_to? :floating_regions
+      target.floating_regions.each do |r|
+        case r
+        when Proc
+          region = r.call(driver)
+          raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless
+              region.is_a? Applitools::FloatingRegion
+          @floating_regions << region
+          @need_convert_floating_regions_coordinates = true
+        when Applitools::FloatingRegion
+          @floating_regions << r
+          @need_convert_floating_regions_coordinates = true
         end
       end
     end

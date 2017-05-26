@@ -5,6 +5,10 @@ require_relative 'require_utils'
 
 module Applitools
   extend Applitools::RequireUtils
+
+  def self.load_dir
+    File.dirname(File.expand_path(__FILE__))
+  end
   # @!visibility private
   class EyesError < StandardError; end
   # @!visibility private
