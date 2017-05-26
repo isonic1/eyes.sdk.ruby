@@ -1,4 +1,4 @@
-module Applitools::Selenium
+module Applitools
   class RegionProvider
     # Do we need it under Selenium module?
     attr_reader :region, :coordinate_type
