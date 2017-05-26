@@ -1,18 +1,10 @@
 require 'forwardable'
 require 'delegate'
 require 'time'
+require_relative 'require_utils'
 
 module Applitools
-  # @!visibility private
-  class << self
-    # @!visibility private
-    def require_dir(dir)
-      Dir[File.join(File.dirname(File.expand_path(__FILE__)), 'applitools', dir, '*.rb')].sort.each do |f|
-        require f
-      end
-    end
-  end
-
+  extend Applitools::RequireUtils
   # @!visibility private
   class EyesError < StandardError; end
   # @!visibility private

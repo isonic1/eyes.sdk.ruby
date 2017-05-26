@@ -1,19 +1,14 @@
 require 'eyes_core'
 
-module Applitools::Selenium
-  # @!visibility private
-  class << self
-    # @!visibility private
-    def require_dir(dir)
-      Dir[File.join(File.dirname(File.expand_path(__FILE__)), 'applitools', dir, '*.rb')].sort.each do |f|
-        require f
-      end
-    end
+module Applitools
+  module Selenium
+    extend Applitools::RequireUtils
   end
 end
 
 Applitools::Selenium.require_dir 'selenium'
 Applitools::Selenium.require_dir 'poltergeist'
+
 
 if defined? Selenium::WebDriver::Driver
   Selenium::WebDriver::Driver.class_eval do
