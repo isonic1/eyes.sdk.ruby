@@ -95,7 +95,8 @@ module Applitools::Connectivity
     end
 
     def match_single_window(data)
-      Applitools::TestResults.new Oj.load(match_single_window_data(data))
+      res = match_single_window_data(data)
+      Applitools::TestResults.new Oj.load(res.body)
     end
 
     def start_session(session_start_info)
