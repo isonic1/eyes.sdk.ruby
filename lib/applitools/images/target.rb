@@ -42,13 +42,14 @@ module Applitools::Images
       end
     end
 
-    attr_accessor :image, :options, :ignored_regions, :region_to_check
+    attr_accessor :image, :options, :ignored_regions, :region_to_check, :floating_regions
 
     def initialize(image)
       Applitools::ArgumentGuard.not_nil(image, 'image')
       Applitools::ArgumentGuard.is_a? image, 'image', Applitools::Screenshot
       self.image = image
       self.ignored_regions = []
+      self.floating_regions = []
       self.options = {
         trim: false
       }
@@ -61,6 +62,22 @@ module Applitools::Images
       else
         self.ignored_regions = []
       end
+      self
+    end
+
+    def floating(*args)
+      value = case args.first
+                when Applitools::FloatingRegion
+                  proc { args.first }
+                when Applitools::Region
+                  proc do
+                    region = args.shift
+                    Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
+                  end
+                else
+                  self.floating_regions = []
+              end
+      floating_regions << value
       self
     end
 
