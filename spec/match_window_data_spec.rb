@@ -26,10 +26,31 @@ RSpec.describe Applitools::MatchWindowData do
     :to_hash
   ]
 
-  it 'returns data as hash' do
-    result = subject.to_hash
-    expect(result).to be_kind_of Hash
-    expect(result.keys).to include('UserInputs', 'AppOutput', 'Tag', 'IgnoreMismatch')
+  context 'results' do
+    it 'returns data as hash' do
+      result = subject.to_hash
+      expect(result).to be_kind_of Hash
+      expect(result.keys).to include('UserInputs', 'AppOutput', 'Tag', 'IgnoreMismatch')
+    end
+
+    it 'raises an error for unconverted ignored regions coordinates' do
+      subject.instance_variable_set(:@need_convert_ignored_regions_coordinates, true)
+      expect { subject.to_hash }.to raise_error Applitools::EyesError
+    end
+
+    it 'raises an error for unconverted floating regions coordinates' do
+      subject.instance_variable_set(:@need_convert_floating_regions_coordinates, true)
+      expect { subject.to_hash }.to raise_error Applitools::EyesError
+    end
+  end
+
+  it 'updates ignored regions' do
+    expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Ignore']).to receive(:<<).with(kind_of(Hash))
+    subject.ignored_regions = [Applitools::Region::EMPTY]
+  end
+  it 'updates floating regions' do
+    expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Floating']).to receive(:<<).with(kind_of(Hash))
+    subject.floating_regions = [Applitools::FloatingRegion.new(0, 0, 0, 0, 0, 0, 0, 0)]
   end
 
   context 'read_target' do
@@ -38,6 +59,7 @@ RSpec.describe Applitools::MatchWindowData do
       double.tap do |t|
         allow(t).to receive(:options).and_return options
         allow(t).to receive(:ignored_regions).and_return []
+        allow(t).to receive(:floating_regions).and_return []
       end
     end
 
@@ -59,7 +81,41 @@ RSpec.describe Applitools::MatchWindowData do
       subject.read_target target, nil
     end
 
-    context 'ignored_regions'
+    context 'ignored_regions' do
+      before do
+        allow(target).to receive(:ignored_regions).and_return(
+          [proc { Applitools::Region::EMPTY }, Applitools::Region::EMPTY]
+        )
+      end
+
+      it 'iterates over ignored regions' do
+        expect(subject.instance_variable_get(:@ignored_regions)).to receive(:<<).with(kind_of(Applitools::Region)).twice
+        subject.read_target(target, nil)
+      end
+      it 'sets @need_convert_ignored_regions_coordinates to true' do
+        expect(subject.instance_variable_get(:@need_convert_ignored_regions_coordinates)).to be false
+        subject.read_target(target, nil)
+        expect(subject.instance_variable_get(:@need_convert_ignored_regions_coordinates)).to be true
+      end
+    end
+    context 'floating regions' do
+      let(:f_region) { Applitools::FloatingRegion.new 0, 0, 0, 0, 0, 0, 0, 0 }
+      before do
+        allow(target).to receive(:floating_regions).and_return [proc { f_region }, f_region]
+      end
+
+      it 'iterates over floating regions' do
+        expect(subject.instance_variable_get(:@floating_regions)).to(
+          receive(:<<).with(kind_of(Applitools::FloatingRegion)).twice
+        )
+        subject.read_target(target, nil)
+      end
+      it 'sets @need_convert_ignored_regions_coordinates to true' do
+        expect(subject.instance_variable_get(:@need_convert_floating_regions_coordinates)).to be false
+        subject.read_target(target, nil)
+        expect(subject.instance_variable_get(:@need_convert_floating_regions_coordinates)).to be true
+      end
+    end
   end
 
   context 'ignore_caret=' do
@@ -166,7 +222,8 @@ RSpec.describe Applitools::MatchWindowData do
             'MatchLevel',
             'SplitBottomHeight',
             'SplitTopHeight',
-            'Ignore'
+            'Ignore',
+            'Floating'
           )
         end
 
@@ -177,6 +234,8 @@ RSpec.describe Applitools::MatchWindowData do
           expect(subject['SplitTopHeight']).to be_zero
           expect(subject['Ignore']).to be_kind_of Array
           expect(subject['Ignore']).to be_empty
+          expect(subject['Floating']).to be_kind_of Array
+          expect(subject['Floating']).to be_empty
         end
 
         describe '[\'Exact\']' do

@@ -77,7 +77,7 @@ module Applitools::Connectivity
           @single_check_endpoint_url,
           content_type: 'application/octet-stream',
           body: body,
-          query: {agent_id: data.agent_id}
+          query: { agent_id: data.agent_id }
         )
       rescue Errno::EWOULDBLOCK, Faraday::ConnectionFailed
         @delays ||= request_delay(RETRY_DELAY, RETRY_STEP_FACTOR, RETRY_MAX_DELAY)
