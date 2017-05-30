@@ -69,14 +69,19 @@ RSpec.describe Applitools::MatchWindowData do
     ]
 
     it 'iterates over options' do
-      expect(subject.send(:target_options_to_read)).to include('trim', 'ignore_caret')
+      expect(subject.send(:target_options_to_read)).to include('trim', 'ignore_caret', 'match_level', 'ignore_mismatch')
+    end
+
+    it 'skips empty options' do
+      allow(subject).to receive(:target_options_to_read).and_return %w(another_test_method)
+      expect(subject).to_not receive(:test_method=)
+      subject.read_target target, nil
     end
 
     it 'uses field= method to set data' do
       allow(subject).to receive(:target_options_to_read).and_return %w(test_method)
-
       expect(subject).to receive(:test_method=)
-      expect(options).to receive('[]').with(:test_method)
+      expect(options).to receive('[]').with(:test_method).and_call_original
 
       subject.read_target target, nil
     end
@@ -229,7 +234,7 @@ RSpec.describe Applitools::MatchWindowData do
 
         it 'has default values' do
           expect(subject['IgnoreCaret']).to eq false
-          expect(subject['MatchLevel']).to eq 'None'
+          expect(subject['MatchLevel']).to eq 'Strict'
           expect(subject['SplitBottomHeight']).to be_zero
           expect(subject['SplitTopHeight']).to be_zero
           expect(subject['Ignore']).to be_kind_of Array

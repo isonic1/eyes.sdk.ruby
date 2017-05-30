@@ -20,7 +20,10 @@ module Applitools
       # Initialize a Applitools::Selenium::Target instance.
       def initialize
         self.frames = []
-        self.options = { ignore_caret: false }
+        self.options = {
+          ignore_caret: false,
+          ignore_mismatch: false
+        }
         reset_for_fullscreen
       end
 
@@ -79,7 +82,7 @@ module Applitools
       end
 
       def timeout(value)
-        options[:timeout] = value
+        options[:timeout] = value.to_i
         self
       end
 
@@ -115,6 +118,17 @@ module Applitools
 
       def trim
         options[:trim] = true
+        self
+      end
+
+      def ignore_mismatch(value)
+        options[:ignore_mismatch] = value ? true : false
+        self
+      end
+
+      def match_level(value)
+        raise Applitools::EyesError unless Applitools::MATCH_LEVEL.keys.include? value
+        options[:match_level] = Applitools::MATCH_LEVEL[value]
         self
       end
 

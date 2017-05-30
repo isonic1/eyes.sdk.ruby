@@ -17,7 +17,7 @@ module Applitools
             'Name' => nil,
             'UserInputs' => [],
             'ImageMatchSettings' => {
-              'MatchLevel' => 'None',
+              'MatchLevel' => 'Strict',
               'SplitTopHeight' => 0,
               'SplitBottomHeight' => 0,
               'IgnoreCaret' => false,
@@ -145,7 +145,8 @@ module Applitools
     def read_target(target, driver)
       # options
       target_options_to_read.each do |field|
-        send("#{field}=", target.options[field.to_sym])
+        a_value = target.options[field.to_sym]
+        send("#{field}=", a_value) unless a_value.nil?
       end
       # ignored regions
       if target.respond_to? :ignored_regions
@@ -180,7 +181,7 @@ module Applitools
     end
 
     def target_options_to_read
-      %w(trim ignore_caret)
+      %w(trim ignore_caret match_level ignore_mismatch)
     end
 
     private :target_options_to_read

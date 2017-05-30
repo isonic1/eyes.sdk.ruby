@@ -3,7 +3,7 @@ module Applitools
   class MatchSingleCheckData < MatchWindowData
     class << self
       def default_data
-        {
+        super.merge!({
           'startInfo' => {
             'agentId' => nil,
             'appIdOrName' => nil,
@@ -16,52 +16,8 @@ module Applitools
             'branchName' => nil,
             'parentBranchName' => nil,
             'properties' => nil
-          },
-          'IgnoreMismatch' => false,
-          'MismatchWait' => 0,
-          'Options' => {
-            'Name' => nil,
-            'UserInputs' => [],
-            'ImageMatchSettings' => {
-              'MatchLevel' => 'None',
-              'SplitTopHeight' => 0,
-              'SplitBottomHeight' => 0,
-              'IgnoreCaret' => false,
-              'Ignore' => [],
-              'Exact' => {
-                'MinDiffIntensity' => 0,
-                'MinDiffWidth' => 0,
-                'MinDiffHeight' => 0,
-                'MatchThreshold' => 0
-              },
-              'scale' => 0,
-              'remainder' => 0
-            },
-            'IgnoreExpectedOutputSettings' => false,
-            'ForceMatch' => false,
-            'ForceMismatch' => false,
-            'IgnoreMatch' => false,
-            'IgnoreMismatch' => false,
-            'Trim' => {
-              'Enabled' => false,
-              'ForegroundIntensity' => 0,
-              'MinEdgeLength' => 0
-            }
-          },
-          'Id' => nil,
-          'UserInputs' => [],
-          'AppOutput' => {
-            'Screenshot64' => nil,
-            'ScreenshotUrl' => nil,
-            'Title' => nil,
-            'IsPrimary' => false,
-            'Elapsed' => 0
-          },
-          'Tag' => nil,
-          'updateBaselineIfDifferent' => false,
-          'updateBaselineIfNew' => false,
-          'removeSessionIfMatching' => false
-        }
+          }
+        })
       end
     end
 

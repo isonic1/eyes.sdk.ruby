@@ -30,7 +30,7 @@ RSpec.describe 'Check frame and element example', :type => :feature, :js => true
     eyes.check 'Overflowed region', target
     target = Applitools::Selenium::Target.window.frame('frame1').fully.floating(:id, 'inner-frame-div', 10, 10, 10, 10)
     eyes.check('', target)
-    target = target.region(:id, 'inner-frame-div').fully # Region in frame..
+    target = target.region(:id, 'inner-frame-div').fully.match_level(:exact) # Region in frame..
     eyes.check('Inner frame div', target)
     target = Applitools::Selenium::Target.window.region(:id, 'overflowing-div-image').fully.trim
     eyes.check('minions', target)
