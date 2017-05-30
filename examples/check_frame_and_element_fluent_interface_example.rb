@@ -3,6 +3,9 @@ require 'capybara/rspec'
 require_relative '../lib/eyes_selenium'
 require 'applitools/capybara'
 
+require 'openssl'
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
 Applitools.register_capybara_driver :browser => :chrome
 
 RSpec.describe 'Check frame and element example', :type => :feature, :js => true do
@@ -12,6 +15,7 @@ RSpec.describe 'Check frame and element example', :type => :feature, :js => true
       eyes.force_full_page_screenshot = false
       eyes.log_handler = Logger.new(STDOUT)
       eyes.stitch_mode = :css
+      # eyes.proxy = Applitools::Connectivity::Proxy.new 'http://localhost:9999'
     end
   end
 
