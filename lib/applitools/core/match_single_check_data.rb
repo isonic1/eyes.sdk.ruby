@@ -33,7 +33,9 @@ module Applitools
                 'MinDiffWidth' => 0,
                 'MinDiffHeight' => 0,
                 'MatchThreshold' => 0
-              }
+              },
+              'scale' => 0,
+              'remainder' => 0
             },
             'IgnoreExpectedOutputSettings' => false,
             'ForceMatch' => false,

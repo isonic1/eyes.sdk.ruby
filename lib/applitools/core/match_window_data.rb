@@ -28,7 +28,9 @@ module Applitools
                 'MinDiffWidth' => 0,
                 'MinDiffHeight' => 0,
                 'MatchThreshold' => 0
-              }
+              },
+              'scale' => 0,
+              'remainder' => 0
             },
             'IgnoreExpectedOutputSettings' => false,
             'ForceMatch' => false,
@@ -122,6 +124,22 @@ module Applitools
 
     def match_level
       current_data['Options']['ImageMatchSettings']['MatchLevel']
+    end
+
+    def scale=(value)
+      current_data['Options']['ImageMatchSettings']['scale'] = value
+    end
+
+    def scale
+      current_data['Options']['ImageMatchSettings']['scale']
+    end
+
+    def remainder=(value)
+      current_data['Options']['ImageMatchSettings']['remainder'] = value
+    end
+
+    def remainder
+      current_data['Options']['ImageMatchSettings']['remainder']
     end
 
     def read_target(target, driver)

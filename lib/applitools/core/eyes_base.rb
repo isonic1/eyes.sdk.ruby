@@ -58,7 +58,8 @@ module Applitools
       self.failed = false
       @inferred_environment = nil
       @properties = []
-
+      @server_scale = 0
+      @server_remainder = 0
       get_app_output_method = ->(r, s) { get_app_output_with_screenshot r, s }
 
       app_output_provider.instance_eval do
@@ -67,7 +68,10 @@ module Applitools
         end
       end
 
-      @default_match_settings = { match_level: Applitools::MATCH_LEVEL[:strict], exact: nil }
+      @default_match_settings = { match_level: Applitools::MATCH_LEVEL[:strict],
+                                  exact: nil,
+                                  scale: server_scale,
+                                  remainder: server_remainder}
     end
 
     def batch
@@ -92,6 +96,24 @@ module Applitools
 
     def match_level
       @default_match_settings[:match_level]
+    end
+
+    def server_scale=(ratio)
+      @server_scale = ratio
+      @default_match_settings[:scale] = ratio
+    end
+
+    def server_scale
+      @server_scale
+    end
+
+    def server_remainder=(ratio)
+      @server_remainder = ratio
+      @default_match_settings[:remainder] = ratio
+    end
+
+    def server_remainder
+      @server_remainder
     end
 
     def disabled=(value)
@@ -271,6 +293,9 @@ module Applitools
       match_window_data.update_baseline_if_new = save_new_tests
       match_window_data.update_baseline_if_different = save_failed_tests
       match_window_data.remove_session_if_matching = remove_session_if_matching
+      match_window_data.scale = server_scale
+      match_window_data.remainder = server_remainder
+
       match_window_task = Applitools::MatchSingleTask.new(
         logger,
         match_timeout,
