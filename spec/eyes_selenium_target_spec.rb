@@ -11,12 +11,12 @@ RSpec.describe Applitools::Selenium::Target do
 
   context 'timeout' do
     it 'sets options[:timeout]' do
-      subject.timeout(100500)
-      expect(subject.options[:timeout]).to eq 100500
+      subject.timeout(100_500)
+      expect(subject.options[:timeout]).to eq 100_500
     end
 
     it 'converts value using to_i method' do
-      integer_value = double(100500)
+      integer_value = double(100_500)
       expect(integer_value).to receive(:to_i).and_return(0)
       subject.timeout(integer_value)
     end
@@ -43,22 +43,7 @@ RSpec.describe Applitools::Selenium::Target do
     end
     it 'raises an exception on wrong value' do
       expect { subject.match_level('unknown') }.to raise_error Applitools::EyesError
-      expect { subject.match_level(:none) }.to_not raise_error 
-    end
-  end
-
-
-
-  context 'ignore caret' do 
-    it 'sets options[:ignore_caret]' do
-      subject.ignore_caret(true)
-      expect(subject.options[:ignore_caret]).to be true
-      subject.ignore_caret(false)
-      expect(subject.options[:ignore_caret]).to be false
-    end
-
-    it 'uses default value' do
-      expect(subject.options[:ignore_caret]).to be false
+      expect { subject.match_level(:none) }.to_not raise_error
     end
   end
 
@@ -66,6 +51,8 @@ RSpec.describe Applitools::Selenium::Target do
     it 'sets ignore_caret option' do
       subject.ignore_caret(true)
       expect(subject.options[:ignore_caret]).to be true
+      subject.ignore_caret(false)
+      expect(subject.options[:ignore_caret]).to be false
     end
 
     it 'sets default value when called without args' do
@@ -75,6 +62,23 @@ RSpec.describe Applitools::Selenium::Target do
 
     it 'false by default' do
       expect(subject.options[:ignore_caret]).to be false
+    end
+  end
+
+  describe ':trim' do
+    it 'false by default' do
+      expect(subject.options[:trim]).to be false
+    end
+    it 'resets if nil is passed' do
+      subject.trim(nil)
+    end
+    it 'sets only true/false values' do
+      subject.trim(0)
+      expect(subject.options[:trim]).to be true
+    end
+    it 'true if no argument' do
+      subject.trim
+      expect(subject.options[:trim]).to be true
     end
   end
 

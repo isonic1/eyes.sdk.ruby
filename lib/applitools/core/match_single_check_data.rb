@@ -3,7 +3,7 @@ module Applitools
   class MatchSingleCheckData < MatchWindowData
     class << self
       def default_data
-        super.merge!({
+        super.merge!(
           'startInfo' => {
             'agentId' => nil,
             'appIdOrName' => nil,
@@ -17,7 +17,7 @@ module Applitools
             'parentBranchName' => nil,
             'properties' => nil
           }
-        })
+        )
       end
     end
 
