@@ -68,15 +68,15 @@ module Applitools::Images
 
     def floating(*args)
       value = case args.first
-                when Applitools::FloatingRegion
-                  proc { args.first }
-                when Applitools::Region
-                  proc do
-                    region = args.shift
-                    Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
-                  end
-                else
-                  self.floating_regions = []
+              when Applitools::FloatingRegion
+                proc { args.first }
+              when Applitools::Region
+                proc do
+                  region = args.shift
+                  Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
+                end
+              else
+                self.floating_regions = []
               end
       floating_regions << value
       self

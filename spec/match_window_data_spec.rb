@@ -228,7 +228,9 @@ RSpec.describe Applitools::MatchWindowData do
             'SplitBottomHeight',
             'SplitTopHeight',
             'Ignore',
-            'Floating'
+            'Floating',
+            'remainder',
+            'scale'
           )
         end
 
@@ -241,6 +243,8 @@ RSpec.describe Applitools::MatchWindowData do
           expect(subject['Ignore']).to be_empty
           expect(subject['Floating']).to be_kind_of Array
           expect(subject['Floating']).to be_empty
+          expect(subject['remainder']).to be_zero
+          expect(subject['scale']).to be_zero
         end
 
         describe '[\'Exact\']' do
