@@ -1,5 +1,6 @@
 module Applitools::Images
   class Target
+    include Applitools::FluentInterface
     class << self
       def path(path)
         raise Applitools::EyesIllegalArgument unless File.exist?(path)
@@ -88,16 +89,6 @@ module Applitools::Images
       else
         self.region_to_check = nil
       end
-      self
-    end
-
-    def trim(value = true)
-      options[:trim] = value ? true : false
-      self
-    end
-
-    def timeout(value = nil)
-      options[:timeout] = value ? value : nil
       self
     end
   end

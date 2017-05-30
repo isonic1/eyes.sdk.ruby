@@ -1,6 +1,7 @@
 module Applitools
   module Selenium
     class Target
+      include Applitools::FluentInterface
       class << self
         def frame(element)
           new.frame(element)
@@ -51,11 +52,6 @@ module Applitools
         self
       end
 
-      def ignore_caret(value = false)
-        options[:ignore_caret] = value ? true : false
-        self
-      end
-
       def floating(*args)
         value = case args.first
                 when Applitools::FloatingRegion
@@ -78,11 +74,6 @@ module Applitools
 
       def fully
         options[:stitch_content] = true
-        self
-      end
-
-      def timeout(value)
-        options[:timeout] = value.to_i
         self
       end
 
@@ -113,22 +104,6 @@ module Applitools
         options[:timeout] = nil
         reset_ignore
         reset_floating
-        self
-      end
-
-      def trim
-        options[:trim] = true
-        self
-      end
-
-      def ignore_mismatch(value)
-        options[:ignore_mismatch] = value ? true : false
-        self
-      end
-
-      def match_level(value)
-        raise Applitools::EyesError unless Applitools::MATCH_LEVEL.keys.include? value
-        options[:match_level] = Applitools::MATCH_LEVEL[value]
         self
       end
 
