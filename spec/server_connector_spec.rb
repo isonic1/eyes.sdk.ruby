@@ -21,7 +21,7 @@ RSpec.shared_examples 'implements long queries flow' do |method|
     subject.send(method, 'http://google.com', {}, 0)
   end
 
-  it 'sets \'Eyes-Ecpect\' header' do
+  it 'sets \'Eyes-Excpect\' header' do
     expect(subject).to receive(:request) do |_url, _method, options|
       expect(options[:headers]).to include('Eyes-Expect')
       expect(options[:headers]['Eyes-Expect']).to eql('202+location')
@@ -57,6 +57,26 @@ RSpec.shared_examples 'implements long queries flow' do |method|
       end
     end
 
+    it 'sets \'Eyes-Date\' header' do
+      allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
+      stubs.send(http_method, '/?apiKey') do |_env|
+        [202, { location: 'http://domain.com/pull' }, 'task is being processed']
+      end
+      expect(subject).to receive(:request).once.ordered.with('doesn\'t_matter', any_args).and_call_original
+
+      expect(subject).to receive(:request) do |_url, _method, options|
+        expect(options[:headers]).to include('Eyes-Date')
+        expect(DateTime.parse(options[:headers]['Eyes-Date']).strftime('%a, %d %b %Y %H:%M:%S GMT')).to(
+          eql(options[:headers]['Eyes-Date'])
+        )
+      end.and_return(a_strange_result)
+      begin
+        subject.send(method, 'doesn\'t_matter', {}, 0)
+      rescue Applitools::EyesError
+        true
+      end
+    end
+
     describe 'pull' do
       before do
         allow(Faraday::Connection).to receive(:new).with(any_args).and_return connection
@@ -67,12 +87,13 @@ RSpec.shared_examples 'implements long queries flow' do |method|
       end
 
       it 'raises an error on 410 response' do
-        expect(subject).to receive(:request).once.ordered.with('http://domain.com/pull', :get).and_return(a_gone_result)
+        expect(subject).to receive(:request)
+          .once.ordered.with('http://domain.com/pull', :get, any_args).and_return(a_gone_result)
         expect { subject.send(method, 'doesn\'t_matter', {}, 0) }.to raise_error Applitools::EyesError
       end
       it 'performs \'delete\' request on 201' do
         expect(subject).to(
-          receive(:request).once.ordered.with('http://domain.com/pull', :get).and_return(a_completed_result)
+          receive(:request).once.ordered.with('http://domain.com/pull', :get, any_args).and_return(a_completed_result)
         )
         expect(subject).to(
           receive(:request).once.ordered.with('http://domain.com/pull', :delete).and_return(a_200_result)
@@ -82,7 +103,7 @@ RSpec.shared_examples 'implements long queries flow' do |method|
       end
       it 'raises an exception if flow fails' do
         expect(subject).to(
-          receive(:request).once.ordered.with('http://domain.com/pull', :get).and_return(a_strange_result)
+          receive(:request).once.ordered.with('http://domain.com/pull', :get, any_args).and_return(a_strange_result)
         )
         expect { subject.send(method, 'doesn\'t_matter', {}, 0) }.to raise_error Applitools::EyesError
       end
