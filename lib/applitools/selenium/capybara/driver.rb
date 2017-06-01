@@ -24,8 +24,8 @@ if defined? Capybara::Selenium::Driver
   end
 end
 
-if defined? Capybara::Session
-  Capybara::Session.class_eval do
+if defined? ::Capybara::Session
+  ::Capybara::Session.class_eval do
     def driver_for_eyes(eyes)
       driver.driver_for_eyes eyes
     end

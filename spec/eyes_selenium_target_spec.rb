@@ -3,12 +3,56 @@ RSpec.describe Applitools::Selenium::Target do
   it_behaves_like 'has chain methods',
     fully: nil,
     ignore_caret: [false],
-    floating: [Applitools::FloatingRegion.new(0, 0, 0, 0, 0, 0, 0, 0)]
+    floating: [Applitools::FloatingRegion.new(0, 0, 0, 0, 0, 0, 0, 0)],
+    timeout: [10],
+    ignore_mismatch: [false],
+    match_level: [:none],
+    ignore: [Applitools::Region::EMPTY]
+
+  context 'timeout' do
+    it 'sets options[:timeout]' do
+      subject.timeout(100_500)
+      expect(subject.options[:timeout]).to eq 100_500
+    end
+
+    it 'converts value using to_i method' do
+      integer_value = double(100_500)
+      expect(integer_value).to receive(:to_i).and_return(0)
+      subject.timeout(integer_value)
+    end
+  end
+
+  context 'ignore mismatch' do
+    it 'sets options[:ignore_mismatch]' do
+      subject.ignore_mismatch(true)
+      expect(subject.options[:ignore_mismatch]).to be true
+      subject.ignore_mismatch(false)
+      expect(subject.options[:ignore_mismatch]).to be false
+    end
+
+    it 'uses default value' do
+      expect(subject.options[:ignore_mismatch]).to be false
+    end
+  end
+
+  context 'match level' do
+    it 'sets options[:match_level]' do
+      subject.match_level(:strict)
+      expect(subject.options[:match_level]).to eq Applitools::MATCH_LEVEL[:strict]
+      expect { subject.match_level('Strict') }.to raise_error Applitools::EyesError
+    end
+    it 'raises an exception on wrong value' do
+      expect { subject.match_level('unknown') }.to raise_error Applitools::EyesError
+      expect { subject.match_level(:none) }.to_not raise_error
+    end
+  end
 
   context 'ignore_caret' do
     it 'sets ignore_caret option' do
       subject.ignore_caret(true)
       expect(subject.options[:ignore_caret]).to be true
+      subject.ignore_caret(false)
+      expect(subject.options[:ignore_caret]).to be false
     end
 
     it 'sets default value when called without args' do
@@ -18,6 +62,23 @@ RSpec.describe Applitools::Selenium::Target do
 
     it 'false by default' do
       expect(subject.options[:ignore_caret]).to be false
+    end
+  end
+
+  describe ':trim' do
+    it 'false by default' do
+      expect(subject.options[:trim]).to be false
+    end
+    it 'resets if nil is passed' do
+      subject.trim(nil)
+    end
+    it 'sets only true/false values' do
+      subject.trim(0)
+      expect(subject.options[:trim]).to be true
+    end
+    it 'true if no argument' do
+      subject.trim
+      expect(subject.options[:trim]).to be true
     end
   end
 

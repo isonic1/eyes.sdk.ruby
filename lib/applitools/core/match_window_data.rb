@@ -17,7 +17,7 @@ module Applitools
             'Name' => nil,
             'UserInputs' => [],
             'ImageMatchSettings' => {
-              'MatchLevel' => 'None',
+              'MatchLevel' => 'Strict',
               'SplitTopHeight' => 0,
               'SplitBottomHeight' => 0,
               'IgnoreCaret' => false,
@@ -145,21 +145,26 @@ module Applitools
     def read_target(target, driver)
       # options
       target_options_to_read.each do |field|
-        send("#{field}=", target.options[field.to_sym])
+        a_value = target.options[field.to_sym]
+        send("#{field}=", a_value) unless a_value.nil?
       end
       # ignored regions
-      target.ignored_regions.each do |r|
-        case r
-        when Proc
-          region = r.call(driver)
-          @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
-          @need_convert_ignored_regions_coordinates = true
-        when Applitools::Region
-          @ignored_regions << r
-          @need_convert_ignored_regions_coordinates = true
+      if target.respond_to? :ignored_regions
+        target.ignored_regions.each do |r|
+          case r
+          when Proc
+            region = r.call(driver)
+            @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
+            @need_convert_ignored_regions_coordinates = true
+          when Applitools::Region
+            @ignored_regions << r
+            @need_convert_ignored_regions_coordinates = true
+          end
         end
       end
+
       # floating regions
+      return unless target.respond_to? :floating_regions
       target.floating_regions.each do |r|
         case r
         when Proc
@@ -176,7 +181,7 @@ module Applitools
     end
 
     def target_options_to_read
-      %w(trim ignore_caret)
+      %w(trim ignore_caret match_level ignore_mismatch)
     end
 
     private :target_options_to_read

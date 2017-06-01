@@ -262,7 +262,6 @@ module Applitools::Selenium
         begin
           match_data = Applitools::MatchWindowData.new
           match_data.tag = name
-          match_data.match_level = default_match_settings[:match_level]
           match_data.read_target(target, driver)
           eyes_element = target.region_to_check.call(driver)
           region_visibility_strategy.move_to_region original_position_provider,
@@ -275,13 +274,13 @@ module Applitools::Selenium
 
           elsif eyes_element.is_a? Applitools::Selenium::Element
             # check_element
-            region_provider = Applitools::Selenium::RegionProvider.new(
+            region_provider = Applitools::RegionProvider.new(
               region_for_element(eyes_element),
               target.coordinate_type
             )
           else
             # check_window
-            region_provider = Applitools::Selenium::RegionProvider.new(
+            region_provider = Applitools::RegionProvider.new(
               region_for_element(eyes_element),
               target.coordinate_type
             )
@@ -299,7 +298,7 @@ module Applitools::Selenium
 
             self.region_to_check = region_provider
 
-            region_provider = Applitools::Selenium::RegionProvider.new(
+            region_provider = Applitools::RegionProvider.new(
               Applitools::Region::EMPTY,
               nil
             )

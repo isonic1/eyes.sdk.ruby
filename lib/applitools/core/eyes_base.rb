@@ -68,10 +68,12 @@ module Applitools
         end
       end
 
-      @default_match_settings = { match_level: Applitools::MATCH_LEVEL[:strict],
-                                  exact: nil,
-                                  scale: server_scale,
-                                  remainder: server_remainder}
+      @default_match_settings = {
+        match_level: Applitools::MATCH_LEVEL[:strict],
+        exact: nil,
+        scale: server_scale,
+        remainder: server_remainder
+      }
     end
 
     def batch
@@ -103,18 +105,14 @@ module Applitools
       @default_match_settings[:scale] = ratio
     end
 
-    def server_scale
-      @server_scale
-    end
+    attr_reader :server_scale
 
     def server_remainder=(ratio)
       @server_remainder = ratio
       @default_match_settings[:remainder] = ratio
     end
 
-    def server_remainder
-      @server_remainder
-    end
+    attr_reader :server_remainder
 
     def disabled=(value)
       @disabled = Applitools::Utils.boolean_value value

@@ -1,13 +1,10 @@
 require 'eyes_core'
 
-module Applitools::Selenium
-  # @!visibility private
-  class << self
-    # @!visibility private
-    def require_dir(dir)
-      Dir[File.join(File.dirname(File.expand_path(__FILE__)), 'applitools', dir, '*.rb')].sort.each do |f|
-        require f
-      end
+module Applitools
+  module Selenium
+    extend Applitools::RequireUtils
+    def self.load_dir
+      File.dirname(File.expand_path(__FILE__))
     end
   end
 end
