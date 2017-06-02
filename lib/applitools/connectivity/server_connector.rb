@@ -179,11 +179,10 @@ module Applitools::Connectivity
         loop do
           Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
           sleep delay
-          res = request(
-            second_step_url,
-            :get,
-            headers: { 'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT') }
-          )
+          second_step_options = { headers: {
+              'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
+          } }
+          res = request(second_step_url, :get, second_step_options)
           break unless res.status == HTTP_STATUS_CODES[:ok]
         end
       end
