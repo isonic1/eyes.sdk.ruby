@@ -6,5 +6,9 @@ module Applitools
       @region = region
       @coordinate_type = coordinate_type
     end
+
+    def to_s
+      "Applitools::RegionProvider(#{region}, #{coordinate_type})"
+    end
   end
 end

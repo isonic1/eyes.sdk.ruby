@@ -230,6 +230,8 @@ module Applitools
         )
       end
 
+      match_window_data.user_inputs = @user_inputs
+
       logger.info 'Calling match_window...'
       result = @match_window_task.match_window(
         match_window_data,

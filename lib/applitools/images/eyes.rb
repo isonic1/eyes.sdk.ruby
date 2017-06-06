@@ -150,37 +150,10 @@ module Applitools::Images
     # @example Ignore mismatch
     #   eyes.check_image(image: my_image, tag: 'My Test', ignore_mismatch: true)
     def check_image(options)
-      options = { tag: nil, ignore_mismatch: false }.merge options
-      match_data = Applitools::MatchWindowData.new
-      match_data.tag = options[:tag]
-      match_data.ignore_mismatch = options[:ignore_mismatch]
-      match_data.match_level = default_match_settings[:match_level]
-
-      if disabled?
-        logger.info "check_image(image, #{options[:tag]}, #{options[:ignore_mismatch]}): Ignored"
-        return false
-      end
-
-      image = get_image_from_options options
-
-      logger.info "check_image(image, #{options[:tag]}, #{options[:ignore_mismatch]})"
-      if image.is_a? Applitools::Screenshot
-        self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
-        self.screenshot = EyesImagesScreenshot.new image
-      end
-      self.title = options[:tag] || ''
-      region_provider = Object.new
-      region_provider.instance_eval do
-        define_singleton_method :region do
-          Applitools::Region::EMPTY
-        end
-
-        define_singleton_method :coordinate_type do
-          nil
-        end
-      end
-      mr = check_window_base region_provider, Applitools::EyesBase::USE_DEFAULT_TIMEOUT, match_data
-      mr.as_expected?
+      options = { tag: '', ignore_mismatch: false }.merge options
+      image = get_image_from_options(options)
+      target = Applitools::Images::Target.any(image).ignore_mismatch(options[:ignore_mismatch])
+      check(options[:tag], target)
     end
 
     # Performs visual validation for the current image.
@@ -200,40 +173,12 @@ module Applitools::Images
     #   eyes.check_region(image_bytes: string_represents_image, tag: 'My Test', region: my_region)
     def check_region(options)
       options = { tag: nil, ignore_mismatch: false }.merge options
-      match_data = Applitools::MatchWindowData.new
-      match_data.tag = options[:tag]
-      match_data.ignore_mismatch = options[:ignore_mismatch]
-      match_data.match_level = default_match_settings[:match_level]
-
-      if disabled?
-        logger.info "check_region(image, #{options[:tag]}, #{options[:ignore_mismatch]}): Ignored"
-        return false
-      end
-
       Applitools::ArgumentGuard.not_nil options[:region], 'options[:region] can\'t be nil!'
       image = get_image_from_options options
-
+      target = Applitools::Images::Target.any(image).ignore_mismatch(options[:ignore_mismatch])
+      target.region(options[:region])
       logger.info "check_region(image, #{options[:region]}, #{options[:tag]}, #{options[:ignore_mismatch]})"
-
-      if image.is_a? Applitools::Screenshot
-        self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
-        self.screenshot = EyesImagesScreenshot.new image
-      end
-      self.title = options[:tag] || ''
-
-      region_provider = Object.new
-      region_provider.instance_eval do
-        define_singleton_method :region do
-          options[:region]
-        end
-        define_singleton_method :coordinate_type do
-          Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
-        end
-      end
-      # mr = check_window_base region_provider, options[:tag], options[:ignore_mismatch],
-      #   Applitools::EyesBase::USE_DEFAULT_TIMEOUT, options.merge(match_level: default_match_settings[:match_level])
-      mr = check_window_base region_provider, Applitools::EyesBase::USE_DEFAULT_TIMEOUT, match_data
-      mr.as_expected?
+      check(options[:tag], target)
     end
 
     # Adds a mouse trigger

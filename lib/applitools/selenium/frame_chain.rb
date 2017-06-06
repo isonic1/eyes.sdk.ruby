@@ -66,6 +66,10 @@ module Applitools::Selenium
       @frames.last.size
     end
 
+    def to_s
+      @frames.map(&:to_s).join(', ')
+    end
+
     class NoFramesException < RuntimeError; end
   end
 end

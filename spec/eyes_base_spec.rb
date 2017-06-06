@@ -389,5 +389,6 @@ describe Applitools::EyesBase do
 
   context 'match_window_base' do
     it_behaves_like 'can be disabled', :check_window_base, [nil, nil, nil]
+    it 'passes user inputs to match_window_data'
   end
 end
