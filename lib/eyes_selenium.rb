@@ -1,6 +1,12 @@
 require 'eyes_core'
 
 module Applitools
+  # @!visibility private
+  STITCH_MODE = {
+      :scroll => :SCROLL,
+      :css => :CSS
+  }.freeze
+
   module Selenium
     extend Applitools::RequireUtils
     def self.load_dir

@@ -11,12 +11,6 @@ module Applitools::Selenium
 
     USE_DEFAULT_MATCH_TIMEOUT = -1
 
-    # @!visibility private
-    STICH_MODE = {
-      :scroll => :SCROLL,
-      :css => :CSS
-    }.freeze
-
     extend Forwardable
     # @!visibility public
 
@@ -99,7 +93,7 @@ module Applitools::Selenium
       self.dont_get_title = false
       self.hide_scrollbars = false
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
-      self.stitch_mode = STICH_MODE[:scroll]
+      self.stitch_mode = Applitools::STITCH_MODE[:scroll]
       self.wait_before_screenshots = DEFAULT_WAIT_BEFORE_SCREENSHOTS
       self.region_visibility_strategy = MoveToRegionVisibilityStrategy.new
       self.debug_screenshot = false
@@ -170,13 +164,13 @@ module Applitools::Selenium
     # @option value [Symbol] :scroll Scroll to perform stitching.
     # @return [Symbol] The type of stitching.
     def stitch_mode=(value)
-      @stitch_mode = value.to_s.upcase == STICH_MODE[:css].to_s ? STICH_MODE[:css] : STICH_MODE[:scroll]
+      @stitch_mode = value.to_s.upcase == Applitools::STITCH_MODE[:css].to_s ? Applitools::STITCH_MODE[:css] : Applitools::STITCH_MODE[:scroll]
       unless driver.nil?
         self.position_provider = self.class.position_provider(
           stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
         )
       end
-      if stitch_mode == STICH_MODE[:css]
+      if stitch_mode == Applitools::STITCH_MODE[:css]
         @css_transition_original_hide_scrollbars = hide_scrollbars
         self.hide_scrollbars = true
       else
@@ -511,7 +505,7 @@ module Applitools::Selenium
           logger.info 'Check frame/element requested'
           algo = Applitools::Selenium::FullPageCaptureAlgorithm.new
 
-          entire_frame_or_element = algo.get_stiched_region(
+          entire_frame_or_element = algo.get_stitched_region(
             image_provider: image_provider,
             region_to_check: region_to_check,
             origin_provider: position_provider,
@@ -542,7 +536,7 @@ module Applitools::Selenium
               nil
             end
           end
-          full_page_image = algo.get_stiched_region image_provider: image_provider,
+          full_page_image = algo.get_stitched_region image_provider: image_provider,
                                   region_to_check: region_provider,
                                   origin_provider: Applitools::Selenium::ScrollPositionProvider.new(driver),
                                   position_provider: position_provider,
