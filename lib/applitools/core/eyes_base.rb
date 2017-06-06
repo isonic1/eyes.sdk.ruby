@@ -137,7 +137,7 @@ module Applitools
     def abort_if_not_closed
       if disabled?
         logger.info "#{__method__} Ignored"
-        return
+        return false
       end
 
       self.open = false
@@ -146,7 +146,7 @@ module Applitools
 
       if running_session.nil?
         logger.info 'Closed'
-        return
+        return false
       end
 
       logger.info 'Aborting server session...'
@@ -163,7 +163,7 @@ module Applitools
     def open_base(options)
       if disabled?
         logger.info "#{__method__} Ignored"
-        return
+        return false
       end
 
       Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
@@ -230,7 +230,7 @@ module Applitools
         )
       end
 
-      match_window_data.user_inputs = @user_inputs
+      match_window_data.user_inputs = user_inputs
 
       logger.info 'Calling match_window...'
       result = @match_window_task.match_window(
@@ -351,7 +351,7 @@ module Applitools
     def close(throw_exception = true)
       if disabled?
         logger.info "#{__method__} Ignored"
-        return
+        return false
       end
 
       logger.info "close(#{throw_exception})"

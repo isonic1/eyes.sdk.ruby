@@ -89,10 +89,8 @@ module Applitools
 
     def user_inputs=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
-      current_data['UserInputs'] += value.select {|i| i.respond_to? :to_hash}.select {|i| self.class.valid_input(i)}.map(&:to_hash)
-      # value.each do |i|
-      #   current_data['UserInputs'] << i if self.class.valid_input(i)
-      # end
+      current_data['UserInputs'] += value.select { |i| i.respond_to? :to_hash }
+                                         .select { |i| self.class.valid_input(i) }.map(&:to_hash)
       current_data['Options']['UserInputs'] = current_data['UserInputs']
     end
 

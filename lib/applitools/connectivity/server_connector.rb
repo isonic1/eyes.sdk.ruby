@@ -56,7 +56,7 @@ module Applitools::Connectivity
       json_data = Oj.dump(Applitools::Utils.camelcase_hash_keys(data.to_hash)).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       Applitools::EyesLogger.debug 'Sending match data...'
-      #Applitools::EyesLogger.debug json_data
+      # Applitools::EyesLogger.debug json_data
       res = long_post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       Applitools::MatchResult.new Oj.load(res.body)

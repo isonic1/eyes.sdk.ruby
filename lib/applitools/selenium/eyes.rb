@@ -18,7 +18,7 @@ module Applitools::Selenium
       def eyes_driver(driver, eyes = nil)
         if driver.respond_to? :driver_for_eyes
           driver.driver_for_eyes eyes
-        elsif  defined?(::Capybara::Poltergeist) && (driver.is_a? ::Capybara::Poltergeist::Driver)
+        elsif defined?(::Capybara::Poltergeist) && (driver.is_a? ::Capybara::Poltergeist::Driver)
           Applitools::Poltergeist::Driver.new(eyes, driver: driver)
         else
           unless driver.is_a?(Applitools::Selenium::Driver)
@@ -164,7 +164,11 @@ module Applitools::Selenium
     # @option value [Symbol] :scroll Scroll to perform stitching.
     # @return [Symbol] The type of stitching.
     def stitch_mode=(value)
-      @stitch_mode = value.to_s.upcase == Applitools::STITCH_MODE[:css].to_s ? Applitools::STITCH_MODE[:css] : Applitools::STITCH_MODE[:scroll]
+      @stitch_mode = if value.to_s.upcase == Applitools::STITCH_MODE[:css].to_s
+                       Applitools::STITCH_MODE[:css]
+                     else
+                       Applitools::STITCH_MODE[:scroll]
+                     end
       unless driver.nil?
         self.position_provider = self.class.position_provider(
           stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
@@ -244,10 +248,10 @@ module Applitools::Selenium
 
           elsif eyes_element.is_a? Applitools::Selenium::Element
             # check_element
-            logger.info "check_region(#{Applitools::Region.from_location_size(eyes_element.location, eyes_element.size)})"
+            logger.info 'check_region(' \
+              "#{Applitools::Region.from_location_size(eyes_element.location, eyes_element.size)})"
             region_provider = Applitools::RegionProvider.new(
-              region_for_element(eyes_element),
-              target.coordinate_type
+              region_for_element(eyes_element), target.coordinate_type
             )
           else
             # check_window

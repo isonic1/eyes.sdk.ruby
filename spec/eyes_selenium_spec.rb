@@ -23,23 +23,4 @@ RSpec.describe Applitools::Selenium::Eyes do
   end
 
   let(:driver) { Applitools::Selenium::Driver.new(subject, driver: original_driver) }
-  describe ':check_window' do
-    it_should_behave_like 'can be disabled', :check_window, []
-  end
-
-  describe ':check_region' do
-    it_should_behave_like 'can be disabled', :check_region, [[:id, 'id']]
-  end
-
-  describe ':check_frame' do
-    it_should_behave_like 'can be disabled', :check_frame, [{index: 0}]
-  end
-
-  describe ':check_region_in_frame' do
-    it_should_behave_like 'can be disabled', :check_region_in_frame, [{index: 0, by: [:id, 'id']}]
-  end
-
-  describe ':check' do
-    it_should_behave_like 'can be disabled', :check, ['name', Applitools::Selenium::Target.new]
-  end
 end

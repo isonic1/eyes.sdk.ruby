@@ -3,8 +3,8 @@ require 'eyes_core'
 module Applitools
   # @!visibility private
   STITCH_MODE = {
-      :scroll => :SCROLL,
-      :css => :CSS
+    :scroll => :SCROLL,
+    :css => :CSS
   }.freeze
 
   module Selenium
