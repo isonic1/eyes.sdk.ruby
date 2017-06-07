@@ -11,6 +11,8 @@ RSpec.describe Applitools::MatchWindowData do
     end
   end
 
+  let!(:value) { double }
+
   it_should_behave_like 'responds to method', [
     :app_output,
     :app_output=,
@@ -22,9 +24,65 @@ RSpec.describe Applitools::MatchWindowData do
     :options=,
     :ignore_mismatch,
     :ignore_mismatch=,
+    :exact,
+    :exact=,
+    :remainder,
+    :remainder=,
+    :scale,
+    :scale=,
     :to_s,
     :to_hash
   ]
+
+  context 'exact' do
+    it 'reads options=> match_window_settings=>exact key' do
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Exact'].object_id).to eq subject.exact.object_id
+    end
+  end
+  
+  context 'exact=' do
+    it 'accepts hash or nil' do 
+      expect { subject.exact = {} }.to_not raise_error
+      expect { subject.exact = nil }.to_not raise_error
+      expect { subject.exact = 'String' }.to raise_error Applitools::EyesError
+    end
+    it 'iterates over keys' do
+      value = {}
+      current_exact = subject.send('current_data')['Options']['ImageMatchSettings']['Exact']
+      %w(MinDiffIntensity MinDiffWidth MinDiffHeight MatchThreshold).each do |k|
+        expect(value).to receive('[]').with(k)
+        expect(current_exact).to receive('[]=').with(k, any_args)
+      end
+      subject.exact = value
+    end
+    it 'sets options=>match_window_settings=>exact key' do
+      expect(subject.send('current_data')['Options']['ImageMatchSettings']).to receive('[]=').with('Exact', any_args)
+      subject.exact = {}
+    end
+  end
+
+  context 'remainder' do
+    it 'reads options=>match_window_settings=>remainder key' do
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['remainder'].object_id).to eq subject.remainder.object_id
+    end
+  end
+  context 'remainder='do
+    it 'sets options=>match_window_settings=>remainder key' do
+      subject.remainder = value
+      expect(subject.remainder.object_id).to eq value.object_id
+    end
+  end
+  context 'scale' do
+    it 'reads options=>match_window_settings=>scale key' do
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['scale'].object_id).to eq subject.scale.object_id
+    end
+  end
+  context 'scale=' do
+    it 'sets options=>match_window_settings=>scale key' do
+      subject.scale = value
+      expect(subject.scale.object_id).to eq value.object_id
+    end
+  end
 
   context 'results' do
     it 'returns data as hash' do

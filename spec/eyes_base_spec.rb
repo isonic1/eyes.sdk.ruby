@@ -55,7 +55,8 @@ describe Applitools::EyesBase do
     :clear_user_inputs,
     :user_inputs,
     :start_session,
-    :base_agent_id
+    :base_agent_id,
+    :set_default_settings
     # :close_response_time
   ]
 
@@ -82,6 +83,45 @@ describe Applitools::EyesBase do
     expect(subject.send(:save_new_tests)).to eq true
     expect(subject.send(:save_failed_tests)).to eq false
     expect(subject.send(:match_timeout)).to eq Applitools::EyesBase::DEFAULT_MATCH_TIMEOUT
+  end
+
+  context ':set_default_settings' do
+    let(:data) { Applitools::MatchWindowData.new }
+    it 'iterates over keys' do
+      %w(match_level exact scale remainder).each do |k|
+        expect(subject.default_match_settings).to receive('[]').with(k.to_sym)
+        expect_any_instance_of(Applitools::MatchWindowData).to receive("#{k}=")
+      end
+      subject.send('set_default_settings', data)
+    end
+  end
+
+  context ':default_match_settings' do
+    it 'returns Hash' do
+      expect(subject.default_match_settings).to be_a Hash
+    end
+    it 'has default value' do
+      expect(subject.default_match_settings.keys).to contain_exactly(*%w(match_level exact scale remainder).map(&:to_sym))
+      expect(subject.server_scale).to eq 0
+      expect(subject.server_remainder).to eq 0
+      expect(subject.exact).to be nil
+      expect(subject.match_level).to eq Applitools::MATCH_LEVEL[:strict]
+    end
+  end
+
+  context ':default_match_settings=' do
+    it 'accepts hash as an argument' do
+      expect { subject.default_match_settings = {} }.to_not raise_error
+      expect { subject.default_match_settings = 'invalid' }.to raise_error Applitools::EyesError
+    end
+    it 'raises an error when value contains extra keys' do
+      expect{ subject.default_match_settings = { extra_key: 'none' } }.to raise_error Applitools::EyesError
+      expect{ subject.default_match_settings = { match_level: 'none' } }.to_not raise_error
+    end
+    it 'merges passed value to default_match_settings' do
+      expect(subject.default_match_settings).to receive(:merge!)
+      subject.default_match_settings = {}
+    end
   end
 
   context 'add_property' do
