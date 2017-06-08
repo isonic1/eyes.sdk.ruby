@@ -105,6 +105,8 @@ RSpec.describe Applitools::Selenium::Target do
       double.tap do |b|
         allow(b).to receive(:element_location).and_return(Applitools::Location.new(10, 10))
         allow(b).to receive(:element_size).and_return(Applitools::RectangleSize.new(10, 10))
+        allow(b).to receive(:getElementLocation).and_return(Applitools::Location.new(10, 10))
+        allow(b).to receive(:getElementSize).and_return(Applitools::RectangleSize.new(10, 10))
       end
     end
 
