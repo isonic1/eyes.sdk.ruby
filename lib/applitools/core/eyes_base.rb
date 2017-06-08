@@ -84,7 +84,11 @@ module Applitools
     def default_match_settings=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Hash
       extra_keys = value.keys - match_level_keys
-      raise Applitools::EyesIllegalArgument.new("Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}") unless extra_keys.empty?
+      unless extra_keys.empty?
+        raise Applitools::EyesIllegalArgument.new(
+          "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
+        )
+      end
       default_match_settings.merge! value
     end
 
@@ -412,7 +416,7 @@ module Applitools
       %w(match_level exact scale remainder).map(&:to_sym)
     end
 
-    def set_default_settings(match_data)
+    def update_default_settings(match_data)
       match_level_keys.each do |k|
         match_data.send("#{k}=", default_match_settings[k])
       end

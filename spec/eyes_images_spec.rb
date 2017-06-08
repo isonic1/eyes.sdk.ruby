@@ -26,7 +26,8 @@ RSpec.describe Applitools::Images::Eyes do
     before do
       subject.api_key = 'API_KEY_FOR_TESTS'
       subject.open(app_name: 'app_name', test_name: 'test_name')
-      allow_any_instance_of(Applitools::MatchWindowTask).to receive(:match_window).and_return(Applitools::MatchResults.new)
+      allow_any_instance_of(Applitools::MatchWindowTask).to receive(:match_window)
+        .and_return(Applitools::MatchResults.new)
     end
 
     it 'performs \':read_target\' for match_data' do
@@ -35,11 +36,13 @@ RSpec.describe Applitools::Images::Eyes do
     end
 
     it 'sets default values before \'reading\' target' do
-      expect(subject).to receive(:set_default_settings).with(Applitools::MatchWindowData).and_raise Applitools::EyesError
+      expect(subject).to receive(:update_default_settings)
+        .with(Applitools::MatchWindowData).and_raise Applitools::EyesError
       expect_any_instance_of(Applitools::MatchWindowData).to_not receive(:read_target)
       begin
         subject.check('', target)
       rescue Applitools::EyesError
+        subject
       end
     end
   end
@@ -48,7 +51,8 @@ RSpec.describe Applitools::Images::Eyes do
     before do
       subject.api_key = 'API_KEY_FOR_TESTS'
       subject.open(app_name: 'app_name', test_name: 'test_name')
-      allow_any_instance_of(Applitools::MatchSingleTask).to receive(:match_window).and_return(Applitools::TestResults.new)
+      allow_any_instance_of(Applitools::MatchSingleTask).to receive(:match_window)
+        .and_return(Applitools::TestResults.new)
     end
 
     it 'performs \':read_target\' for match_data' do
@@ -57,13 +61,14 @@ RSpec.describe Applitools::Images::Eyes do
     end
 
     it 'sets default values before \'reading\' target' do
-      expect(subject).to receive(:set_default_settings).with(Applitools::MatchWindowData).and_raise Applitools::EyesError
+      expect(subject).to receive(:update_default_settings)
+        .with(Applitools::MatchWindowData).and_raise Applitools::EyesError
       expect_any_instance_of(Applitools::MatchWindowData).to_not receive(:read_target)
       begin
         subject.check_single('', target)
       rescue Applitools::EyesError
+        subject
       end
     end
   end
-
 end

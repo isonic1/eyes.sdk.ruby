@@ -36,12 +36,13 @@ RSpec.describe Applitools::MatchWindowData do
 
   context 'exact' do
     it 'reads options=> match_window_settings=>exact key' do
-      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Exact'].object_id).to eq subject.exact.object_id
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['Exact'].object_id)
+        .to eq subject.exact.object_id
     end
   end
-  
+
   context 'exact=' do
-    it 'accepts hash or nil' do 
+    it 'accepts hash or nil' do
       expect { subject.exact = {} }.to_not raise_error
       expect { subject.exact = nil }.to_not raise_error
       expect { subject.exact = 'String' }.to raise_error Applitools::EyesError
@@ -63,10 +64,11 @@ RSpec.describe Applitools::MatchWindowData do
 
   context 'remainder' do
     it 'reads options=>match_window_settings=>remainder key' do
-      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['remainder'].object_id).to eq subject.remainder.object_id
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['remainder'].object_id)
+        .to eq subject.remainder.object_id
     end
   end
-  context 'remainder='do
+  context 'remainder=' do
     it 'sets options=>match_window_settings=>remainder key' do
       subject.remainder = value
       expect(subject.remainder.object_id).to eq value.object_id
@@ -74,7 +76,8 @@ RSpec.describe Applitools::MatchWindowData do
   end
   context 'scale' do
     it 'reads options=>match_window_settings=>scale key' do
-      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['scale'].object_id).to eq subject.scale.object_id
+      expect(subject.send(:current_data)['Options']['ImageMatchSettings']['scale'].object_id)
+        .to eq subject.scale.object_id
     end
   end
   context 'scale=' do

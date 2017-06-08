@@ -103,8 +103,8 @@ RSpec.describe Applitools::Selenium::Target do
   context 'region methods' do
     let(:bridge) do
       double.tap do |b|
-        allow(b).to receive(:element_location).and_return(Applitools::Location.new(10,10))
-        allow(b).to receive(:element_size).and_return(Applitools::RectangleSize.new(10,10))
+        allow(b).to receive(:element_location).and_return(Applitools::Location.new(10, 10))
+        allow(b).to receive(:element_size).and_return(Applitools::RectangleSize.new(10, 10))
       end
     end
 
@@ -118,7 +118,7 @@ RSpec.describe Applitools::Selenium::Target do
           args.each do |a|
             expect(a).to be_a_one_of(String, Symbol)
           end
-          Applitools::Region.new(10,10,10,10)
+          Applitools::Region.new(10, 10, 10, 10)
         end
       end
     end

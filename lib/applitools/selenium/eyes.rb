@@ -234,7 +234,7 @@ module Applitools::Selenium
         begin
           match_data = Applitools::MatchWindowData.new
           match_data.tag = name
-          set_default_settings(match_data)
+          update_default_settings(match_data)
           match_data.read_target(target, driver)
           eyes_element = target.region_to_check.call(driver)
           region_visibility_strategy.move_to_region original_position_provider,

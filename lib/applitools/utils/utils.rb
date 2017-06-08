@@ -18,7 +18,7 @@ module Applitools::Utils
 
   def to_method_name(str)
     str = str.to_s if !str.is_a?(String) && str.respond_to?(:to_s)
-    underscore(str).gsub /\//, '__'
+    underscore(str).gsub(%r{\/}, '__')
   end
 
   def wrap(object)

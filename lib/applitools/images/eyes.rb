@@ -64,7 +64,7 @@ module Applitools::Images
 
       match_window_data = Applitools::MatchWindowData.new
       match_window_data.tag = name
-      set_default_settings(match_window_data)
+      update_default_settings(match_window_data)
       match_window_data.read_target(target, nil)
 
       image = target.image
@@ -86,7 +86,7 @@ module Applitools::Images
 
       match_window_data = Applitools::MatchSingleCheckData.new
       match_window_data.tag = name
-      set_default_settings(match_window_data)
+      update_default_settings(match_window_data)
       match_window_data.read_target(target, nil)
 
       image = target.image
