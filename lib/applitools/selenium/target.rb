@@ -38,9 +38,7 @@ module Applitools
           reset_ignore
         else
           ignored_regions << case args.first
-                             when Applitools::Selenium::Element
-                               proc { args.first }
-                             when Applitools::Region
+                             when Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element
                                proc { args.first }
                              else
                                proc do |driver|
@@ -56,8 +54,8 @@ module Applitools
         value = case args.first
                 when Applitools::FloatingRegion
                   proc { args.first }
-                when Applitools::Selenium::Element
-                  proc { Applitools::FloatingRegion.for_element args.shift, *args }
+                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+                  proc { Applitools::FloatingRegion.any args.shift, *args }
                 when Applitools::Region
                   proc do
                     region = args.shift
@@ -65,7 +63,7 @@ module Applitools
                   end
                 else
                   proc do |driver|
-                    Applitools::FloatingRegion.for_element driver.find_element(args.shift, args.shift), *args
+                    Applitools::FloatingRegion.any driver.find_element(args.shift, args.shift), *args
                   end
                 end
         floating_regions << value
@@ -91,9 +89,7 @@ module Applitools
       # @return [Applitools::Selenium::Target] Self instance.
       def region(*args)
         self.region_to_check = case args.first
-                               when Applitools::Selenium::Element
-                                 proc { args.first }
-                               when Applitools::Region
+                               when Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element
                                  proc { args.first }
                                else
                                  proc do |driver|

@@ -1,4 +1,22 @@
 require 'spec_helper'
+
+RSpec::Matchers.define :be_a_one_of do |*expected|
+  match do |actual|
+    result = false
+    expected.each do |klass|
+      if actual.is_a?(klass)
+        result = true
+        break
+      end
+    end
+    result
+  end
+
+  failure_message do |actual|
+    "Expected that #{actual} would be kind of #{expected.join(' or ')}"
+  end
+end
+
 RSpec.describe Applitools::Selenium::Target do
   it_behaves_like 'has chain methods',
     fully: nil,
@@ -83,13 +101,32 @@ RSpec.describe Applitools::Selenium::Target do
   end
 
   context 'region methods' do
+    let(:bridge) do
+      double.tap do |b|
+        allow(b).to receive(:element_location).and_return(Applitools::Location.new(10,10))
+        allow(b).to receive(:element_size).and_return(Applitools::RectangleSize.new(10,10))
+      end
+    end
+
+    let(:selenium_webdriver_element) do
+      Selenium::WebDriver::Element.new(bridge, 'my_id')
+    end
+
     let(:driver) do
       double.tap do |d|
-        allow(d).to receive(:find_element)
+        allow(d).to receive(:find_element) do |*args|
+          args.each do |a|
+            expect(a).to be_a_one_of(String, Symbol)
+          end
+          Applitools::Region.new(10,10,10,10)
+        end
       end
     end
 
     context 'floating' do
+      # let(:selenium_webdriver_element) do
+      #   class_double('Selenium::WebDriver::Element')
+      # end
       before do
         expect(subject.instance_variable_get(:@floating_regions)).to receive(:<<) do |*args|
           expect(args.first).to be_a Proc
@@ -109,12 +146,18 @@ RSpec.describe Applitools::Selenium::Target do
       it 'accepts Applitools::FloatingRegion' do
         subject.floating(Applitools::FloatingRegion.new(0, 0, 0, 0, 0, 0, 0, 0))
       end
+      it 'accepts Selenium::WebDriver::Element' do
+        subject.floating(selenium_webdriver_element, 10, 10, 10, 10)
+      end
     end
 
     context 'region' do
-      before do
+      after do
         expect(subject.instance_variable_get(:@region_to_check)).to be_a Proc
-        expect { subject.instance_variable_get(:@region_to_check).call(driver) }.to_not raise_error
+        region = nil
+        expect { region = subject.instance_variable_get(:@region_to_check).call(driver) }.to_not raise_error
+        expect(region).to respond_to :location
+        expect(region).to respond_to :size
       end
       it 'accepts :how, :what' do
         subject.region(:css, '.class')
@@ -124,6 +167,9 @@ RSpec.describe Applitools::Selenium::Target do
       end
       it 'accepts Applitools::Selenium::Element' do
         subject.region(Applitools::Selenium::Element.new(driver, Applitools::Region::EMPTY))
+      end
+      it 'accepts Selenium::WebDriver::Element' do
+        subject.region(selenium_webdriver_element)
       end
     end
 
@@ -142,6 +188,9 @@ RSpec.describe Applitools::Selenium::Target do
       end
       it 'accepts Applitools::Selenium::Element' do
         subject.ignore(Applitools::Selenium::Element.new(driver, Applitools::Region::EMPTY))
+      end
+      it 'accepts Selenium::WebDriver::Element' do
+        subject.ignore(selenium_webdriver_element)
       end
     end
   end

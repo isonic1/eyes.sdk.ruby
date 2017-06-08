@@ -2,11 +2,20 @@ require_relative 'region'
 module Applitools
   class FloatingRegion < Region
     class << self
+      def any(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
+        case element
+        when Applitools::Selenium::Element, ::Selenium::WebDriver::Element, Applitools::Region
+          for_element(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
+        else
+          raise Applitools::EyesIllegalArgument.new "Unsupported element - #{element.class}"
+        end
+      end
+
       def for_element(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
-        Applitools::ArgumentGuard.is_a? element, 'element', Applitools::Selenium::Element
         new element.location.x, element.location.y, element.size.width, element.size.height, max_left_offset,
           max_top_offset, max_right_offset, max_bottom_offset
       end
+      private :for_element
     end
 
     attr_accessor :max_top_offset, :max_right_offset, :max_bottom_offset, :max_left_offset

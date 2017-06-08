@@ -16,6 +16,11 @@ module Applitools::Utils
     uncapitalize(tokens.shift) + tokens.map(&:capitalize).join
   end
 
+  def to_method_name(str)
+    str = str.to_s if !str.is_a?(String) && str.respond_to?(:to_s)
+    underscore(str).gsub /\//, '__'
+  end
+
   def wrap(object)
     if object.nil?
       []
