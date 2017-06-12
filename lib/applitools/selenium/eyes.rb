@@ -560,6 +560,7 @@ module Applitools::Selenium
           ewd_screenshot
         else
           logger.info 'Screenshot requested...'
+          sleep wait_before_screenshots
           image = image_provider.take_screenshot
           scale_provider.scale_image(image) if scale_provider
           cut_provider.cut(image) if cut_provider
