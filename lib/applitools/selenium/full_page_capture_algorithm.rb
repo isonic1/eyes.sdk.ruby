@@ -19,8 +19,8 @@ module Applitools::Selenium
     # @option [Integer] :wait_before_screenshots The time to wait before taking screenshot.
     # @option [Faraday::Request::UrlEncoded] :eyes_screenshot_factory The images.
     # @return [Applitools::Image] The entire image.
-    def get_stiched_region(options = {})
-      logger.info 'get_stiched_region() has been invoked.'
+    def get_stitched_region(options = {})
+      logger.info 'get_stitched_region() has been invoked.'
       image_provider = options[:image_provider]
       region_provider = options[:region_to_check]
       origin_provider = options[:origin_provider]

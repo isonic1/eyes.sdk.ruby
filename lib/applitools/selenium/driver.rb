@@ -28,7 +28,6 @@ module Applitools::Selenium
     }.freeze
 
     attr_reader :browser
-    attr_accessor :wait_before_screenshots
     attr_accessor :rotation
 
     def_delegators :@eyes, :add_mouse_trigger, :add_text_trigger
@@ -45,7 +44,6 @@ module Applitools::Selenium
     def initialize(eyes, options)
       super(options[:driver])
       @is_mobile_device = options.fetch(:is_mobile_device, false)
-      @wait_before_screenshots = 0
       @eyes = eyes
       @frame_chain = Applitools::Selenium::FrameChain.new
       @browser = Applitools::Selenium::Browser.new(self, @eyes)

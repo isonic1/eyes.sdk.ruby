@@ -33,7 +33,7 @@ module Applitools
     attr_accessor :app_name, :baseline_name, :branch_name, :parent_branch_name, :batch, :agent_id, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :host_os, :host_app, :base_line_name, :position_provider, :viewport_size, :verbose_results,
-      :inferred_environment, :remove_session_if_matching
+      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -68,12 +68,28 @@ module Applitools
         end
       end
 
+      self.exact = nil
+      self.match_level = Applitools::MATCH_LEVEL[:strict]
+      self.server_scale = 0
+      self.server_remainder = 0
+
       @default_match_settings = {
-        match_level: Applitools::MATCH_LEVEL[:strict],
-        exact: nil,
+        match_level: match_level,
+        exact: exact,
         scale: server_scale,
         remainder: server_remainder
       }
+    end
+
+    def default_match_settings=(value)
+      Applitools::ArgumentGuard.is_a? value, 'value', Hash
+      extra_keys = value.keys - match_level_keys
+      unless extra_keys.empty?
+        raise Applitools::EyesIllegalArgument.new(
+          "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
+        )
+      end
+      default_match_settings.merge! value
     end
 
     def batch
@@ -91,28 +107,6 @@ module Applitools
         base_agent_id
       end
     end
-
-    def match_level=(level)
-      @default_match_settings[:match_level] = level
-    end
-
-    def match_level
-      @default_match_settings[:match_level]
-    end
-
-    def server_scale=(ratio)
-      @server_scale = ratio
-      @default_match_settings[:scale] = ratio
-    end
-
-    attr_reader :server_scale
-
-    def server_remainder=(ratio)
-      @server_remainder = ratio
-      @default_match_settings[:remainder] = ratio
-    end
-
-    attr_reader :server_remainder
 
     def disabled=(value)
       @disabled = Applitools::Utils.boolean_value value
@@ -137,7 +131,7 @@ module Applitools
     def abort_if_not_closed
       if disabled?
         logger.info "#{__method__} Ignored"
-        return
+        return false
       end
 
       self.open = false
@@ -146,7 +140,7 @@ module Applitools
 
       if running_session.nil?
         logger.info 'Closed'
-        return
+        return false
       end
 
       logger.info 'Aborting server session...'
@@ -163,7 +157,7 @@ module Applitools
     def open_base(options)
       if disabled?
         logger.info "#{__method__} Ignored"
-        return
+        return false
       end
 
       Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
@@ -229,6 +223,8 @@ module Applitools
           server_connector
         )
       end
+
+      match_window_data.user_inputs = user_inputs
 
       logger.info 'Calling match_window...'
       result = @match_window_task.match_window(
@@ -349,7 +345,7 @@ module Applitools
     def close(throw_exception = true)
       if disabled?
         logger.info "#{__method__} Ignored"
-        return
+        return false
       end
 
       logger.info "close(#{throw_exception})"
@@ -415,6 +411,16 @@ module Applitools
     attr_reader :user_inputs, :properties
 
     private :full_agent_id, :full_agent_id=
+
+    def match_level_keys
+      %w(match_level exact scale remainder).map(&:to_sym)
+    end
+
+    def update_default_settings(match_data)
+      match_level_keys.each do |k|
+        match_data.send("#{k}=", default_match_settings[k])
+      end
+    end
 
     def app_environment
       Applitools::AppEnvironment.new os: host_os, hosting_app: host_app,

@@ -8,7 +8,7 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 eyes = Applitools::Images::Eyes.new
 eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
-eyes.proxy = Applitools::Connectivity::Proxy.new 'http://localhost:9999'
+# eyes.proxy = Applitools::Connectivity::Proxy.new 'http://localhost:9999'
 
 viber_home_image_bytes = File.read('./images/viber-home.png', mode: 'rb')
 viber_home_image = Applitools::Screenshot.from_datastream viber_home_image_bytes

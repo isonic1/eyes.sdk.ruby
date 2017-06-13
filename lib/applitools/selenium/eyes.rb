@@ -11,12 +11,6 @@ module Applitools::Selenium
 
     USE_DEFAULT_MATCH_TIMEOUT = -1
 
-    # @!visibility private
-    STICH_MODE = {
-      :scroll => :SCROLL,
-      :css => :CSS
-    }.freeze
-
     extend Forwardable
     # @!visibility public
 
@@ -24,7 +18,7 @@ module Applitools::Selenium
       def eyes_driver(driver, eyes = nil)
         if driver.respond_to? :driver_for_eyes
           driver.driver_for_eyes eyes
-        elsif driver.is_a? Capybara::Poltergeist::Driver
+        elsif defined?(::Capybara::Poltergeist) && (driver.is_a? ::Capybara::Poltergeist::Driver)
           Applitools::Poltergeist::Driver.new(eyes, driver: driver)
         else
           unless driver.is_a?(Applitools::Selenium::Driver)
@@ -99,7 +93,7 @@ module Applitools::Selenium
       self.dont_get_title = false
       self.hide_scrollbars = false
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
-      self.stitch_mode = STICH_MODE[:scroll]
+      self.stitch_mode = Applitools::STITCH_MODE[:scroll]
       self.wait_before_screenshots = DEFAULT_WAIT_BEFORE_SCREENSHOTS
       self.region_visibility_strategy = MoveToRegionVisibilityStrategy.new
       self.debug_screenshot = false
@@ -170,13 +164,17 @@ module Applitools::Selenium
     # @option value [Symbol] :scroll Scroll to perform stitching.
     # @return [Symbol] The type of stitching.
     def stitch_mode=(value)
-      @stitch_mode = value.to_s.upcase == STICH_MODE[:css].to_s ? STICH_MODE[:css] : STICH_MODE[:scroll]
+      @stitch_mode = if value.to_s.upcase == Applitools::STITCH_MODE[:css].to_s
+                       Applitools::STITCH_MODE[:css]
+                     else
+                       Applitools::STITCH_MODE[:scroll]
+                     end
       unless driver.nil?
         self.position_provider = self.class.position_provider(
           stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
         )
       end
-      if stitch_mode == STICH_MODE[:css]
+      if stitch_mode == Applitools::STITCH_MODE[:css]
         @css_transition_original_hide_scrollbars = hide_scrollbars
         self.hide_scrollbars = true
       else
@@ -190,39 +188,10 @@ module Applitools::Selenium
     # @param [String] tag An optional tag to be assosiated with the snapshot.
     # @param [Fixnum] match_timeout The amount of time to retry matching (seconds)
     def check_window(tag = nil, match_timeout = USE_DEFAULT_MATCH_TIMEOUT)
-      self.tag_for_debug = tag
-      self.screenshot_name_enumerator = nil
-      if disabled?
-        logger.info "check_window(#{tag}, #{match_timeout}): Ignored"
-        return
+      target = Applitools::Selenium::Target.window.tap do |t|
+        t.timeout(match_timeout)
       end
-
-      logger.info "check_window(match_timeout: #{match_timeout}, tag: #{tag}): Ignored" if disabled?
-      logger.info "check_window(match_timeout: #{match_timeout}, tag: #{tag})"
-
-      region_provider = Object.new
-      region_provider.instance_eval do
-        define_singleton_method :region do
-          Applitools::Region::EMPTY
-        end
-        define_singleton_method :coordinate_type do
-          nil
-        end
-      end
-
-      self.eyes_screenshot_factory = lambda do |image|
-        Applitools::Selenium::EyesWebDriverScreenshot.new(
-          image, driver: driver, force_offset: position_provider.force_offset
-        )
-      end
-
-      match_data = Applitools::MatchWindowData.new.tap do |d|
-        d.tag = tag
-        d.ignore_mismatch = false
-        d.match_level = default_match_settings[:match_level]
-      end
-
-      check_window_base region_provider, match_timeout, match_data
+      check(tag, target)
     end
 
     # @!visibility private
@@ -246,11 +215,14 @@ module Applitools::Selenium
     # @param [Applitools::Selenium::Target] target which area of the window to check.
     # @return [Applitools::MatchResult] The match results.
     def check(name, target)
+      logger.info "check(#{name}) is called"
+      self.tag_for_debug = name
       Applitools::ArgumentGuard.is_a? target, 'target', Applitools::Selenium::Target
       original_overflow = nil
       original_position_provider = position_provider
 
       eyes_element = nil
+      timeout = target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::EyesWebDriverScreenshot.new(
@@ -262,6 +234,7 @@ module Applitools::Selenium
         begin
           match_data = Applitools::MatchWindowData.new
           match_data.tag = name
+          update_default_settings(match_data)
           match_data.read_target(target, driver)
           eyes_element = target.region_to_check.call(driver)
           region_visibility_strategy.move_to_region original_position_provider,
@@ -270,16 +243,19 @@ module Applitools::Selenium
           check_window = false
           if !target.frames.empty? && eyes_element.is_a?(Applitools::Region)
             # check_current_frame
+            logger.info "check_region_in_frame(#{eyes_element})"
             region_provider = region_provider_for_frame
 
           elsif eyes_element.is_a? Applitools::Selenium::Element
             # check_element
+            logger.info 'check_region(' \
+              "#{Applitools::Region.from_location_size(eyes_element.location, eyes_element.size)})"
             region_provider = Applitools::RegionProvider.new(
-              region_for_element(eyes_element),
-              target.coordinate_type
+              region_for_element(eyes_element), target.coordinate_type
             )
           else
             # check_window
+            logger.info "check_window(match_timeout: #{timeout}, tag: #{match_data.tag})"
             region_provider = Applitools::RegionProvider.new(
               region_for_element(eyes_element),
               target.coordinate_type
@@ -305,7 +281,7 @@ module Applitools::Selenium
           end
 
           check_window_base(
-            region_provider, target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT, match_data
+            region_provider, timeout, match_data
           )
         ensure
           eyes_element.overflow = original_overflow unless original_overflow.nil?
@@ -421,13 +397,11 @@ module Applitools::Selenium
     #   stitch_content: false)
     # @!parse def check_region(element, how=nil, what=nil, options = {}); end
     def check_region(*args)
-      options = Applitools::Utils.extract_options! args
+      options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge! Applitools::Utils.extract_options!(args)
+      target = Applitools::Selenium::Target.new.region(*args).timeout(options[:match_timeout])
+      target.fully if options[:stitch_content]
       self.screenshot_name_enumerator = nil
-      if options.delete(:stitch_content)
-        check_element args, options
-      else
-        check_region_ args, options
-      end
+      check(options[:tag], target)
     end
 
     # Validates the contents of an iframe and matches it with the expected output.
@@ -435,29 +409,24 @@ module Applitools::Selenium
     # @param [Hash] options The specific parameters of the desired screenshot.
     # @option options [Fixnum] :timeout The amount of time to retry matching. (Seconds)
     # @option options [String] :tag An optional tag to be associated with the snapshot.
-    # @option options [String] :frame_key The key of the relevant frame.
-    # @option options [String] :name_or_id The name or id of the screenshot.
+    # @option options [String] :frame Frame element or frame name or frame id.
+    # @option options [String] :name_or_id The name or id of the target frame (deprecated. use :frame instead).
+    # @option options [String] :frame_element The frame element (deprecated. use :frame instead).
     # @return [Applitools::MatchResult] The match results.
+
     def check_frame(options = {})
       options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge!(options)
-
-      process_in_frame options do |opts, frame_key|
-        if disabled?
-          logger.info "check_frame(#{frame_key}: #{opts[frame_key]}, timeout: #{opts[:timeout]}, " \
-            "tag: #{opts[:tag]}): Ignored"
-          return
-        end
-
-        logger.info "check_frame(#{frame_key}: #{opts[frame_key]}, timeout: #{opts[:timeout]}, " \
-          "tag: #{opts[:tag]})"
-        check_current_frame opts[:timeout], opts[:tag]
-      end
+      frame = options[:frame] || options[:frame_element] || options[:name_or_id]
+      target = Applitools::Selenium::Target.frame(frame).timeout(options[:timeout]).fully
+      check(options[:tag], target)
     end
 
     # Validates the contents of a region in an iframe and matches it with the expected output.
     #
     # @param [Hash] options The specific parameters of the desired screenshot.
-    # @option options [String] :name_or_id The name or id of the frame.
+    # @option options [String] :name_or_id The name or id of the target frame (deprecated. use :frame instead).
+    # @option options [String] :frame_element The frame element (deprecated. use :frame instead).
+    # @option options [String] :frame Frame element or frame name or frame id.
     # @option options [String] :tag An optional tag to be associated with the snapshot.
     # @option options [Symbol] :by By which identifier to find the region (e.g :css, :id).
     # @option options [Fixnum] :timeout The amount of time to retry matching. (Seconds)
@@ -469,16 +438,14 @@ module Applitools::Selenium
       Applitools::ArgumentGuard.is_a? options[:by], 'options[:by]', Array
 
       how_what = options.delete(:by)
+      frame = options[:frame] || options[:frame_element] || options[:name_or_id]
 
-      process_in_frame options do |opts, frame_key|
-        if disabled?
-          logger.info "check_region_in_frame(#{frame_key}: #{options[frame_key]}, by: #{options[:by]}, " \
-                          "timeout: #{options[:timeout]}, tag: #{options[:tag]}): Ignored)"
-          return
-        end
+      target = Applitools::Selenium::Target.new.timeout(options[:timeout])
+      target.frame(frame) if frame
+      target.fully if options[:stitch_content]
+      target.region(*how_what)
 
-        check_region(*how_what, tag: opts[:tag], timeout: opts[:timeout], stitch_content: opts[:stitch_content])
-      end
+      check(options[:tag], target)
     end
 
     # @!parse def check_region(element, how=nil, what=nil, options = {}); end
@@ -516,142 +483,11 @@ module Applitools::Selenium
       end
     end
 
-    # Validates the contents of an iframe and matches it with the expected output.
-    #
-    # @param [Hash] options The options.
-    # @option [Fixnum] :index The index of the iframe.
-    # @option [String] :name_or_id The name or id of the screenshot.
-    # @option [Applitools::Selenium::Element] :frame_element The relevant frame.
-    # @option [Array] :frames_path
-    # @option [Applitools::Selenium::FrameChain] :frame_chain
-    # @option [Fixnum] :timeout The amount of time to retry matching. (Seconds)
-    # @option [String] :tag An optional tag to be associated with the snapshot.
-    # @option [String] :frame_key The key of the relevant frame.
-    def check_frame__(options = {})
-      options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge!(options)
-
-      unless options[:index] ||
-          options[:name_or_id] ||
-          options[:frame_element] ||
-          options[:frame_chain] ||
-          options[:frames_path]
-        raise Applitools::EyesIllegalArgument.new 'You must pass :index or :name_or_id or :frame_element option' \
-          '  or :frame_chain option or :frames_path option'
-      end
-
-      if (needed_keys = (options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path])).length == 1
-        frame_key = needed_keys.first
-      else
-        raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' \
-          'Only one of :index, :name_or_id or :frame_elenent or :frame_chain or :frames_path is allowed.'
-      end
-
-      if disabled?
-        logger.info "check_frame(#{frame_key}: #{options[frame_key]}, timeout: #{options[:timeout]}," \
-          " tag: #{options[:tag]}): Ignored"
-        return
-      end
-
-      frame_or_frames = options[frame_key]
-      if frame_or_frames.respond_to? :pop
-        frame_to_check = frame_or_frames.pop
-        original_frame_chain = driver.frame_chain
-        logger.info 'Switching to parent frame according to frames path...'
-        driver.switch_to.frames(frame_key => frame_or_frames)
-        logger.info 'Done!'
-        case frame_to_check
-        when String
-          frame_options = { name_or_id: frame_to_check }
-        when Applitools::Selenium::Element
-          frame_options = { frame_element: frame_to_check }
-        else
-          raise Applitools::EyesError.new "Unknown frame class: #{frame_to_check.class}"
-        end
-      else
-        frame_options = { frame_key => options[frame_key] }
-      end
-
-      logger.info "check_frame(#{frame_key}: #{options[frame_key]}, timeout: #{options[:timeout]}," /
-        " tag: #{options[:tag]})"
-      logger.info 'Switching to requested frame...'
-
-      driver.switch_to.frame frame_options
-      logger.info 'Done!'
-
-      check_current_frame options[:timeout], options[:tag]
-
-      logger.info 'Switching back to parent_frame...'
-      driver.switch_to.parent_frame
-      logger.info 'Done!'
-      return unless original_frame_chain
-
-      logger.info 'Switching back into original frame...'
-      driver.switch_to.frames frame_chain: original_frame_chain
-    end
-
     private
 
     attr_accessor :check_frame_or_element, :region_to_check, :dont_get_title,
       :device_pixel_ratio, :position_provider, :scale_provider, :tag_for_debug,
       :region_visibility_strategy, :eyes_screenshot_factory
-
-    def process_in_frame(options = {})
-      unless options[:index] ||
-          options[:name_or_id] ||
-          options[:frame_element] ||
-          options[:frame_chain] ||
-          options[:frames_path] ||
-          options[:target_frames]
-        raise Applitools::EyesIllegalArgument.new 'You must pass :index or :name_or_id or :frame_element option' /
-          'or :frame_chain option or :frames_path option'
-      end
-
-      needed_keys = (
-        options.keys & [:index, :name_or_id, :frame_element, :frame_chain, :frames_path, :target_frames]
-      )
-
-      if needed_keys.length == 1
-        frame_key = needed_keys.first
-      else
-        raise Applitools::EyesIllegalArgument.new 'You\'ve passed some extra keys!' /
-          'Only one of :index, :name_or_id or :frame_elenent or :frame_chain or :frames_path is allowed.'
-      end
-
-      frame_or_frames = options[frame_key]
-      if frame_or_frames.respond_to? :pop
-        frame_to_check = frame_or_frames.pop
-        original_frame_chain = driver.frame_chain
-        logger.info 'Switching to parent frame according to frames path...'
-        driver.switch_to.frames(frame_key => frame_or_frames)
-        logger.info 'Done!'
-        case frame_to_check
-        when String
-          frame_options = { name_or_id: frame_to_check }
-        when Applitools::Selenium::Element
-          frame_options = { frame_element: frame_to_check }
-        else
-          raise Applitools::EyesError.new "Unknown frame class: #{frame_to_check.class}"
-        end
-      else
-        frame_options = { frame_key => options[frame_key] }
-      end
-
-      logger.info 'Switching to requested frame...'
-
-      driver.switch_to.frame frame_options
-      logger.info 'Done!'
-
-      yield(options, frame_key) if block_given?
-
-      logger.info 'Switching back to parent_frame...'
-      driver.switch_to.parent_frame
-      logger.info 'Done!'
-
-      return unless original_frame_chain
-
-      logger.info 'Switching back into original frame...'
-      driver.switch_to.frames frame_chain: original_frame_chain
-    end
 
     def capture_screenshot
       image_provider = Applitools::Selenium::TakesScreenshotImageProvider.new driver,
@@ -673,7 +509,7 @@ module Applitools::Selenium
           logger.info 'Check frame/element requested'
           algo = Applitools::Selenium::FullPageCaptureAlgorithm.new
 
-          entire_frame_or_element = algo.get_stiched_region(
+          entire_frame_or_element = algo.get_stitched_region(
             image_provider: image_provider,
             region_to_check: region_to_check,
             origin_provider: position_provider,
@@ -704,7 +540,7 @@ module Applitools::Selenium
               nil
             end
           end
-          full_page_image = algo.get_stiched_region image_provider: image_provider,
+          full_page_image = algo.get_stitched_region image_provider: image_provider,
                                   region_to_check: region_provider,
                                   origin_provider: Applitools::Selenium::ScrollPositionProvider.new(driver),
                                   position_provider: position_provider,
@@ -724,6 +560,7 @@ module Applitools::Selenium
           ewd_screenshot
         else
           logger.info 'Screenshot requested...'
+          sleep wait_before_screenshots
           image = image_provider.take_screenshot
           scale_provider.scale_image(image) if scale_provider
           cut_provider.cut(image) if cut_provider
@@ -1033,7 +870,7 @@ module Applitools::Selenium
     #    pair should be used in find_element
     # @param [Hash] options
     # @option options [String] :tag
-    # @option options [Float] :tmatch_timeout
+    # @option options [Float] :match_timeout
 
     def check_element(element_or_selector, options = {})
       selector = element_or_selector if Applitools::Selenium::Driver::FINDERS.keys.include? element_or_selector.first

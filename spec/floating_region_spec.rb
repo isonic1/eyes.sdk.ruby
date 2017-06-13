@@ -10,9 +10,9 @@ RSpec.describe Applitools::FloatingRegion do
   end
   let(:element) { Applitools::Selenium::Element.new nil, original_element }
   it 'can be created from an element' do
-    expect(described_class).to respond_to :for_element
-    expect { described_class.for_element(nil, 0, 0, 0, 0) }.to raise_error Applitools::EyesError
-    expect { described_class.for_element(element, 0, 0, 0, 0) }.to_not raise_error
+    expect(described_class).to respond_to :any
+    expect { described_class.any(nil, 0, 0, 0, 0) }.to raise_error Applitools::EyesError
+    expect { described_class.any(element, 0, 0, 0, 0) }.to_not raise_error
   end
 
   it_should_behave_like 'responds to method', [:to_hash]

@@ -89,9 +89,8 @@ module Applitools
 
     def user_inputs=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
-      value.each do |i|
-        current_data['UserInputs'] << i if self.class.valid_input(i)
-      end
+      current_data['UserInputs'] += value.select { |i| i.respond_to? :to_hash }
+                                         .select { |i| self.class.valid_input(i) }.map(&:to_hash)
       current_data['Options']['UserInputs'] = current_data['UserInputs']
     end
 
@@ -140,6 +139,20 @@ module Applitools
 
     def remainder
       current_data['Options']['ImageMatchSettings']['remainder']
+    end
+
+    def exact
+      current_data['Options']['ImageMatchSettings']['Exact']
+    end
+
+    def exact=(value)
+      raise Applitools::EyesError.new('You should pass a hash as a value!') unless value.nil? || value.is_a?(Hash)
+      return current_data['Options']['ImageMatchSettings']['Exact'] = nil if value.nil?
+      current_value = exact || {}
+      %w(MinDiffIntensity MinDiffWidth MinDiffHeight MatchThreshold).each do |k|
+        current_value[k] = value[k]
+      end
+      current_data['Options']['ImageMatchSettings']['Exact'] = current_value
     end
 
     def read_target(target, driver)
