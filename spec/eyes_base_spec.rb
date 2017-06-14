@@ -457,4 +457,45 @@ describe Applitools::EyesBase do
       subject.check_window_base(region_provider, 0, match_data)
     end
   end
+
+  context ':default_match level' do
+    it 'sets options[:match_level]' do
+      subject.default_match_level(:strict)
+      expect(subject.match_level).to eq Applitools::MATCH_LEVEL[:strict]
+      expect { subject.default_match_level('Strict') }.to raise_error Applitools::EyesError
+    end
+    it 'raises an exception on wrong value' do
+      expect { subject.default_match_level('unknown') }.to raise_error Applitools::EyesError
+      expect { subject.default_match_level(:none) }.to_not raise_error
+    end
+    it 'accepts a hash of exact values' do
+      aggregate_failures do
+        expect { subject.default_match_level(:exact, min_diff_height: 0) }.to_not raise_error
+        expect { subject.default_match_level(:exact) }.to_not raise_error
+      end
+    end
+    it 'processes exact values only if match_level == exact' do
+      expect { subject.default_match_level(:strict, 'MinDiffIntensity' => 0) }.to raise_error Applitools::EyesError
+    end
+    it 'raises an exception if passed hash contains extra keys' do
+      expect { subject.default_match_level(:exact, 'unknown_key' => 'a_value') }.to raise_error Applitools::EyesError
+    end
+    it 'accepts underscored keys as well as original' do
+      expect { subject.default_match_level(:exact, 'MinDiffIntensity' => 0, :min_diff_height => 0) }.to_not raise_error
+    end
+    it 'updates exact if exact values have been passed' do
+      subject.exact = {}
+      expect { subject.default_match_level(:exact, 'MinDiffIntensity' => 0) }.to change { subject.exact }
+    end
+    it 'uses default exact values if nothing is passed' do
+      subject.default_match_level(:exact)
+      aggregate_failures do
+        expect(subject.exact).to be_a Hash
+        expect(subject.exact.keys).to(
+          contain_exactly('MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold')
+        )
+        expect(subject.exact.values).to contain_exactly(0, 0, 0, 0)
+      end
+    end
+  end
 end

@@ -1,4 +1,6 @@
+require_relative 'match_level_setter'
 module Applitools::FluentInterface
+  include Applitools::MatchLevelSetter
   def ignore_caret(value = false)
     options[:ignore_caret] = value ? true : false
     self
@@ -19,9 +21,17 @@ module Applitools::FluentInterface
     self
   end
 
-  def match_level(value)
-    raise Applitools::EyesError unless Applitools::MATCH_LEVEL.keys.include? value
-    options[:match_level] = Applitools::MATCH_LEVEL[value]
+  # Sets match_level for current test
+  # @param [Symbol] value Can be one of allowed match levels - :none, :layout, :layout2, :content, :strict or :exact
+  # @param [Hash] exact_options exact options are used only for :exact match level
+  # @option exact_options [Integer] :min_diff_intensity
+  # @option exact_options [Integer] :min_diff_width
+  # @option exact_options [Integer] :min_diff_height
+  # @option exact_options [Integer] :match_threshold
+  # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
+
+  def match_level(value, exact_options = {})
+    options[:match_level], options[:exact] = match_level_with_exact(value, exact_options)
     self
   end
 end

@@ -194,7 +194,7 @@ module Applitools
     end
 
     def target_options_to_read
-      %w(trim ignore_caret match_level ignore_mismatch)
+      %w(trim ignore_caret match_level ignore_mismatch exact)
     end
 
     private :target_options_to_read

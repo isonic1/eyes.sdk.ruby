@@ -63,6 +63,35 @@ RSpec.describe Applitools::Selenium::Target do
       expect { subject.match_level('unknown') }.to raise_error Applitools::EyesError
       expect { subject.match_level(:none) }.to_not raise_error
     end
+    it 'accepts a hash of exact values' do
+      aggregate_failures do
+        expect { subject.match_level(:exact, min_diff_height: 0) }.to_not raise_error
+        expect { subject.match_level(:exact) }.to_not raise_error
+      end
+    end
+    it 'processes exact values only if match_level == exact' do
+      expect { subject.match_level(:strict, 'MinDiffIntensity' => 0) }.to raise_error Applitools::EyesError
+    end
+    it 'raises an exception if passed hash contains extra keys' do
+      expect { subject.match_level(:exact, 'unknown_key' => 'a_value') }.to raise_error Applitools::EyesError
+    end
+    it 'accepts underscored keys as well as original' do
+      expect { subject.match_level(:exact, 'MinDiffIntensity' => 0, :min_diff_height => 0) }.to_not raise_error
+    end
+    it 'updates options[:exact] if exact values have been passed' do
+      subject.options[:exact] = {}
+      expect { subject.match_level(:exact, 'MinDiffIntensity' => 0) }.to change { subject.options[:exact] }
+    end
+    it 'uses default exact values if nothing is passed' do
+      subject.match_level(:exact)
+      aggregate_failures do
+        expect(subject.options[:exact]).to be_a Hash
+        expect(subject.options[:exact].keys).to(
+          contain_exactly('MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold')
+        )
+        expect(subject.options[:exact].values).to contain_exactly(0, 0, 0, 0)
+      end
+    end
   end
 
   context 'ignore_caret' do

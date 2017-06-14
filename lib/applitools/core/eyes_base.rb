@@ -1,5 +1,6 @@
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
+require_relative 'match_level_setter'
 
 module Applitools
   MATCH_LEVEL = {
@@ -12,6 +13,7 @@ module Applitools
   }.freeze
 
   class EyesBase
+    include Applitools::MatchLevelSetter
     extend Forwardable
     extend Applitools::Helpers
 
@@ -79,6 +81,19 @@ module Applitools
         scale: server_scale,
         remainder: server_remainder
       }
+    end
+
+    # Sets default match_level which will be applied to any test, unless match_level is set for a test explicitly
+    # @param [Symbol] value Can be one of allowed match levels - :none, :layout, :layout2, :content, :strict or :exact
+    # @param [Hash] exact_options exact options are used only for :exact match level
+    # @option exact_options [Integer] :min_diff_intensity
+    # @option exact_options [Integer] :min_diff_width
+    # @option exact_options [Integer] :min_diff_height
+    # @option exact_options [Integer] :match_threshold
+    # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
+
+    def default_match_level(value, options = {})
+      @match_level, self.exact = match_level_with_exact(value, options)
     end
 
     def default_match_settings=(value)
