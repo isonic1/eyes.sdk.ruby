@@ -14,7 +14,7 @@ module Applitools::Selenium
 
     # Types the keys into a text box.
     #
-    # @param [Array] *keys The keys to type into the text box.
+    # @param [Array] keys The keys to type into the text box.
     def send_keys(*keys)
       active_element = Applitools::Selenium::Element.new(driver, driver.switch_to.active_element)
       current_control = active_element.region

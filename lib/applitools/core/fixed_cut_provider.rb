@@ -11,6 +11,8 @@ module Applitools
     #   Applitools::FixedCutProvider.new Applitools::Region.new(20,20, 300, 300)
     # @example Creates cut provider by a set of fields
     #   Applitools::FixedCutProvider.new 20, 20, 300, 300
+    # @!parse def initialize(crop_region, header, left, right, footer); end
+
     def initialize(*args)
       self.region = nil
       self.left = 0

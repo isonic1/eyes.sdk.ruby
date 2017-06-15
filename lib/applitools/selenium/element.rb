@@ -67,9 +67,8 @@ module Applitools::Selenium
     alias eql? ==
 
     # Types content into text box.
-    #
-    # @param [Array] *args The arguments.
-    # @option *args [String] The content to type.
+    # @param [Array, String] keys The content to type.
+    # @!parse def send_keys(keys); end;
     def send_keys(*args)
       Selenium::WebDriver::Keys.encode(args).each do |key|
         @driver.add_text_trigger(self, key.to_s)
