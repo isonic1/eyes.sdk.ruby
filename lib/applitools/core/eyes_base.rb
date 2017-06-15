@@ -92,9 +92,16 @@ module Applitools
     # @option exact_options [Integer] :match_threshold
     # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
 
-    def default_match_level(value, options = {})
-      @match_level, self.exact = match_level_with_exact(value, options)
+    def default_match_level(value, exact_options = {})
+      @match_level, self.exact = match_level_with_exact(value, exact_options)
     end
+
+    # Sets default match settings
+    # @param [Hash] value
+    # @option value [Symbol] match_level
+    # @option value [Hash] exact exact values. Available keys are 'MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold'
+    # @option value [Fixnum] scale
+    # @option value [Fixnum] remainder
 
     def default_match_settings=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Hash
