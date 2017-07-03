@@ -128,21 +128,7 @@ module Applitools::Selenium
       end
 
       @driver = self.class.eyes_driver(driver, self)
-
-      # if driver.respond_to? :driver_for_eyes
-      #   @driver = driver.driver_for_eyes self
-      # elsif driver.is_a? Capybara::Poltergeist::Driver
-      #   @driver = Applitools::Poltergeist::Driver.new(self, driver: driver)
-      # else
-      #   unless driver.is_a?(Applitools::Selenium::Driver)
-      #     logger.warn("Unrecognized driver type: (#{driver.class.name})!")
-      #     is_mobile_device = driver.respond_to?(:capabilities) && driver.capabilities['platformName']
-      #     @driver = Applitools::Selenium::Driver.new(self, driver: driver, is_mobile_device: is_mobile_device)
-      #   end
-      # end
-
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
-
       self.position_provider = self.class.position_provider(
         stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
       )

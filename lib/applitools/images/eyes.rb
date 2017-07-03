@@ -59,32 +59,27 @@ module Applitools::Images
     end
 
     def check(name, target)
-      Applitools::ArgumentGuard.not_nil(name, 'name')
-      region_provider = get_region_provider(target)
-
-      match_window_data = Applitools::MatchWindowData.new
-      match_window_data.tag = name
-      update_default_settings(match_window_data)
-      match_window_data.read_target(target, nil)
-
-      image = target.image
-      self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
-      self.screenshot = EyesImagesScreenshot.new image
-
-      mr = check_window_base(
-        region_provider,
-        target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
-        match_window_data
-      )
-      mr.as_expected?
+      check_it(name, target, Applitools::MatchWindowData.new).as_expected?
     end
 
     def check_single(name, target, options = {})
-      open_base(options) unless options.empty?
+      open_and_close(name, target, options) do |n, t|
+        check_it(n, t, Applitools::MatchSingleCheckData.new)
+      end
+    end
+
+    def open_and_close(*args)
+      options_for_open = { app_name: '', test_name: '' }.merge Applitools::Utils.extract_options!(args)
+      open(options_for_open)
+      result = yield(*args)
+      close
+      result
+    end
+
+    def check_it(name, target, match_window_data)
       Applitools::ArgumentGuard.not_nil(name, 'name')
       region_provider = get_region_provider(target)
 
-      match_window_data = Applitools::MatchSingleCheckData.new
       match_window_data.tag = name
       update_default_settings(match_window_data)
       match_window_data.read_target(target, nil)
@@ -93,12 +88,19 @@ module Applitools::Images
       self.viewport_size = Applitools::RectangleSize.new image.width, image.height if viewport_size.nil?
       self.screenshot = EyesImagesScreenshot.new image
 
-      mr = check_single_base(
+      if match_window_data.is_a? Applitools::MatchSingleCheckData
+        return check_single_base(
+          region_provider,
+          target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+          match_window_data
+        )
+      end
+
+      check_window_base(
         region_provider,
         target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
         match_window_data
       )
-      mr
     end
 
     def get_region_provider(target)
