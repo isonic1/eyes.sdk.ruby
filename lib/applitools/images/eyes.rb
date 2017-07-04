@@ -69,7 +69,7 @@ module Applitools::Images
     end
 
     def open_and_close(*args)
-      options_for_open = { app_name: '', test_name: '' }.merge Applitools::Utils.extract_options!(args)
+      options_for_open = Applitools::Utils.extract_options!(args)
       open(options_for_open)
       result = yield(*args)
       close
