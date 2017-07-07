@@ -97,7 +97,7 @@ RSpec.shared_examples 'implements long queries flow' do |method|
         )
         expect(subject).to(
           receive(:request).once.ordered.with(
-            'http://domain.com/pull', :delete, hash_including(headers: hash_including('Eyes-Date'))
+            'http://location.to.finish', :delete, hash_including(headers: hash_including('Eyes-Date'))
           ).and_return(a_200_result)
         )
         res = subject.send(method, 'doesn\'t_matter', {}, 0)
@@ -117,7 +117,9 @@ describe Applitools::Connectivity::ServerConnector do
   let(:a_result) { Faraday::Response.new }
   let(:a_200_result) { a_result.dup.finish(status: 200, response_headers: {}, body: 'Status: 200(For tests)') }
   let(:a_gone_result) { a_result.dup.finish(status: 410, response_headers: {}, body: '') }
-  let(:a_completed_result) { a_result.dup.finish(status: 201, response_headers: {}, body: 'COMPLETED!') }
+  let(:a_completed_result) do
+    a_result.dup.finish(status: 201, response_headers: { location: 'http://location.to.finish' }, body: 'COMPLETED!')
+  end
   let(:a_strange_result) { a_result.dup.finish(status: 255, response_headers: {}, body: 'STRANGE') }
   let(:an_internal_server_error) do
     a_result.dup.finish(status: 500, response_headers: {}, body: 'Status: 500(For tests)')
