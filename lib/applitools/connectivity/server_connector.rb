@@ -170,7 +170,7 @@ module Applitools::Connectivity
     def long_request(url, method, request_delay, options = {})
       delay = request_delay
       options = { headers: {
-        'Eyes-Expect' => '202+location',
+        'Eyes-Expect' => '202+location'
       }.merge(eyes_date_header) }.merge! options
       res = request(url, method, options)
       return res if res.status == HTTP_STATUS_CODES[:ok]
