@@ -96,7 +96,7 @@ RSpec.shared_examples 'implements long queries flow' do |method|
           receive(:request).once.ordered.with('http://domain.com/pull', :get, any_args).and_return(a_completed_result)
         )
         expect(subject).to(
-          receive(:request).once.ordered.with('http://domain.com/pull', :delete).and_return(a_200_result)
+          receive(:request).once.ordered.with('http://domain.com/pull', :delete, hash_including(:headers => hash_including('Eyes-Date'))).and_return(a_200_result)
         )
         res = subject.send(method, 'doesn\'t_matter', {}, 0)
         expect(res.body).to eq 'Status: 200(For tests)'

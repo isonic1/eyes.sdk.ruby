@@ -171,8 +171,7 @@ module Applitools::Connectivity
       delay = request_delay
       options = { headers: {
         'Eyes-Expect' => '202+location',
-        'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
-      } }.merge! options
+      }.merge(eyes_date_header) }.merge! options
       res = request(url, method, options)
       return res if res.status == HTTP_STATUS_CODES[:ok]
 
@@ -183,7 +182,7 @@ module Applitools::Connectivity
           Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
           sleep delay
           second_step_options = {
-            headers: { 'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT') }
+            headers: {}.merge(eyes_date_header)
           }
           res = request(second_step_url, :get, second_step_options)
           break unless res.status == HTTP_STATUS_CODES[:ok]
@@ -191,8 +190,12 @@ module Applitools::Connectivity
       end
 
       raise Applitools::EyesError.new('The server task has gone.') if res.status == HTTP_STATUS_CODES[:gone]
-      return request(second_step_url, :delete) if res.status == HTTP_STATUS_CODES[:created]
+      return request(second_step_url, :delete, headers: eyes_date_header) if res.status == HTTP_STATUS_CODES[:created]
       raise Applitools::EyesError.new('Unknown error processing long request')
+    end
+
+    def eyes_date_header
+      { 'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT') }
     end
   end
 end
