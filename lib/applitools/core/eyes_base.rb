@@ -1,5 +1,6 @@
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
+require_relative 'match_level_setter'
 
 module Applitools
   MATCH_LEVEL = {
@@ -12,6 +13,7 @@ module Applitools
   }.freeze
 
   class EyesBase
+    include Applitools::MatchLevelSetter
     extend Forwardable
     extend Applitools::Helpers
 
@@ -80,6 +82,28 @@ module Applitools
         remainder: server_remainder
       }
     end
+
+    # Sets default match_level which will be applied to any test, unless match_level is set for a test explicitly
+    # @param [Symbol] value Can be one of allowed match levels - :none, :layout, :layout2, :content, :strict or :exact
+    # @param [Hash] exact_options exact options are used only for :exact match level
+    # @option exact_options [Integer] :min_diff_intensity
+    # @option exact_options [Integer] :min_diff_width
+    # @option exact_options [Integer] :min_diff_height
+    # @option exact_options [Integer] :match_threshold
+    # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
+
+    def default_match_level(value, exact_options = {})
+      @match_level, self.exact = match_level_with_exact(value, exact_options)
+    end
+
+    # rubocop:disable LineLength
+    # Sets default match settings
+    # @param [Hash] value
+    # @option value [Symbol] match_level
+    # @option value [Hash] exact exact values. Available keys are 'MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold'
+    # @option value [Fixnum] scale
+    # @option value [Fixnum] remainder
+    # rubocop:enable LineLength
 
     def default_match_settings=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Hash

@@ -120,8 +120,8 @@ module Applitools::Selenium
       screenshot.to_blob
     end
 
-    # Finds an element, specified by +what+ parameter interpreting it in the way, specified in +how+ parameter
-    # @param [Symbol] how Defines the way that +what+ parameter will be interpreted (The type of selector). Can be one
+    # Finds an element in a window.
+    # @param [Symbol] how Defines the way that +what+ parameter will be interpreted (finder). Can be one
     #   of: +:class+, +:class_name+, +:css+, +:id+, +:link+, +:link_text+, +:name+, +:partial_link_text+, +:tag_name+,
     #   +:xpath+
     # @param [String] what The selector to find an element
@@ -135,11 +135,6 @@ module Applitools::Selenium
     # @return [Applitools::Selenium::Element]
     # @!parse def find_element(how, what); end
 
-    # Finds an element in a window.
-    #
-    # @param [Array] *args The arguments for finding the element (at most contains 2 params).
-    # @option args [Symbol] :by By what means to search for the element (e.g. :css, :id).
-    # @option args [String] Name of element.
     def find_element(*args)
       how, what = extract_args(args)
 
@@ -149,8 +144,8 @@ module Applitools::Selenium
       Applitools::Selenium::Element.new(self, driver.find_element(how, what))
     end
 
-    # Finds elements, specified by +what+ parameter interpreting it in the way, specified in +how+ parameter
-    # @param [Symbol] how Defines the way that +what+ parameter will be interpreted (The type of selector). Can be one
+    # Finds elements in a window.
+    # @param [Symbol] how Defines the way that +what+ parameter will be interpreted (finder). Can be one
     #   of: +:class+, +:class_name+, +:css+, +:id+, +:link+, +:link_text+, +:name+, +:partial_link_text+, +:tag_name+,
     #   +:xpath+
     # @param [String] what The selector to find an element
@@ -164,11 +159,6 @@ module Applitools::Selenium
     # @return [ [Applitools::Selenium::Element] ]
     # @!parse def find_elements(how, what); end
 
-    # Finds elements in a window.
-    #
-    # @param [Array] *args The arguments for finding the element (at most contains 2 params).
-    # @option args [Symbol] :by By what means to search for the element (e.g. :css, :id).
-    # @option args [String] Name of elements.
     def find_elements(*args)
       how, what = extract_args(args)
 

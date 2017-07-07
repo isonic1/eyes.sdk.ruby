@@ -28,11 +28,15 @@ module Applitools
         reset_for_fullscreen
       end
 
+      # rubocop:disable LineLength
       # Add the wanted ignored regions.
       #
-      # @param [Array] *args The arguments to ignore.
-      # @option args [String] :name The name of the region to ignore.
-      # @option args [Integer] :id The id of the region to ignore.
+      # @param [Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element] region_or_element the region to ignore or an element representing the region to ignore
+      # @param [Symbol, String] how A finder to be used (see Selenium::WebDriver documentation for complete list of available finders)
+      # @param [Symbol, String] what An id or selector to find
+      # @!parse def ignore(region_or_element, how, what); end;
+      # rubocop:enable LineLength
+
       def ignore(*args)
         if args.empty?
           reset_ignore
@@ -81,12 +85,20 @@ module Applitools
         self
       end
 
+      # rubocop:disable LineLength
       # Add the desired region.
       #
-      # @param [Array] *args The arguments to add.
-      # @option args [Integer] :timeout The timeout.
-      # @option args [Integer] :id The id of the region.
-      # @return [Applitools::Selenium::Target] Self instance.
+      # @param [Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element] element the target region or an element representing the target region
+      # @param [Symbol, String] how The finder to be used (:css, :id, etc. see Selenium::WebDriver documentation for complete list of available finders)
+      # @param [Symbol, String] what Selector or id of an element
+      # @example Add region by element
+      #   target.region(an_element)
+      # @example Add target region by finder
+      #   target.region(:id, 'target_region')
+      # @return [Applitools::Selenium::Target] A Target instance.
+      # @!parse def region(element, how, what); end;
+      # rubocop:enable LineLength
+
       def region(*args)
         self.region_to_check = case args.first
                                when Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element

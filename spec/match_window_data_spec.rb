@@ -130,7 +130,9 @@ RSpec.describe Applitools::MatchWindowData do
     ]
 
     it 'iterates over options' do
-      expect(subject.send(:target_options_to_read)).to include('trim', 'ignore_caret', 'match_level', 'ignore_mismatch')
+      expect(subject.send(:target_options_to_read)).to(
+        include('trim', 'ignore_caret', 'match_level', 'ignore_mismatch', 'exact')
+      )
     end
 
     it 'skips empty options' do

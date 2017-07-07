@@ -27,7 +27,12 @@ RSpec.describe Applitools::Images::Eyes do
       subject.api_key = 'API_KEY_FOR_TESTS'
       subject.open(app_name: 'app_name', test_name: 'test_name')
       allow_any_instance_of(Applitools::MatchWindowTask).to receive(:match_window)
-        .and_return(Applitools::MatchResults.new)
+        .and_return(Applitools::MatchResults.new.tap { |r| r.as_expected = false })
+    end
+
+    it 'calls check_it for actual check' do
+      expect(subject).to receive('check_it').and_call_original
+      subject.check('', target)
     end
 
     it 'performs \':read_target\' for match_data' do
@@ -45,19 +50,37 @@ RSpec.describe Applitools::Images::Eyes do
         subject
       end
     end
+
+    it 'calls check_window_base' do
+      expect(subject).to receive('check_window_base').and_call_original
+      subject.check('', target)
+    end
+
+    it 'returns boolean' do
+      expect(subject.check('', target)).to be(true).or be(false)
+    end
   end
 
   context ':check_single' do
     before do
       subject.api_key = 'API_KEY_FOR_TESTS'
-      subject.open(app_name: 'app_name', test_name: 'test_name')
       allow_any_instance_of(Applitools::MatchSingleTask).to receive(:match_window)
-        .and_return(Applitools::TestResults.new)
+        .and_return(Applitools::TestResults.new(:key => :value))
+    end
+
+    it 'wraps code with open_and_close' do
+      expect(subject).to receive('open_and_close').and_call_original
+      subject.check_single('test', target, app_name: 'app_name', test_name: 'test_name')
+    end
+
+    it 'calls check_it for actual check' do
+      expect(subject).to receive('check_it')
+      subject.check_single('', target, app_name: 'app_name', test_name: 'test_name')
     end
 
     it 'performs \':read_target\' for match_data' do
       expect_any_instance_of(Applitools::MatchWindowData).to receive(:read_target)
-      subject.check_single('', target)
+      subject.check_single('', target, app_name: 'app_name', test_name: 'test_name')
     end
 
     it 'sets default values before \'reading\' target' do
@@ -65,10 +88,19 @@ RSpec.describe Applitools::Images::Eyes do
         .with(Applitools::MatchWindowData).and_raise Applitools::EyesError
       expect_any_instance_of(Applitools::MatchWindowData).to_not receive(:read_target)
       begin
-        subject.check_single('', target)
+        subject.check_single('', target, app_name: 'app_name', test_name: 'test_name')
       rescue Applitools::EyesError
         subject
       end
+    end
+
+    it 'calls check_single_base' do
+      expect(subject).to receive('check_single_base').and_call_original
+      subject.check_single('', target, app_name: 'app_name', test_name: 'test_name')
+    end
+
+    it 'returns match_result' do
+      expect(subject.check_single('', target, app_name: 'app_name', test_name: 'test_name')).to match(:key => :value)
     end
   end
 end

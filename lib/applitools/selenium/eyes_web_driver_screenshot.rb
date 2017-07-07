@@ -22,10 +22,21 @@ module Applitools::Selenium
     class << self
       alias _new new
 
+      # rubocop:disable LineLength
       # Creates new image.
       #
-      # @param [Array] *args The arguments.
+      # @param [Applitools::Screenshot] image
+      # @param [Hash] options
+      # @option options [Applitools::Selenium::Driver] :driver Applitools driver instance.
+      # @option options [Applitools::RectangleSize] :entire_frame_size The size of the entire frame.
+      # @option options [Applitools::Location] :frame_location_in_screenshot The location of the frame in the screenshot.
+      # @option options [String] :screenshot_type One of allowed types - 'VIEPORT' or 'ENTIRE_FRAME'
+      # @option options [Applitools::Location] :force_offset
+
       # @return [Applitools::Screenshot] The image.
+      # @!parse def initialize(image, options); end
+      # rubocop:enable LineLength
+
       def new(*args)
         image = args.shift
         raise Applitools::EyesIllegalArgument.new 'image is expected to be Applitools::Screenshot!' unless
@@ -79,7 +90,6 @@ module Applitools::Selenium
     # @param [Hash] options The options.
     # @option options [Symbol] :driver Applitools driver instance.
     # @option options [Symbol] :entire_frame_size The size of the entire frame.
-    # @option options [Symbol] :entire_frame The frame instance.
     # @option options [Symbol] :frame_location_in_screenshot The location of the frame in the screenshot.
     def initialize_for_element(options = {})
       Applitools::ArgumentGuard.not_nil options[:driver], 'options[:driver]'
@@ -169,17 +179,9 @@ module Applitools::Selenium
       logger.info 'Done!'
     end
 
-    # def scroll_position
-    #   begin
-    #     position_provider.state
-    #   rescue
-    #     Applitools::Location.new(0,0)
-    #   end
-    # end
-
     # Convert the location.
     #
-    # @param [Applitools::Location] location.
+    # @param [Applitools::Location] location Location to convert
     # @param [Applitools::EyesScreenshot::COORDINATE_TYPES] from Source.
     # @param [Applitools::EyesScreenshot::COORDINATE_TYPES] to Destination.
     # @return [Applitools::Location] The converted location.
