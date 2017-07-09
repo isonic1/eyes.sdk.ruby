@@ -172,7 +172,7 @@ module Applitools
       logger.info '---Test aborted'
 
     rescue Applitools::EyesError => e
-      logger.error e.messages
+      logger.error e.message
 
     ensure
       self.running_session = nil

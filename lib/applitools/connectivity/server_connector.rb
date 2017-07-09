@@ -170,29 +170,41 @@ module Applitools::Connectivity
     def long_request(url, method, request_delay, options = {})
       delay = request_delay
       options = { headers: {
-        'Eyes-Expect' => '202+location',
-        'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
-      } }.merge! options
+        'Eyes-Expect' => '202+location'
+      }.merge(eyes_date_header) }.merge! options
       res = request(url, method, options)
-      return res if res.status == HTTP_STATUS_CODES[:ok]
+      check_status(res, delay)
+    end
 
-      if res.status == HTTP_STATUS_CODES[:accepted]
+    def eyes_date_header
+      { 'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT') }
+    end
+
+    def check_status(res, delay)
+      case res.status
+      when HTTP_STATUS_CODES[:ok]
+        res
+      when HTTP_STATUS_CODES[:accepted]
         second_step_url = res.headers[:location]
-        delay = [MAX_LONG_REQUEST_DELAY, (delay * LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR).round].min
         loop do
+          delay = [MAX_LONG_REQUEST_DELAY, (delay * LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR).round].min
           Applitools::EyesLogger.debug "Still running... retrying in #{delay}s"
           sleep delay
           second_step_options = {
-            headers: { 'Eyes-Date' => Time.now.utc.strftime('%a, %d %b %Y %H:%M:%S GMT') }
+            headers: {}.merge(eyes_date_header)
           }
           res = request(second_step_url, :get, second_step_options)
           break unless res.status == HTTP_STATUS_CODES[:ok]
         end
+        check_status(res, delay)
+      when HTTP_STATUS_CODES[:created]
+        last_step_url = res.headers[:location]
+        request(last_step_url, :delete, headers: eyes_date_header)
+      when HTTP_STATUS_CODES[:gone]
+        raise Applitools::EyesError.new('The server task has gone.')
+      else
+        raise Applitools::EyesError.new('Unknown error processing long request')
       end
-
-      raise Applitools::EyesError.new('The server task has gone.') if res.status == HTTP_STATUS_CODES[:gone]
-      return request(second_step_url, :delete) if res.status == HTTP_STATUS_CODES[:created]
-      raise Applitools::EyesError.new('Unknown error processing long request')
     end
   end
 end
