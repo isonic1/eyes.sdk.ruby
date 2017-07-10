@@ -58,13 +58,8 @@ module Applitools
         value = case args.first
                 when Applitools::FloatingRegion
                   proc { args.first }
-                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element, ::Applitools::Region
                   proc { Applitools::FloatingRegion.any args.shift, *args }
-                when Applitools::Region
-                  proc do
-                    region = args.shift
-                    Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
-                  end
                 else
                   proc do |driver|
                     Applitools::FloatingRegion.any driver.find_element(args.shift, args.shift), *args

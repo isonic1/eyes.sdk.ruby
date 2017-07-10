@@ -73,7 +73,7 @@ module Applitools::Images
               when Applitools::Region
                 proc do
                   region = args.shift
-                  Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
+                  Applitools::FloatingRegion.new region, *args
                 end
               else
                 self.floating_regions = []

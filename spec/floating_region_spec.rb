@@ -2,17 +2,33 @@ require 'spec_helper'
 
 RSpec.describe Applitools::FloatingRegion do
   subject { Applitools::FloatingRegion.new 0, 0, 0, 0, 0, 0, 0, 0 }
+
   let(:original_element) do
     instance_double(Selenium::WebDriver::Element).tap do |el|
       allow(el).to receive(:location).and_return Applitools::Location.new(0, 0)
       allow(el).to receive(:size).and_return Applitools::RectangleSize.new(0, 0)
     end
   end
+
   let(:element) { Applitools::Selenium::Element.new nil, original_element }
+  let(:bounds) { Applitools::FloatingBounds.new(10,10,10,10) }
+  let(:region) { Applitools::Region.new(10,10,10,10) }
+
   it 'can be created from an element' do
     expect(described_class).to respond_to :any
     expect { described_class.any(nil, 0, 0, 0, 0) }.to raise_error Applitools::EyesError
     expect { described_class.any(element, 0, 0, 0, 0) }.to_not raise_error
+  end
+
+  it 'can be created from region and bounds' do
+    fr = nil
+    expect { fr = described_class.any(element, bounds) }.to_not raise_error
+    expect { described_class.new(region, bounds) }.to_not raise_error
+    expect(fr).to be_a_kind_of Applitools::FloatingRegion
+  end
+
+  it 'can be created from plain coordinates' do
+    expect { described_class.new(10,10,10,10,10,10,10,10) }.to_not raise_error
   end
 
   it_should_behave_like 'responds to method', [:to_hash]
