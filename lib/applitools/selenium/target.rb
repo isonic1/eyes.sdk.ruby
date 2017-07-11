@@ -41,12 +41,27 @@ module Applitools
         if args.empty?
           reset_ignore
         else
+          requested_padding = if args.last.is_a? Applitools::PaddingBounds
+                                args.pop
+                              else
+                                Applitools::PaddingBounds::PIXEL_PADDING
+                              end
           ignored_regions << case args.first
-                             when Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element
-                               proc { args.first }
+                             when Applitools::Region
+                               proc { args.first.padding(requested_padding) }
+                             when Applitools::Selenium::Element, ::Selenium::WebDriver::Element
+                               proc do
+                                 region = args.first
+                                 Applitools::Region.from_location_size(
+                                   region.location, region.size
+                                 ).padding(requested_padding)
+                               end
                              else
                                proc do |driver|
-                                 driver.find_element(*args)
+                                 region = driver.find_element(*args)
+                                 Applitools::Region.from_location_size(
+                                     region.location, region.size
+                                 ).padding(requested_padding)
                                end
                              end
 
@@ -55,14 +70,19 @@ module Applitools
       end
 
       def floating(*args)
+        requested_padding = if args.last.is_a? Applitools::PaddingBounds
+                              args.pop
+                            else
+                              Applitools::PaddingBounds::PIXEL_PADDING
+                            end
         value = case args.first
                 when Applitools::FloatingRegion
-                  proc { args.first }
+                  proc { args.first.padding(requested_padding) }
                 when ::Selenium::WebDriver::Element, Applitools::Selenium::Element, ::Applitools::Region
-                  proc { Applitools::FloatingRegion.any args.shift, *args }
+                  proc { Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding) }
                 else
                   proc do |driver|
-                    Applitools::FloatingRegion.any driver.find_element(args.shift, args.shift), *args
+                    Applitools::FloatingRegion.any(driver.find_element(args.shift, args.shift), *args).padding(requested_padding)
                   end
                 end
         floating_regions << value

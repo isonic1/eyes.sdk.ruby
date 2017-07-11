@@ -80,10 +80,10 @@ module Applitools
         'Left' => left,
         'Width' => width,
         'Height' => height,
-        'MaxUpOffset' => max_top_offset,
-        'MaxLeftOffset' => max_left_offset,
-        'MaxRightOffset' => max_right_offset,
-        'MaxDownOffset' => max_bottom_offset
+        'MaxUpOffset' => max_top_offset + padding_top,
+        'MaxLeftOffset' => max_left_offset + padding_left,
+        'MaxRightOffset' => max_right_offset + padding_right,
+        'MaxDownOffset' => max_bottom_offset + padding_bottom
       }
     end
   end

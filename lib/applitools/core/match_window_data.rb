@@ -3,7 +3,7 @@ module Applitools
     class << self
       def convert_coordinates(region, screenshot)
         screenshot.convert_region_location(
-          Applitools::Region.from_location_size(region.location, region.size),
+          region.with_padding,
           Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
           Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
         ).to_hash
@@ -166,8 +166,7 @@ module Applitools
         target.ignored_regions.each do |r|
           case r
           when Proc
-            region = r.call(driver)
-            @ignored_regions << Applitools::Region.from_location_size(region.location, region.size)
+            @ignored_regions << r.call(driver)
             @need_convert_ignored_regions_coordinates = true
           when Applitools::Region
             @ignored_regions << r

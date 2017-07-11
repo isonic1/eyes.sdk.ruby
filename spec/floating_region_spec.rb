@@ -33,6 +33,28 @@ RSpec.describe Applitools::FloatingRegion do
 
   it_should_behave_like 'responds to method', [:to_hash]
 
+  context 'padding' do
+    let(:valid_padding) { Applitools::PaddingBounds.new(10, 11, 12, 13) }
+
+    it 'respond to :padding' do
+      expect(subject).to respond_to :padding
+    end
+
+    it 'padding accepts Applitools::PaddingBounds as an argument' do
+      expect { subject.padding('not valid string') }.to raise_error Applitools::EyesError
+      expect { subject.padding(valid_padding) }.to_not raise_error
+    end
+
+    it 'adds padding bounds to an external rectangle' do
+      expect(subject.padding(valid_padding).to_hash).to include(
+                                                          'MaxLeftOffset' => 10,
+                                                          'MaxRightOffset' => 12,
+                                                          'MaxUpOffset' => 11,
+                                                          'MaxDownOffset' => 13
+                                                        )
+    end
+  end
+
   context 'to_hash' do
     it 'conteins necessary keys' do
       expect(subject.to_hash.keys).to contain_exactly(

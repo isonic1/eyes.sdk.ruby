@@ -165,7 +165,6 @@ RSpec.describe Applitools::Selenium::Target do
         end
       end
       it 'accepts :how, :what' do
-        allow(Applitools::FloatingRegion).to receive :for_element
         subject.floating(:css, '.class', 10, 10, 10, 10)
       end
       it 'accepts Applitools::Region' do
@@ -207,8 +206,10 @@ RSpec.describe Applitools::Selenium::Target do
     context 'ignore' do
       before do
         expect(subject.instance_variable_get(:@ignored_regions)).to receive(:<<) do |*args|
+          ignore_region = nil
           expect(args.first).to be_a Proc
-          expect { args.first.call(driver) }.to_not raise_error
+          expect { ignore_region = args.first.call(driver) }.to_not raise_error
+          expect(ignore_region).to be_a Applitools::Region
         end
       end
       it 'accepts :how, :what' do
