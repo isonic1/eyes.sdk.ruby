@@ -36,14 +36,6 @@ module Applitools
       :left, :top, :width, :height, :max_left_offset, :max_top_offset, :max_right_offset, :max_bottom_offset
     ].freeze
 
-    # def initialize(left, top, width, height, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
-    #   super(left, top, width, height)
-    #   self.max_left_offset = max_left_offset
-    #   self.max_top_offset = max_top_offset
-    #   self.max_right_offset = max_right_offset
-    #   self.max_bottom_offset = max_bottom_offset
-    # end
-
     def initialize(*args)
       case args.size
       when 2
