@@ -18,20 +18,20 @@ RSpec.describe Applitools::Region do
     it 'resets padding if called without arguments' do
       subject.padding(valid_padding)
       expect(subject.padding).to have_attributes(
-                                   :padding_top => 0,
-                                   :padding_left => 0,
-                                   :padding_right => 0,
-                                   :padding_bottom => 0
-                                 )
+        padding_top: 0,
+        padding_left: 0,
+        padding_right: 0,
+        padding_bottom: 0
+      )
     end
 
     it 'has zero padding by default' do
       expect(subject).to have_attributes(
-                           :padding_top => 0,
-                           :padding_left => 0,
-                           :padding_right => 0,
-                           :padding_bottom => 0
-                         )
+        padding_top: 0,
+        padding_left: 0,
+        padding_right: 0,
+        padding_bottom: 0
+      )
     end
 
     it 'padding accepts Applitools::PaddingBounds as an argument' do
@@ -41,12 +41,11 @@ RSpec.describe Applitools::Region do
 
     it 'with_padding returns new instance which includes paddings' do
       expect(subject.padding(valid_padding).with_padding.to_hash).to include(
-                                                          :left => -1,
-                                                          :top => -1,
-                                                          :width => 33,
-                                                          :height => 36
-                                                        )
+        left: -1,
+        top: -1,
+        width: 33,
+        height: 36
+      )
     end
   end
-
 end

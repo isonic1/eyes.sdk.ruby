@@ -11,8 +11,8 @@ RSpec.describe Applitools::FloatingRegion do
   end
 
   let(:element) { Applitools::Selenium::Element.new nil, original_element }
-  let(:bounds) { Applitools::FloatingBounds.new(10,10,10,10) }
-  let(:region) { Applitools::Region.new(10,10,10,10) }
+  let(:bounds) { Applitools::FloatingBounds.new(10, 10, 10, 10) }
+  let(:region) { Applitools::Region.new(10, 10, 10, 10) }
 
   it 'can be created from an element' do
     expect(described_class).to respond_to :any
@@ -28,7 +28,7 @@ RSpec.describe Applitools::FloatingRegion do
   end
 
   it 'can be created from plain coordinates' do
-    expect { described_class.new(10,10,10,10,10,10,10,10) }.to_not raise_error
+    expect { described_class.new(10, 10, 10, 10, 10, 10, 10, 10) }.to_not raise_error
   end
 
   it_should_behave_like 'responds to method', [:to_hash]
@@ -47,11 +47,11 @@ RSpec.describe Applitools::FloatingRegion do
 
     it 'adds padding bounds to an external rectangle' do
       expect(subject.padding(valid_padding).to_hash).to include(
-                                                          'MaxLeftOffset' => 10,
-                                                          'MaxRightOffset' => 12,
-                                                          'MaxUpOffset' => 11,
-                                                          'MaxDownOffset' => 13
-                                                        )
+        'MaxLeftOffset' => 10,
+        'MaxRightOffset' => 12,
+        'MaxUpOffset' => 11,
+        'MaxDownOffset' => 13
+      )
     end
   end
 

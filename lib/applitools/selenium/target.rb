@@ -60,7 +60,7 @@ module Applitools
                                proc do |driver|
                                  region = driver.find_element(*args)
                                  Applitools::Region.from_location_size(
-                                     region.location, region.size
+                                   region.location, region.size
                                  ).padding(requested_padding)
                                end
                              end
@@ -82,7 +82,9 @@ module Applitools
                   proc { Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding) }
                 else
                   proc do |driver|
-                    Applitools::FloatingRegion.any(driver.find_element(args.shift, args.shift), *args).padding(requested_padding)
+                    Applitools::FloatingRegion.any(
+                      driver.find_element(args.shift, args.shift), *args
+                    ).padding(requested_padding)
                   end
                 end
         floating_regions << value
