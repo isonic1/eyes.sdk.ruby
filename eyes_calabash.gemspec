@@ -22,4 +22,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = %w(lib)
   spec.add_dependency 'eyes_images', "= #{Applitools::VERSION}"
   spec.add_dependency 'cucumber'
+  spec.add_dependency 'rspec-expectations'
 end
