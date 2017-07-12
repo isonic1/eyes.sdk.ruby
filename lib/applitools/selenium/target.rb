@@ -28,14 +28,12 @@ module Applitools
         reset_for_fullscreen
       end
 
-      # rubocop:disable LineLength
       # Add the wanted ignored regions.
       #
       # @param [Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element] region_or_element the region to ignore or an element representing the region to ignore
       # @param [Symbol, String] how A finder to be used (see Selenium::WebDriver documentation for complete list of available finders)
       # @param [Symbol, String] what An id or selector to find
-      # @!parse def ignore(region_or_element, how, what); end;
-      # rubocop:enable LineLength
+      # @!parse def ignore(region_or_element, how, what, padding = Applitools::PaddingBounds::PIXEL_PADDING); end;
 
       def ignore(*args)
         if args.empty?
@@ -68,6 +66,29 @@ module Applitools
         end
         self
       end
+
+      # Sets the wanted floating region
+      # @param region_or_element [Applitools::FloatingRegion, Selenium::WebDriver::Element, Applitools::Selenium::Element, Applitools::Region]
+      # @param bounds [Applitools::FloatingBounds]
+      # @!parse def floating(region_or_element, bounds, padding); end;
+      # @param left [Integer]
+      # @param top [Integer]
+      # @param right [Integer]
+      # @param bottom [Integer]
+      # @param padding [Applitools::PaddingBounds]
+      # @example
+      #   target.floating(:id, 'my_id', 10, 10, 10, 10)
+      # @example
+      #   target.floating(:id, 'my_id', Applitools::FloatingBounds.new(10, 10, 10, 10))
+      # @example
+      #   target.floating(region, Applitools::FloatingBounds.new(10, 10, 10, 10))
+      # @example
+      #   target.floating(floating_region)
+      # @example
+      #   target.floating(floating_region, bounds)
+      # @example
+      #   target.floating(:id, 'my_id', Applitools::FloatingBounds.new(10, 10, 10, 10), Applitools::PaddingBounds.new(10, 10, 10, 10))
+      # @!parse def floating(region_or_element, bounds, left,top, right, bottom, padding); end;
 
       def floating(*args)
         requested_padding = if args.last.is_a? Applitools::PaddingBounds
@@ -102,9 +123,7 @@ module Applitools
         self
       end
 
-      # rubocop:disable LineLength
       # Add the desired region.
-      #
       # @param [Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element] element the target region or an element representing the target region
       # @param [Symbol, String] how The finder to be used (:css, :id, etc. see Selenium::WebDriver documentation for complete list of available finders)
       # @param [Symbol, String] what Selector or id of an element
@@ -114,7 +133,6 @@ module Applitools
       #   target.region(:id, 'target_region')
       # @return [Applitools::Selenium::Target] A Target instance.
       # @!parse def region(element, how, what); end;
-      # rubocop:enable LineLength
 
       def region(*args)
         self.region_to_check = case args.first
