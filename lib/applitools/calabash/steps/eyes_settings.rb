@@ -6,7 +6,7 @@ Given(/^eyes test name is "([^"]*)"$/) do |name|
   Applitools::Calabash::EyesSettings.instance.test_name = name
 end
 
-Given(/^eyes vieport size is "([^"]*)"$/) do |size|
+Given(/^eyes viewport size is "([^"]*)"$/) do |size|
   Applitools::Calabash::EyesSettings.instance.viewport_size = Applitools::RectangleSize.from_any_argument(size).to_h
 end
 
@@ -15,7 +15,7 @@ Given(/^eyes API key "([^"]*)"$/) do |key|
 end
 
 Given /^eyes tag is "([^"]*)"$/ do |tag|
-  Applitools::Calabash::EyesSettings.instance.tag = tag
+  @tag = tag
 end
 
 Given /^calabash screenshot dir is "([^"]*)"$/ do |path|
@@ -43,20 +43,9 @@ Given /^create directories$/ do
 end
 
 Given /^set it up$/ do
-  p "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DIRS!!!!!!!!!!!1"
   step %{clear directories}
   step %{create directories}
   Applitools::Calabash::EyesSettings.instance.needs_setting_up = false
 end
 
-Then /^open eyes$/ do
-  eyes_settings = Applitools::Calabash::EyesSettings.instance
-  eyes_settings.eyes ||= Applitools::Images::Eyes.new.tap do |eyes|
-    eyes.api_key = eyes_settings.applitools_api_key
-    log_file_path = File.join(eyes_settings.log_prefix, eyes_settings.log_file)
-    eyes.log_handler = Logger.new(File.new(log_file_path, 'w+'))
-  end
-
-  eyes_settings.eyes.open eyes_settings.options_for_open unless eyes_settings.eyes.open?
-end
 

@@ -1,4 +1,5 @@
 require 'singleton'
+require 'securerandom'
 module Applitools
   module Calabash
     class EyesSettings
@@ -23,23 +24,20 @@ module Applitools
         result.merge!(viewport_size: viewport_size)
       end
 
-      def tag=(value)
-        @tag = value
-      end
-
-      def tag
-        return unless @tag
-        value = @tag
-        remove_instance_variable :@tag
-        value
-      end
-
       def screenshot_prefix
-        File.join(Dir.getwd, tmp_dir, screenshot_dir)
+        File.join(Dir.getwd, tmp_dir, screenshot_dir, '')
       end
 
       def log_prefix
         File.join(Dir.getwd, log_dir)
+      end
+
+      def screenshot_names
+        @names ||= Enumerator.new do |y|
+          loop do
+            y << {prefix: screenshot_prefix, name: "#{SecureRandom.uuid}.png"}
+          end
+        end
       end
     end
   end

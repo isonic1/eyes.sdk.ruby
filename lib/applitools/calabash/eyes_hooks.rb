@@ -6,6 +6,8 @@ if respond_to? :Before
     step %{eyes application name is "#{scenario.feature.name}"} unless eyes_settings.app_name
     step %{eyes test name is "#{scenario.name}"} unless eyes_settings.test_name
 
+    step %{eyes tag is "#{scenario.name}"}
+
     step %{set it up} if eyes_settings.needs_setting_up
   end
 end
