@@ -434,8 +434,6 @@ module Applitools::Selenium
       check(options[:tag], target)
     end
 
-    # @!parse def check_region(element, how=nil, what=nil, options = {}); end
-
     # Use this method to perform seamless testing with selenium through eyes driver.
     # It yields a block and passes to it an Applitools::Selenium::Driver instance, which wraps standard driver.
     # Using Selenium methods inside the 'test' block will send the messages to Selenium
