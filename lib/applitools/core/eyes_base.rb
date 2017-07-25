@@ -93,7 +93,12 @@ module Applitools
     # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
 
     def default_match_level(value, exact_options = {})
-      @match_level, self.exact = match_level_with_exact(value, exact_options)
+      result = match_level_with_exact(value, exact_options)
+      self.default_match_settings[:match_level] = result.first
+      self.match_level = result.first
+      self.default_match_settings[:exact] = result.last
+      self.exact = result.last
+      result
     end
 
     # rubocop:disable LineLength
