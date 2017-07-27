@@ -1,6 +1,11 @@
+require_relative 'padding_bounds'
 module Applitools
   class Region
+    extend Forwardable
     attr_accessor :left, :top, :width, :height
+
+    def_delegators :@padding, :padding_left, :padding_top, :padding_right, :padding_bottom
+
     alias x left
     alias y top
 
@@ -15,6 +20,7 @@ module Applitools
       @top = top.round
       @width = width.round
       @height = height.round
+      @padding = Applitools::PaddingBounds::ZERO_PADDING
     end
 
     EMPTY = Region.new(0, 0, 0, 0)
@@ -104,6 +110,23 @@ module Applitools
 
     def size_equals?(region)
       width == region.width && height == region.height
+    end
+
+    # Sets padding for a current region. If called without any argument, all paddings will be set to 0
+    # @param padding[Applitools::PaddingBounds] represents paddings to be set for a region
+    # @return [Applitools::Region]
+    def padding(padding = nil)
+      padding = Applitools::PaddingBounds::ZERO_PADDING unless padding
+      Applitools::ArgumentGuard.is_a?(padding, 'padding', Applitools::PaddingBounds)
+      @padding = padding
+      self
+    end
+
+    def with_padding
+      Applitools::Region.from_location_size(
+        Applitools::Location.new(left - padding_left, top - padding_top),
+        Applitools::RectangleSize.new(width + padding_left + padding_right, height + padding_top + padding_bottom)
+      )
     end
 
     class << self
