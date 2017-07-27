@@ -13,8 +13,11 @@ module Applitools
       end
 
       def clear_directories(eyes_settings)
-        FileUtils.remove_dir(File.join Dir.getwd, eyes_settings.tmp_dir)
-        FileUtils.remove_dir(File.join Dir.getwd, eyes_settings.log_dir)
+        tmp_dir = File.join Dir.getwd, eyes_settings.tmp_dir
+        log_dir = File.join Dir.getwd, eyes_settings.log_dir
+
+        FileUtils.remove_dir(tmp_dir) if File.exist?(tmp_dir)
+        FileUtils.remove_dir(log_dir) if File.exist?(log_dir)
       end
 
       def using_screenshot(context)
@@ -24,12 +27,14 @@ module Applitools
       end
 
       def region_from_element(element)
-        Applitools::Region.new(
+        region = Applitools::Region.new(
           element['rect']['x'],
           element['rect']['y'],
           element['rect']['width'],
           element['rect']['height'],
         )
+        return region if defined?(Calabash::Android)
+        region.scale_it!(Applitools::Calabash::EyesSettings.instance.eyes.density)
       end
 
       def pixel_ratio(context)

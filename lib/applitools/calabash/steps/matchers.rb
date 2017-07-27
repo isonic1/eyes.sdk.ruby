@@ -1,4 +1,4 @@
-Then /^take screenshot$/ do
+Then /^take eyes screenshot$/ do
   @target = nil
   Applitools::Calabash::Utils.using_screenshot(self) do |screenshot_path|
     @target = Applitools::Images::Target.path(screenshot_path)
@@ -21,8 +21,8 @@ Then /^target should match a baseline$/ do
 end
 
 Then /^the whole screen should match a baseline/ do
-  step %{take screenshot}
-  step %{ignore status bar}
+  step %{take eyes screenshot}
+  step %{ignore status bar} if defined?(Calabash::Android)
   step %{target should match a baseline}
 end
 
@@ -37,7 +37,7 @@ end
 
 Then /^query element "([^"]*)" and take (\d+)$/ do |query, index|
   if element = query(query)[index.to_i]
-    step %{take screenshot}
+    step %{take eyes screenshot}
     @target.region(Applitools::Calabash::Utils.region_from_element(element))
   end
 end

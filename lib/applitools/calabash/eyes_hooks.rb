@@ -3,8 +3,8 @@ if respond_to? :Before
     eyes_settings = Applitools::Calabash::EyesSettings.instance
 
     step %{eyes API key "#{ENV['APPLITOOLS_API_KEY']}"} unless eyes_settings.applitools_api_key
-    step %{eyes application name is "#{scenario.feature.name}"} unless eyes_settings.app_name
-    step %{eyes test name is "#{scenario.name}"} unless eyes_settings.test_name
+
+    step %{eyes test name is "#{scenario.feature.name}"} unless eyes_settings.test_name
 
     step %{eyes tag is "#{scenario.name}"}
 

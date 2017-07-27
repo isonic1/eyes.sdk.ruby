@@ -84,6 +84,14 @@ module Applitools
       Applitools::Location.for(mid_x.round, mid_y.round)
     end
 
+    def scale_it!(scale_factor)
+      @left *= scale_factor
+      @top *= scale_factor
+      @width *= scale_factor
+      @height *= scale_factor
+      self
+    end
+
     def sub_regions(subregion_size, is_fixed_size = false)
       return self.class.sub_regions_with_fixed_size self, subregion_size if is_fixed_size
       self.class.sub_regions_with_varying_size self, subregion_size
