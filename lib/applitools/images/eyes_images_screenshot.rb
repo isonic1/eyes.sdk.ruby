@@ -37,7 +37,7 @@ module Applitools::Images
 
     def convert_region_location(region, from, to)
       Applitools::ArgumentGuard.not_nil region, 'region'
-      return Core::Region.new(0, 0, 0, 0) if region.empty?
+      return Applitools::Region.new(0, 0, 0, 0) if region.empty?
 
       Applitools::ArgumentGuard.not_nil from, 'from'
       Applitools::ArgumentGuard.not_nil to, 'to'

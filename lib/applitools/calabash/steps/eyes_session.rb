@@ -46,7 +46,7 @@ if defined?(Calabash::Android)
     result = /DisplayDeviceInfo.*density (?<density>\d+)/.match(
       `#{default_device.adb_command} shell dumpsys display`
     )
-    Applitools::Calabash::EyesSettings.instance.eyes.density = result[:density]
+    Applitools::Calabash::EyesSettings.instance.eyes.density = result[:density].to_i
   end
 
   Then /^set device size$/ do
