@@ -176,6 +176,7 @@ module Applitools::Selenium
     def check_window(tag = nil, match_timeout = USE_DEFAULT_MATCH_TIMEOUT)
       target = Applitools::Selenium::Target.window.tap do |t|
         t.timeout(match_timeout)
+        t.fully if force_full_page_screenshot
       end
       check(tag, target)
     end
@@ -206,6 +207,7 @@ module Applitools::Selenium
       Applitools::ArgumentGuard.is_a? target, 'target', Applitools::Selenium::Target
       original_overflow = nil
       original_position_provider = position_provider
+      original_force_full_page_screenshot = force_full_page_screenshot
 
       eyes_element = nil
       timeout = target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
@@ -272,7 +274,7 @@ module Applitools::Selenium
         ensure
           eyes_element.overflow = original_overflow unless original_overflow.nil?
           self.check_frame_or_element = false
-          self.force_full_page_screenshot = false
+          self.force_full_page_screenshot = original_force_full_page_screenshot
           self.position_provider = original_position_provider
           self.region_to_check = nil
           region_visibility_strategy.return_to_original_position position_provider
