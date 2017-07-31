@@ -176,6 +176,7 @@ module Applitools::Selenium
     def check_window(tag = nil, match_timeout = USE_DEFAULT_MATCH_TIMEOUT)
       target = Applitools::Selenium::Target.window.tap do |t|
         t.timeout(match_timeout)
+        t.fully if force_full_page_screenshot
       end
       check(tag, target)
     end
