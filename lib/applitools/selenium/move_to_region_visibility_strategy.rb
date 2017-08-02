@@ -7,13 +7,12 @@ module Applitools::Selenium
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
     attr_accessor :original_position
 
-    # rubocop:disable LineLength
     # Set the location of the position provider.
     #
     # @param [Applitools::Selenium::CssTranslatePositionProvider, Applitools::Selenium::ScrollPositionProvider] position_provider
     #   The position provider type (e.g. Applitools::Selenium::CssTranslatePositionProvider, Applitools::Selenium::ScrollPositionProvider).
     # @param [Applitools::Location] location The location to move to.
-    # rubocop:enable LineLength
+
     def move_to_region(position_provider, location)
       logger.info 'Getting current position state...'
       self.original_position = position_provider.state
@@ -30,11 +29,10 @@ module Applitools::Selenium
       logger.info 'Done!'
     end
 
-    # rubocop:disable LineLength
     # Returns the position provider to its original position.
     # @param [Applitools::Selenium::CssTranslatePositionProvider, Applitools::Selenium::ScrollPositionProvider] position_provider
     #   The position provider type (e.g. Applitools::Selenium::CssTranslatePositionProvider,  Applitools::Selenium::ScrollPositionProvider).
-    # rubocop:enable LineLength
+
     def return_to_original_position(position_provider)
       return if original_position.nil?
       logger.info 'Returning to original position...'

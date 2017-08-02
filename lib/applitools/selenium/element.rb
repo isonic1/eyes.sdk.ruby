@@ -106,7 +106,7 @@ module Applitools::Selenium
         top = 0
       end
 
-      Applitools::Base::Region.new(left, top, width, height)
+      Applitools::Region.new(left, top, width, height)
     end
 
     def find_element(*args)

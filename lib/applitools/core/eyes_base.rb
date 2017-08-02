@@ -95,14 +95,12 @@ module Applitools
       (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
     end
 
-    # rubocop:disable LineLength
     # Sets default match settings
     # @param [Hash] value
     # @option value [Symbol] match_level
     # @option value [Hash] exact exact values. Available keys are 'MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold'
     # @option value [Fixnum] scale
     # @option value [Fixnum] remainder
-    # rubocop:enable LineLength
 
     def default_match_settings=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Hash

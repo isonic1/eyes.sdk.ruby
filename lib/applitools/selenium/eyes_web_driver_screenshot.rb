@@ -22,7 +22,6 @@ module Applitools::Selenium
     class << self
       alias _new new
 
-      # rubocop:disable LineLength
       # Creates new image.
       #
       # @param [Applitools::Screenshot] image
@@ -35,7 +34,6 @@ module Applitools::Selenium
 
       # @return [Applitools::Screenshot] The image.
       # @!parse def initialize(image, options); end
-      # rubocop:enable LineLength
 
       def new(*args)
         image = args.shift

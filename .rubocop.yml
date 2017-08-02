@@ -1,6 +1,7 @@
 # Custom config for RuboCop static code analysis
 Metrics/LineLength:
   Max: 120
+  IgnoredPatterns: ['# .*']
 
 Metrics/MethodLength:
   Enabled: false

@@ -56,10 +56,16 @@ module Applitools::Images
       }
     end
 
-    def ignore(region = nil)
+    def ignore(*args)
+      requested_padding = if args.last.is_a? Applitools::PaddingBounds
+                            args.pop
+                          else
+                            Applitools::PaddingBounds::PIXEL_PADDING
+                          end
+      region = args.shift
       if region
         Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
-        ignored_regions << region
+        ignored_regions << region.padding(requested_padding)
       else
         self.ignored_regions = []
       end
@@ -67,13 +73,19 @@ module Applitools::Images
     end
 
     def floating(*args)
+      requested_padding = if args.last.is_a? Applitools::PaddingBounds
+                            args.pop
+                          else
+                            Applitools::PaddingBounds::PIXEL_PADDING
+                          end
+
       value = case args.first
               when Applitools::FloatingRegion
-                proc { args.first }
+                proc { args.first.padding(requested_padding) }
               when Applitools::Region
                 proc do
                   region = args.shift
-                  Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
+                  Applitools::FloatingRegion.any(region, *args).padding(requested_padding)
                 end
               else
                 self.floating_regions = []
