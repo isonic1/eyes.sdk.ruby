@@ -6,16 +6,22 @@ if respond_to? :Before
 
     step %{eyes application name is "#{scenario.feature.name}"}
 
-    step %{eyes test name is "#{scenario.name}"} unless eyes_settings.test_name
+    step %{eyes test name is "#{scenario.name}"}
 
     step %{eyes tag is ""}
 
     step %{set it up} if eyes_settings.needs_setting_up
+
+    step %{open eyes}
   end
 end
 
 if respond_to? :After
   After('@eyes', '@close') do |scenario|
-    p 'AFTER'
+    step %{terminate eyes session}
   end
 end
+
+# at_exit do
+#
+# end

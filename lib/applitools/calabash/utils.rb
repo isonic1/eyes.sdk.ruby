@@ -33,7 +33,7 @@ module Applitools
           element['rect']['width'],
           element['rect']['height'],
         )
-        return region if defined?(::Calabash::Android)
+        return region if Applitools::Calabash::EnvironmentDetector.android?
         region.scale_it!(Applitools::Calabash::EyesSettings.instance.eyes.density)
       end
 
