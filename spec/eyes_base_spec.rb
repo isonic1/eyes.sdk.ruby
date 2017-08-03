@@ -111,9 +111,9 @@ describe Applitools::EyesBase do
       expect(subject.match_level).to eq Applitools::MATCH_LEVEL[:strict]
     end
     it 'sets match level before tests' do
-      subject.default_match_level(:layout)
+      subject.set_default_match_settings(:layout)
       expect(subject.default_match_settings).to include(match_level: 'Layout')
-      subject.default_match_level(:strict)
+      subject.set_default_match_settings(:strict)
       expect(subject.default_match_settings).to include(match_level: 'Strict')
     end
   end
