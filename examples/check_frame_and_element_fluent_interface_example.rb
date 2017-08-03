@@ -15,6 +15,7 @@ RSpec.describe 'Check frame and element example', :type => :feature, :js => true
       eyes.force_full_page_screenshot = false
       eyes.log_handler = Logger.new(STDOUT)
       eyes.stitch_mode = :css
+      eyes.match_level = Applitools::MATCH_LEVEL[:content]
       # eyes.proxy = Applitools::Connectivity::Proxy.new 'http://localhost:9999'
     end
   end

@@ -89,8 +89,9 @@ describe Applitools::EyesBase do
     let(:data) { Applitools::MatchWindowData.new }
     it 'iterates over keys' do
       %w(match_level exact scale remainder).each do |k|
-        expect(subject.default_match_settings).to receive('[]').with(k.to_sym)
-        expect_any_instance_of(Applitools::MatchWindowData).to receive("#{k}=")
+        expect_any_instance_of(Applitools::MatchWindowData).to(
+          receive("#{k}=").with(subject.default_match_settings[k.to_sym])
+        )
       end
       subject.send('update_default_settings', data)
     end
@@ -110,9 +111,9 @@ describe Applitools::EyesBase do
       expect(subject.match_level).to eq Applitools::MATCH_LEVEL[:strict]
     end
     it 'sets match level before tests' do
-      subject.default_match_level(:layout)
+      subject.set_default_match_settings(:layout)
       expect(subject.default_match_settings).to include(match_level: 'Layout')
-      subject.default_match_level(:strict)
+      subject.set_default_match_settings(:strict)
       expect(subject.default_match_settings).to include(match_level: 'Strict')
     end
   end
@@ -127,8 +128,16 @@ describe Applitools::EyesBase do
       expect { subject.default_match_settings = { match_level: 'none' } }.to_not raise_error
     end
     it 'merges passed value to default_match_settings' do
-      expect(subject.default_match_settings).to receive(:merge!)
-      subject.default_match_settings = {}
+      expect(subject).to receive(:match_level=).with('match_level')
+      expect(subject).to receive(:exact=).with('exact')
+      expect(subject).to receive(:server_scale=).with('server_scale')
+      expect(subject).to receive(:server_remainder=).with('server_remainder')
+      subject.default_match_settings = {
+        match_level: 'match_level',
+        exact: 'exact',
+        scale: 'server_scale',
+        remainder: 'server_remainder'
+      }
     end
   end
 
@@ -464,37 +473,43 @@ describe Applitools::EyesBase do
     end
   end
 
-  context ':default_match level' do
+  context ':set_default_match_settins' do
     it 'sets options[:match_level]' do
-      subject.default_match_level(:strict)
+      subject.set_default_match_settings(:strict)
       expect(subject.match_level).to eq Applitools::MATCH_LEVEL[:strict]
-      expect { subject.default_match_level('Strict') }.to raise_error Applitools::EyesError
+      expect { subject.set_default_match_settings('Strict') }.to raise_error Applitools::EyesError
     end
     it 'raises an exception on wrong value' do
-      expect { subject.default_match_level('unknown') }.to raise_error Applitools::EyesError
-      expect { subject.default_match_level(:none) }.to_not raise_error
+      expect { subject.set_default_match_settings('unknown') }.to raise_error Applitools::EyesError
+      expect { subject.set_default_match_settings(:none) }.to_not raise_error
     end
     it 'accepts a hash of exact values' do
       aggregate_failures do
-        expect { subject.default_match_level(:exact, min_diff_height: 0) }.to_not raise_error
-        expect { subject.default_match_level(:exact) }.to_not raise_error
+        expect { subject.set_default_match_settings(:exact, min_diff_height: 0) }.to_not raise_error
+        expect { subject.set_default_match_settings(:exact) }.to_not raise_error
       end
     end
     it 'processes exact values only if match_level == exact' do
-      expect { subject.default_match_level(:strict, 'MinDiffIntensity' => 0) }.to raise_error Applitools::EyesError
+      expect { subject.set_default_match_settings(:strict, 'MinDiffIntensity' => 0) }.to(
+        raise_error Applitools::EyesError
+      )
     end
     it 'raises an exception if passed hash contains extra keys' do
-      expect { subject.default_match_level(:exact, 'unknown_key' => 'a_value') }.to raise_error Applitools::EyesError
+      expect { subject.set_default_match_settings(:exact, 'unknown_key' => 'a_value') }.to(
+        raise_error Applitools::EyesError
+      )
     end
     it 'accepts underscored keys as well as original' do
-      expect { subject.default_match_level(:exact, 'MinDiffIntensity' => 0, :min_diff_height => 0) }.to_not raise_error
+      expect { subject.set_default_match_settings(:exact, 'MinDiffIntensity' => 0, :min_diff_height => 0) }.to_not(
+        raise_error
+      )
     end
     it 'updates exact if exact values have been passed' do
       subject.exact = {}
-      expect { subject.default_match_level(:exact, 'MinDiffIntensity' => 0) }.to change { subject.exact }
+      expect { subject.set_default_match_settings(:exact, 'MinDiffIntensity' => 0) }.to change { subject.exact }
     end
     it 'uses default exact values if nothing is passed' do
-      subject.default_match_level(:exact)
+      subject.set_default_match_settings(:exact)
       aggregate_failures do
         expect(subject.exact).to be_a Hash
         expect(subject.exact.keys).to(

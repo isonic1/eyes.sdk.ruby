@@ -6,6 +6,7 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 eyes = Applitools::Selenium::Eyes.new
 eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
+eyes.match_level = Applitools::MATCH_LEVEL[:layout]
 
 begin
   web_driver = Selenium::WebDriver.for :chrome
