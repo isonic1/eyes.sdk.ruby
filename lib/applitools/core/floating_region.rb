@@ -4,7 +4,7 @@ module Applitools
     class << self
       def any(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
         case element
-        when Applitools::Selenium::Element, ::Selenium::WebDriver::Element, Applitools::Region
+        when Applitools::Selenium::Element, ::Selenium::WebDriver::Element, Applitools::Region, Applitools::AbstractRegion
           for_element(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
         else
           raise Applitools::EyesIllegalArgument.new "Unsupported element - #{element.class}"
@@ -26,6 +26,18 @@ module Applitools
       self.max_top_offset = max_top_offset
       self.max_right_offset = max_right_offset
       self.max_bottom_offset = max_bottom_offset
+    end
+
+    def scale_it!(scale_factor)
+      self.left *= scale_factor
+      self.top *= scale_factor
+      self.width *= scale_factor
+      self.height *= scale_factor
+      self.max_left_offset *= scale_factor
+      self.max_top_offset *= scale_factor
+      self.max_right_offset *= scale_factor
+      self.max_bottom_offset *= scale_factor
+      self
     end
 
     def to_hash

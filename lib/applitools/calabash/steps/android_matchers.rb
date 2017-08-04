@@ -1,10 +1,14 @@
+Then /^take eyes screenshot$/ do
+  @target = nil
+  Applitools::Calabash::Utils.using_screenshot(self) do |screenshot_path|
+    @target = Applitools::Calabash::AndroidTarget.path(screenshot_path)
+  end
+end
+
 Then /^ignore status bar$/ do
   raise Applitools::EyesError, '@target is not set' unless @target
   status_bar = query("view id:'statusBarBackground'").first
-  if status_bar
-    ignore_region = Applitools::Calabash::Utils.region_from_element(status_bar)
-    @target.ignore(ignore_region)
-  end
+  @target.ignore Applitools::Calabash::CalabashElement.new(status_bar) if status_bar
 end
 
 Then /^the whole screen should match a baseline/ do
