@@ -8,13 +8,14 @@ OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
 Applitools.register_capybara_driver :browser => :chrome
 
-RSpec.describe 'Check frame and element example', :type => :feature, :js => true do
+RSpec.describe 'Layout Check frame and element example', :type => :feature, :js => true do
   let(:eyes) do
     Applitools::Selenium::Eyes.new.tap do |eyes|
       eyes.api_key = ENV['APPLITOOLS_API_KEY']
       eyes.force_full_page_screenshot = true
       eyes.log_handler = Logger.new(STDOUT)
       eyes.stitch_mode = :css
+      eyes.match_level = Applitools::MATCH_LEVEL[:layout]
       # eyes.proxy = Applitools::Connectivity::Proxy.new 'http://localhost:9999'
     end
   end
