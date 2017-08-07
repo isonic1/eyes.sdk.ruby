@@ -1,7 +1,7 @@
 Then /^take eyes screenshot$/ do
   @target = nil
   Applitools::Calabash::Utils.using_screenshot(self) do |screenshot_path|
-    @target = Applitools::Calabash::AndroidTarget.path(screenshot_path)
+    @target = Applitools::Calabash::Target.path(screenshot_path)
   end
 end
 
