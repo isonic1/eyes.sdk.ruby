@@ -17,6 +17,14 @@ module Applitools
         return unless density
         "density: #{density}"
       end
+
+      def capture_screenshot
+
+      end
+
+      def check_it
+
+      end
     end
   end
 end
