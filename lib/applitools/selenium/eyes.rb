@@ -696,6 +696,8 @@ module Applitools::Selenium
       add_mouse_trigger_base(mouse_action, control, cursor)
     end
 
+    public :add_text_trigger, :add_mouse_trigger, :add_mouse_trigger_by_region_and_location
+
     protected
 
     def check_current_frame(match_timeout, tag)
