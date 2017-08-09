@@ -75,7 +75,7 @@ module Applitools::Selenium
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
-      :disable_vertical_scrolling, :explicit_entire_size
+      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -97,6 +97,9 @@ module Applitools::Selenium
       self.wait_before_screenshots = DEFAULT_WAIT_BEFORE_SCREENSHOTS
       self.region_visibility_strategy = MoveToRegionVisibilityStrategy.new
       self.debug_screenshot = false
+      self.debug_screenshot_provider = Applitools::DebugScreenshotProvider.new
+                                                                          .tag_access { tag_for_debug }
+                                                                          .debug_flag_access { debug_screenshot }
       self.disable_horizontal_scrolling = false
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil
@@ -388,7 +391,6 @@ module Applitools::Selenium
       options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge! Applitools::Utils.extract_options!(args)
       target = Applitools::Selenium::Target.new.region(*args).timeout(options[:match_timeout])
       target.fully if options[:stitch_content]
-      self.screenshot_name_enumerator = nil
       check(options[:tag], target)
     end
 
@@ -477,7 +479,7 @@ module Applitools::Selenium
 
     def capture_screenshot
       image_provider = Applitools::Selenium::TakesScreenshotImageProvider.new driver,
-        debug_screenshot: debug_screenshot, name_enumerator: screenshot_name_enumerator
+        debug_screenshot_provider: debug_screenshot_provider
       logger.info 'Getting screenshot (capture_screenshot() has been invoked)'
 
       update_scaling_params
@@ -493,7 +495,9 @@ module Applitools::Selenium
       begin
         if check_frame_or_element
           logger.info 'Check frame/element requested'
-          algo = Applitools::Selenium::FullPageCaptureAlgorithm.new
+          algo = Applitools::Selenium::FullPageCaptureAlgorithm.new(
+            debug_screenshot_provider: debug_screenshot_provider
+          )
 
           entire_frame_or_element = algo.get_stitched_region(
             image_provider: image_provider,
@@ -515,7 +519,9 @@ module Applitools::Selenium
           logger.info 'Full page screenshot requested'
           original_frame = driver.frame_chain
           driver.switch_to.default_content
-          algo = Applitools::Selenium::FullPageCaptureAlgorithm.new
+          algo = Applitools::Selenium::FullPageCaptureAlgorithm.new(
+            debug_screenshot_provider: debug_screenshot_provider
+          )
           region_provider = Object.new
           region_provider.instance_eval do
             def region
@@ -957,23 +963,6 @@ module Applitools::Selenium
 
         region_visibility_strategy.return_to_original_position position_provider
       end
-    end
-
-    def screenshot_name_enumerator
-      @name_enumerator ||= Enumerator.new do |y|
-        counter = 1
-        loop do
-          y << "#{tag_for_debug.gsub(/\s+/, '_')}__#{Time.now.strftime('%Y_%m_%d_%H_%M')}__#{counter}.png"
-          counter += 1
-        end
-      end
-    end
-
-    # Resets screenshot_names sequence to initial state.
-    #
-    # @param [Boolean] value should be false or nil to reset the sequence. Takes no effect if +true+ passed
-    def screenshot_name_enumerator=(value)
-      @name_enumerator = nil unless value
     end
 
     def inferred_environment

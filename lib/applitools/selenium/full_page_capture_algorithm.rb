@@ -4,8 +4,15 @@ module Applitools::Selenium
     extend Forwardable
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
+    attr_reader :debug_screenshot_provider
+
     MAX_SCROLL_BAR_SIZE = 50
     MIN_SCREENSHOT_PART_HEIGHT = 10
+
+    def initialize(options = {})
+      @debug_screenshot_provider = options[:debug_screenshot_provider] ||
+        Applitools::DebugScreenshotProvider.new.tag_access { '' }.debug_flag_access { false }
+    end
 
     # Returns the stitched image.
     #
@@ -60,17 +67,25 @@ module Applitools::Selenium
 
       logger.info 'Getting top/left image...'
       image = image_provider.take_screenshot
+      debug_screenshot_provider.save(image, 'left_top_original')
       image = scale_provider.scale_image(image) if scale_provider
+      debug_screenshot_provider.save(image, 'left_top_original_scaled')
       image = cut_provider.cut(image) if cut_provider
+      debug_screenshot_provider.save(image, 'left_top_original_cutted')
       logger.info 'Done! Creating screenshot object...'
       screenshot = eyes_screenshot_factory.call(image)
 
       if region_provider.coordinate_type
         left_top_image = screenshot.sub_screenshot(region_provider.region, region_provider.coordinate_type)
+        debug_screenshot_provider.save_subscreenshot(left_top_image, region_provider.region)
       else
         left_top_image = screenshot.sub_screenshot(
           Applitools::Region.from_location_size(Applitools::Location.new(0, 0), entire_size),
           Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+        )
+        debug_screenshot_provider.save_subscreenshot(
+          left_top_image,
+          Applitools::Region.from_location_size(Applitools::Location.new(0, 0), entire_size)
         )
       end
 
@@ -122,9 +137,11 @@ module Applitools::Selenium
         logger.info "Set position to #{current_position}"
         logger.info 'Getting image...'
 
-        part_image = image_provider.take_screenshot
+        part_image = image_provider.take_screenshot(debug_suffix: "scrolled_(#{current_position})")
         part_image = scale_provider.scale_image part_image if scale_provider
+        debug_screenshot_provider.save(part_image, 'scaled')
         part_image = cut_provider.cut part_image if cut_provider
+        debug_screenshot_provider.save(part_image, 'cutted')
 
         logger.info 'Done!'
         begin
@@ -133,6 +150,7 @@ module Applitools::Selenium
           )
           a_screenshot = eyes_screenshot_factory.call(part_image).sub_screenshot(region_to_check,
             Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative], false)
+          debug_screenshot_provider.save_subscreenshot(a_screenshot, region_to_check)
         rescue Applitools::OutOfBoundsException => e
           logger.error e.message
           break
@@ -168,11 +186,13 @@ module Applitools::Selenium
         stitched_image.crop!(0, 0,
           [actual_image_width, stitched_image.width].min,
           [actual_image_height, stitched_image.height].min)
+        debug_screenshot_provider.save(stitched_image, 'trimmed')
         logger.info 'Done!'
       end
 
       logger.info 'Converting to screenshot...'
       result_screenshot = Applitools::Screenshot.from_any_image(stitched_image)
+      debug_screenshot_provider.save(result_screenshot, 'full_page')
       logger.info 'Done converting!'
       result_screenshot
     end
