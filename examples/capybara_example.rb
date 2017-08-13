@@ -32,6 +32,7 @@ describe 'Capybara Example', :type => :feature, :js => true do
   let(:eyes) do
     Applitools::Selenium::Eyes.new.tap do |eyes|
       eyes.api_key = ENV['APPLITOOLS_API_KEY']
+      eyes.hide_scrollbars = true
       eyes.log_handler = Logger.new(STDOUT)
     end
   end
