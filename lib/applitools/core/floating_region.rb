@@ -2,23 +2,39 @@ require_relative 'region'
 module Applitools
   class FloatingRegion < Region
     class << self
-      def any(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
+      def any(element, *args)
         case element
-        when Applitools::Selenium::Element, ::Selenium::WebDriver::Element, Applitools::Region, Applitools::AbstractRegion
-          for_element(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
+        when Applitools::Region
+          for_element(element, *args)
+        when ::Selenium::WebDriver::Element
+          for_element(Applitools::Region.from_location_size(element.location, element.size), *args)
+        when Applitools::Selenium::Element
+          for_element(element.bounds, *args)
         else
           raise Applitools::EyesIllegalArgument.new "Unsupported element - #{element.class}"
         end
       end
 
-      def for_element(element, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
-        new element.location.x, element.location.y, element.size.width, element.size.height, max_left_offset,
-          max_top_offset, max_right_offset, max_bottom_offset
+      def for_element(element, *args)
+        case args.count
+        when 1
+          new element, args.first
+        when 4
+          new element, FloatingBounds.new(*args)
+        else
+          raise(
+            Applitools::EyesIllegalArgument,
+            'Applitools::FloatingRegion.for_element has been called with illegal argument'
+          )
+        end
       end
       private :for_element
     end
 
     attr_accessor :max_top_offset, :max_right_offset, :max_bottom_offset, :max_left_offset
+    NAMES = [
+      :left, :top, :width, :height, :max_left_offset, :max_top_offset, :max_right_offset, :max_bottom_offset
+    ].freeze
 
     def initialize(left, top, width, height, max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
       super(left, top, width, height)
@@ -46,11 +62,31 @@ module Applitools
         'Left' => left,
         'Width' => width,
         'Height' => height,
-        'MaxUpOffset' => max_top_offset,
-        'MaxLeftOffset' => max_left_offset,
-        'MaxRightOffset' => max_right_offset,
-        'MaxDownOffset' => max_bottom_offset
+        'MaxUpOffset' => max_top_offset + padding_top,
+        'MaxLeftOffset' => max_left_offset + padding_left,
+        'MaxRightOffset' => max_right_offset + padding_right,
+        'MaxDownOffset' => max_bottom_offset + padding_bottom
       }
+    end
+  end
+
+  class FloatingBounds
+    attr_accessor :max_left_offset, :max_top_offset, :max_right_offset, :max_bottom_offset
+    def initialize(max_left_offset, max_top_offset, max_right_offset, max_bottom_offset)
+      Applitools::ArgumentGuard.is_a?(max_left_offset, 'max_left_offset', Integer)
+      Applitools::ArgumentGuard.is_a?(max_top_offset, 'max_top_offset', Integer)
+      Applitools::ArgumentGuard.is_a?(max_right_offset, 'max_right_offset', Integer)
+      Applitools::ArgumentGuard.is_a?(max_bottom_offset, 'max_bottom_offset', Integer)
+
+      Applitools::ArgumentGuard.greater_than_or_equal_to_zero(max_left_offset, 'max_left_offset')
+      Applitools::ArgumentGuard.greater_than_or_equal_to_zero(max_top_offset, 'max_top_offset')
+      Applitools::ArgumentGuard.greater_than_or_equal_to_zero(max_right_offset, 'max_right_offset')
+      Applitools::ArgumentGuard.greater_than_or_equal_to_zero(max_bottom_offset, 'max_bottom_offset')
+
+      self.max_left_offset = max_left_offset
+      self.max_top_offset = max_top_offset
+      self.max_right_offset = max_right_offset
+      self.max_bottom_offset = max_bottom_offset
     end
   end
 end

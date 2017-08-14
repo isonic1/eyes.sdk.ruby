@@ -32,6 +32,7 @@ describe 'Capybara Example', :type => :feature, :js => true do
   let(:eyes) do
     Applitools::Selenium::Eyes.new.tap do |eyes|
       eyes.api_key = ENV['APPLITOOLS_API_KEY']
+      eyes.hide_scrollbars = true
       eyes.log_handler = Logger.new(STDOUT)
     end
   end
@@ -41,7 +42,9 @@ describe 'Capybara Example', :type => :feature, :js => true do
                viewport_size: { width: 800, height: 600 })
     visit 'http://github.com'
     eyes.check_window('homepage')
-    fill_in('user[login]', with: 'user')
+    # require 'pry'
+    # binding.pry
+    fill_in(id: 'user[login]', with: 'user')
     eyes.check_window('homepage with username')
     eyes.close
   end
@@ -52,7 +55,7 @@ describe 'Capybara Example', :type => :feature, :js => true do
   #
   it 'common capybara test' do
     visit 'http://github.com'
-    fill_in('user[login]', with: 'user')
+    fill_in(id: 'user[login]', with: 'user')
     # and so on
   end
 
@@ -61,7 +64,7 @@ describe 'Capybara Example', :type => :feature, :js => true do
     # this uses :selenium_chrome driver (see Capybara.register_driver block) instead of :eyes driver
     Capybara.using_driver :selenium_chrome do
       visit 'http://github.com'
-      fill_in('user[login]', with: 'user')
+      fill_in(id: 'user[login]', with: 'user')
       # and so on
     end
   end
@@ -75,7 +78,7 @@ describe 'Other Capybara tests', :type => :feature, :js => true do
   it 'some other chrome test' do
     Capybara.using_driver :selenium_chrome do
       visit 'http://github.com'
-      fill_in('user[login]', with: 'user')
+      fill_in(id: 'user[login]', with: 'user')
       # and so on
     end
   end

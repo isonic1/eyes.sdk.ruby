@@ -4,7 +4,7 @@ module Applitools::Selenium
     extend Forwardable
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
-    attr_accessor :driver, :name_enumerator
+    attr_accessor :driver, :debug_screenshot_provider
 
     # Initialize an Applitools::Selenium::TakesScreenshotImageProvider.
     #
@@ -15,21 +15,16 @@ module Applitools::Selenium
     def initialize(driver, options = {})
       self.driver = driver
       options = { debug_screenshot: false }.merge! options
-      self.debug_screenshot = options[:debug_screenshot]
-      self.name_enumerator = options[:name_enumerator]
+      self.debug_screenshot_provider = options[:debug_screenshot_provider]
     end
 
     # Takes a screenshot.
     #
     # @return [Applitools::Screenshot::Datastream] The screenshot.
-    def take_screenshot
+    def take_screenshot(options = {})
       logger.info 'Getting screenshot...'
-      if debug_screenshot
-        screenshot = driver.screenshot_as(:png) do |raw_screenshot|
-          save_debug_screenshot(raw_screenshot)
-        end
-      else
-        screenshot = driver.screenshot_as(:png)
+      screenshot = driver.screenshot_as(:png) do |raw_screenshot|
+        save_debug_screenshot(raw_screenshot, options[:debug_suffix])
       end
       logger.info 'Done getting screenshot! Creating Applitools::Screenshot...'
       Applitools::Screenshot.from_datastream screenshot
@@ -39,8 +34,8 @@ module Applitools::Selenium
 
     attr_accessor :debug_screenshot
 
-    def save_debug_screenshot(screenshot)
-      ChunkyPNG::Image.from_string(screenshot).save(name_enumerator.next)
+    def save_debug_screenshot(screenshot, suffix)
+      debug_screenshot_provider.save(screenshot, suffix || '')
     end
   end
 end

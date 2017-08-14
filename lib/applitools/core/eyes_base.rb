@@ -74,13 +74,12 @@ module Applitools
       self.match_level = Applitools::MATCH_LEVEL[:strict]
       self.server_scale = 0
       self.server_remainder = 0
+    end
 
-      @default_match_settings = {
-        match_level: match_level,
-        exact: exact,
-        scale: server_scale,
-        remainder: server_remainder
-      }
+    def match_level=(value)
+      return @match_level = value if Applitools::MATCH_LEVEL.values.include?(value)
+      return @match_level = Applitools::MATCH_LEVEL[value.to_sym] if Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
+      raise Applitools::EyesError, "Unknown match level #{value}"
     end
 
     # Sets default match_level which will be applied to any test, unless match_level is set for a test explicitly
@@ -92,18 +91,16 @@ module Applitools
     # @option exact_options [Integer] :match_threshold
     # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
 
-    def default_match_level(value, exact_options = {})
-      @match_level, self.exact = match_level_with_exact(value, exact_options)
+    def set_default_match_settings(value, exact_options = {})
+      (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
     end
 
-    # rubocop:disable LineLength
     # Sets default match settings
     # @param [Hash] value
     # @option value [Symbol] match_level
     # @option value [Hash] exact exact values. Available keys are 'MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold'
     # @option value [Fixnum] scale
     # @option value [Fixnum] remainder
-    # rubocop:enable LineLength
 
     def default_match_settings=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Hash
@@ -113,7 +110,21 @@ module Applitools
           "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
         )
       end
-      default_match_settings.merge! value
+      result = default_match_settings.merge!(value)
+      self.match_level = result[:match_level]
+      self.exact = result[:exact]
+      self.server_scale = result[:scale]
+      self.server_remainder = result[:remainder]
+      result
+    end
+
+    def default_match_settings
+      {
+        match_level: match_level,
+        exact: exact,
+        scale: server_scale,
+        remainder: server_remainder
+      }
     end
 
     def batch
