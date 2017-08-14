@@ -4,6 +4,7 @@ end
 
 Then /^set density$/ do
   dimensions = default_device.screen_dimensions
+  Applitools::Calabash::EyesSettings.instance.viewport_size = Applitools::RectangleSize.new(dimensions[:width], dimensions[:height])
   Applitools::Calabash::EyesSettings.instance.eyes.density = dimensions[:scale] #:native_scale?
 end
 

@@ -15,7 +15,7 @@ end
 
 Then /^query element "([^"]*)" and take (\d+)$/ do |query, index|
   if element = query(query)[index.to_i]
-    step %{take eyes screenshot}
+    step %{create target}
     @target.region(Applitools::Calabash::CalabashElement.new(element))
   end
 end

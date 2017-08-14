@@ -38,6 +38,10 @@ module Applitools
         Applitools::RectangleSize.from_struct(self)
       end
 
+      def region
+        Applitools::Region.from_location_size(location, size)
+      end
+
       private
 
       def valid_element?(element)

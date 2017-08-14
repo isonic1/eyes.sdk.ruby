@@ -14,11 +14,20 @@ if respond_to? :Before
 
     step %{open eyes}
   end
+
+  Before('@eyes') do |_scenario|
+    Applitools::Calabash::EyesSettings.instance.eyes.add_context(self)
+  end
 end
 
 if respond_to? :After
-  After('@eyes', '@close') do |scenario|
+  After('@eyes', '@close') do |_scenario|
     step %{terminate eyes session}
+  end
+
+  After('@eyes') do |_scenario|
+    eyes = Applitools::Calabash::EyesSettings.instance.eyes
+    Applitools::Calabash::EyesSettings.instance.eyes.remove_context if eyes && eyes.open?
   end
 end
 

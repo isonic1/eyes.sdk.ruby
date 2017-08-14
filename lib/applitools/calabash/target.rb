@@ -1,35 +1,36 @@
 module Applitools
   module Calabash
-    class Target < Applitools::Images::Target
-      attr_reader :scale_factor
+    class Target
+      include Applitools::FluentInterface
 
-      class << self
-        alias_method :android, :path
+      attr_accessor :options, :ignored_regions, :region_to_check, :floating_regions
 
-        def ios(path, scale_factor)
-          path(path, scale_factor)
+      def initialize
+        self.ignored_regions = []
+        self.floating_regions = []
+        self.options = {
+            trim: false
+        }
+      end
+
+      def ignore(region = nil)
+        if region
+          Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Calabash::CalabashElement
+          ignored_regions << region.region
+        else
+          self.ignored_regions = []
         end
+        self
+      end
 
-
-        def path(path, scale_factor = 1)
-          raise Applitools::EyesIllegalArgument unless File.exist?(path)
-          new(Applitools::Screenshot.from_image(::ChunkyPNG::Image.from_file(path)), scale_factor)
+      def region(region = nil)
+        if region
+          Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Calabash::CalabashElement
+          self.region_to_check = region
+        else
+          self.region_to_check = nil
         end
-      end
-
-      def initialize(image, scale_factor = 1)
-        super(image)
-        @scale_factor = scale_factor
-      end
-
-      def ignore(*args)
-        return super unless (element = args.first).is_a? Applitools::Calabash::CalabashElement
-        super(Applitools::Region.from_location_size(element.location, element.size).scale_it!(scale_factor))
-      end
-
-      def region(*args)
-        return super unless (element = args.first).is_a? Applitools::Calabash::CalabashElement
-        super(Applitools::Region.from_location_size(element.location, element.size).scale_it!(scale_factor))
+        self
       end
 
       def floating(*args)
