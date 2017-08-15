@@ -25,7 +25,7 @@ module Applitools
             Applitools::Screenshot.from_image(
               ::ChunkyPNG::Image.from_file(screenshot_path)
             ),
-            scale_ratio: density
+            scale_factor: density
           )
         end
         result
