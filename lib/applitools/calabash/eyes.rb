@@ -28,24 +28,16 @@ module Applitools
       end
 
       def capture_screenshot
-        Applitools::Calabash::Utils.using_screenshot(context) do |screenshot_path|
-          self.screenshot = screenshot_class.new(
-            Applitools::Screenshot.from_image(
-              ::ChunkyPNG::Image.from_file(screenshot_path)
-            ),
-            scale_factor: density
-          )
-        end
-        screenshot
+        screenshot_provider.capture_screenshot(context, density)
       end
 
-      def screenshot_class
+      def screenshot_provider
         env = Applitools::Calabash::EnvironmentDetector.current_environment
         case env
           when :android
-            Applitools::Calabash::EyesCalabashAndroidScreenshot
+            Applitools::Calabash::AndroidScreenshotProvider.instance
           when :ios
-            Applitools::Calabash::EyesCalabashIosScreenshot
+            Applitools::Calabash::IosScreenshotProvider.instance
         end
       end
 
@@ -98,6 +90,12 @@ module Applitools
               end
             end
           end
+        end
+      end
+
+      def get_app_output_with_screenshot(*args)
+        super do |screenshot|
+          screenshot.scale_it!
         end
       end
     end

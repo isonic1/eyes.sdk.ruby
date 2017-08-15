@@ -55,6 +55,13 @@ module Applitools
 
       abstract_method :convert_region_location, false
 
+      def scale_it!
+        width = (image.width.to_f/scale_factor).to_i
+        height = (image.height.to_f/scale_factor).to_i
+        image.resample_bicubic!(width, height)
+        self
+      end
+
       private
 
       def bounds

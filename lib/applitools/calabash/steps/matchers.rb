@@ -1,3 +1,8 @@
+Then /^create target$/ do
+  @target = nil
+  @target = Applitools::Calabash::Target.new
+end
+
 Then /^target should match a baseline$/ do
   raise Applitools::EyesError, '@target is not set' unless @target
   raise Applitools::EyesError, '@tag is not set' unless @tag

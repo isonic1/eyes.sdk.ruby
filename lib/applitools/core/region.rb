@@ -91,10 +91,10 @@ module Applitools
     end
 
     def scale_it!(scale_factor)
-      @left *= scale_factor
-      @top *= scale_factor
-      @width *= scale_factor
-      @height *= scale_factor
+      @left = (@left * scale_factor).to_i
+      @top = (@top * scale_factor).to_i
+      @width = (@width * scale_factor).to_i
+      @height = (@height * scale_factor).to_i
       self
     end
 

@@ -1,8 +1,3 @@
-Then /^create target$/ do
-  @target = nil
-  @target = Applitools::Calabash::Target.new
-end
-
 Then /^ignore status bar$/ do
   raise Applitools::EyesError, '@target is not set' unless @target
   status_bar = query("view id:'statusBarBackground'").first
