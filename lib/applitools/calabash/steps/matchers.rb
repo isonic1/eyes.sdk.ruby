@@ -10,7 +10,16 @@ Then /^target should match a baseline$/ do
 end
 
 Then /^the element "([^"]*)" should match a baseline$/ do |query|
+  step %{create target}
   step %{query element "#{query}"}
+  @target.region(@current_element) if @current_element
+  step %{target should match a baseline}
+end
+
+Then /^the entire element "([^"]*)" should match a baseline$/ do |query|
+  step %{create target}
+  step %{query element "#{query}"}
+  @target.region(@current_element).fully if @current_element
   step %{target should match a baseline}
 end
 
@@ -18,11 +27,5 @@ Then /^query element "([^"]*)"$/ do |query|
   step %{query element "#{query}" and take 0}
 end
 
-Then /^query element "([^"]*)" and take (\d+)$/ do |query, index|
-  if element = query(query)[index.to_i]
-    step %{create target}
-    @target.region(Applitools::Calabash::CalabashElement.new(element))
-  end
-end
 
 

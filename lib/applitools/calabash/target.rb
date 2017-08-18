@@ -13,6 +13,11 @@ module Applitools
         }
       end
 
+      def fully
+        options[:stitch_content] = true
+        self
+      end
+
       def ignore(region = nil)
         if region
           Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Calabash::CalabashElement
@@ -33,22 +38,22 @@ module Applitools
         self
       end
 
-      def floating(*args)
-        value = case args.first
-                  when Applitools::FloatingRegion
-                    proc { args.first.scale_it!(scale_factor) }
-                  when Applitools::Region
-                    proc do
-                      region = args.shift
-                      region.scale_it!(scale_factor)
-                      Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
-                    end
-                  else
-                    self.floating_regions = []
-                end
-        floating_regions << value
-        self
-      end
+      # def floating(*args)
+      #   value = case args.first
+      #             when Applitools::FloatingRegion
+      #               proc { args.first.scale_it!(scale_factor) }
+      #             when Applitools::Region
+      #               proc do
+      #                 region = args.shift
+      #                 region.scale_it!(scale_factor)
+      #                 Applitools::FloatingRegion.new region.left, region.top, region.width, region.height, *args
+      #               end
+      #             else
+      #               self.floating_regions = []
+      #           end
+      #   floating_regions << value
+      #   self
+      # end
     end
   end
 end

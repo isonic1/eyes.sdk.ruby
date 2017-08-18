@@ -1,7 +1,7 @@
 module Applitools
   module Calabash
     class Eyes < Applitools::Images::Eyes
-      attr_accessor :density
+      attr_accessor :density, :full_page_capture_algorithm
       attr_reader :context
 
       def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
@@ -28,22 +28,30 @@ module Applitools
       end
 
       def capture_screenshot
-        screenshot_provider.capture_screenshot(context, density)
+        return screenshot_provider.capture_screenshot unless full_page_capture_algorithm
+        full_page_capture_algorithm.get_stitched_region
       end
 
       def screenshot_provider
         env = Applitools::Calabash::EnvironmentDetector.current_environment
         case env
           when :android
-            Applitools::Calabash::AndroidScreenshotProvider.instance
+            Applitools::Calabash::AndroidScreenshotProvider.instance.with_density(density).using_context(context)
           when :ios
-            Applitools::Calabash::IosScreenshotProvider.instance
+            Applitools::Calabash::IosScreenshotProvider.instance.with_density(density).using_context(context)
         end
       end
 
       def check_it(name, target, match_window_data)
         Applitools::ArgumentGuard.not_nil(name, 'name')
-        region_provider = get_region_provider(target)
+
+        logger.info 'Full element requested' if target.options[:stitch_content]
+        if target.options[:stitch_content] && (algo = get_full_page_capture_algorithm(target.region_to_check))
+          self.full_page_capture_algorithm = algo
+          region_provider = entire_screenshot_region
+        else
+          region_provider = get_region_provider(target)
+        end
 
         match_window_data.tag = name
         update_default_settings(match_window_data)
@@ -68,28 +76,9 @@ module Applitools
 
       def get_region_provider(target)
         if (region_to_check = target.region_to_check).nil?
-          Object.new.tap do |prov|
-            prov.instance_eval do
-              define_singleton_method :region do
-                Applitools::Region::EMPTY
-              end
-
-              define_singleton_method :coordinate_type do
-                nil
-              end
-            end
-          end
+          entire_screenshot_region
         else
-          Object.new.tap do |prov|
-            prov.instance_eval do
-              define_singleton_method :region do
-                region_to_check.region
-              end
-              define_singleton_method :coordinate_type do
-                Applitools::Calabash::EyesCalabashScreenshot::DRIVER
-              end
-            end
-          end
+          region_for_element(region_to_check)
         end
       end
 
@@ -97,6 +86,48 @@ module Applitools
         super do |screenshot|
           screenshot.scale_it!
         end
+      end
+
+      def entire_screenshot_region
+        Object.new.tap do |prov|
+          prov.instance_eval do
+            define_singleton_method :region do
+              Applitools::Region::EMPTY
+            end
+
+            define_singleton_method :coordinate_type do
+              nil
+            end
+          end
+        end
+      end
+
+      def region_for_element(region_to_check)
+        Object.new.tap do |prov|
+          prov.instance_eval do
+            define_singleton_method :region do
+              region_to_check.region
+            end
+            define_singleton_method :coordinate_type do
+              Applitools::Calabash::EyesCalabashScreenshot::DRIVER
+            end
+          end
+        end
+      end
+
+      def get_full_page_capture_algorithm(element)
+        logger.info "Trying to get full page capture algorithm for element #{element}..."
+        environment = Applitools::Calabash::EnvironmentDetector.current_environment
+        element_class = Applitools::Calabash::Utils.send("grub_#{environment}_class_name", context, element).first
+        logger.info "Trying to get FullPageCaptureAlgorithm for #{element_class}..."
+        algo = Applitools::Calabash::FullPageCaptureAlgorithm.get_algorithm_class(element_class)
+        if algo
+          logger.info "Using #{algo}"
+          algo = algo.new(screenshot_provider, element)
+        else
+          logger.info "FullPageCaptureAlgorithm for #{element_class} not found. Continue with :check_region instead"
+        end
+        algo
       end
     end
   end

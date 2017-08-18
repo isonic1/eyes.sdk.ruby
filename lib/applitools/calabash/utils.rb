@@ -37,7 +37,32 @@ module Applitools
         region.scale_it!(Applitools::Calabash::EyesSettings.instance.eyes.density)
       end
 
-      def pixel_ratio(context)
+      def request_element(context, element, method)
+        Applitools::ArgumentGuard.is_a?(element, 'element', Applitools::Calabash::CalabashElement)
+        context.query(element.element_query, method)
+      end
+
+      def grub_android_class_name(context, element)
+        request_element(context, element, :class)
+      end
+
+      def grub_ios_class_name(context, element)
+
+      end
+
+      def get_android_element(context, query, index)
+        if (id = context.query(query, :getId)[index.to_i]) > 0
+          element_query = "* id:#{id}"
+          element = context.query(element_query).first
+          Applitools::Calabash::CalabashElement.new(element, element_query)
+        else
+          element_query = query + " index:#{index.to_i}"
+          element = context.query(element_query).first
+          Applitools::Calabash::CalabashElement.new(element, element_query)
+        end
+      end
+
+      def get_ios_element(query, index)
 
       end
     end

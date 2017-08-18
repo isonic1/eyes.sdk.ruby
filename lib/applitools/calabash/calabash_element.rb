@@ -2,12 +2,13 @@ module Applitools
   module Calabash
     class CalabashElement
       extend Forwardable
-      attr_reader :original_element
+      attr_reader :original_element, :element_query
       def_delegators :@original_element, :[], :keys, :values
 
-      def initialize(element)
+      def initialize(element, element_query)
         raise Applitools::EyesIllegalArgument, "Invalid element passed! (#{element})" unless valid_element?(element)
         @original_element = element
+        @element_query = element_query
       end
 
       def left
@@ -40,6 +41,10 @@ module Applitools
 
       def region
         Applitools::Region.from_location_size(location, size)
+      end
+
+      def to_s
+        @original_element
       end
 
       private
