@@ -58,6 +58,8 @@ module Applitools
       def scale_it!
         width = (image.width.to_f/scale_factor).to_i
         height = (image.height.to_f/scale_factor).to_i
+#        require 'pry'
+#        binding.pry
         image.resample_bicubic!(width, height)
         self
       end
