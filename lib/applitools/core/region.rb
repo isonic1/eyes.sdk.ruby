@@ -41,7 +41,7 @@ module Applitools
     end
 
     def location
-      Location.new left, top
+      Applitools::Location.new left, top
     end
 
     def location=(other_location)
