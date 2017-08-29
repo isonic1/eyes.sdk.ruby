@@ -46,8 +46,10 @@ module Applitools
         Applitools::ArgumentGuard.not_nil(name, 'name')
 
         logger.info 'Full element requested' if target.options[:stitch_content]
-        if target.options[:stitch_content] && (algo = get_full_page_capture_algorithm(target.region_to_check))
-          self.full_page_capture_algorithm = algo
+
+        self.full_page_capture_algorithm = target.options[:stitch_content] && get_full_page_capture_algorithm(target.region_to_check)
+
+        if full_page_capture_algorithm
           region_provider = entire_screenshot_region
         else
           region_provider = get_region_provider(target)

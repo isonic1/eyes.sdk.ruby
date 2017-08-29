@@ -1,6 +1,7 @@
 module Applitools
   module Calabash
     class CalabashScreenshotProvider
+      WAIT_BEFORE_SCREENSHOT = 1
       attr_reader :density, :context
 
       def initialize
@@ -22,6 +23,7 @@ module Applitools
       include Singleton
 
       def capture_screenshot
+        sleep WAIT_BEFORE_SCREENSHOT
         result = nil
         Applitools::Calabash::Utils.using_screenshot(context) do |screenshot_path|
           result = Applitools::Calabash::EyesCalabashAndroidScreenshot.new(
@@ -38,6 +40,7 @@ module Applitools
     class IosScreenshotProvider < CalabashScreenshotProvider
       include Singleton
       def capture_screenshot
+        sleep WAIT_BEFORE_SCREENSHOT
         result = nil
         Applitools::Calabash::Utils.using_screenshot(context) do |screenshot_path|
           result = Applitools::Calabash::EyesCalabashIosScreenshot.new(

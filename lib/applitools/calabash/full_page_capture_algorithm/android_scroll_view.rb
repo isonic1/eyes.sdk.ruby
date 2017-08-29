@@ -8,13 +8,15 @@ module Applitools
           super
           @entire_content = nil
           @stitched_image = nil
+          @original_position = nil
         end
 
         def get_stitched_region
           create_entire_image
+          store_original_position
           scroll_top
 
-          scroll_while_possible do |scrollable_element|
+          scroll_it! do |scrollable_element|
             put_it_on_canvas!(
               screenshot_provider.capture_screenshot.sub_screenshot(
                 eyes_window,
@@ -26,7 +28,7 @@ module Applitools
             )
           end
 
-          scroll_top
+          restore_original_position
 
           Applitools::Calabash::EyesCalabashAndroidScreenshot.new(
             Applitools::Screenshot.from_image(stitched_image),
@@ -55,26 +57,31 @@ module Applitools
 
         def scroll_top
           logger.info 'Scrolling up...'
-          scroll_while_possible(:up)
+          context.query(element.element_query, scrollTo: [0, 0])
           logger.info 'Done!'
         end
 
-        def scroll_down_once
-          context.scroll(element.element_query, :down)
+        def store_original_position
+          scrollable_element = get_scrollable_element
+          @original_position = Applitools::Location.new(scrollable_element.left, scrollable_element.top)
         end
 
-        def scroll_up_once
-          context.scroll(element.element_query, :up)
+        def restore_original_position
+          return unless @original_position
+          offset = @original_position.offset_negative(get_scrollable_element.location)
+          context.query(element.element_query, scrollBy: [-offset.x, -offset.y])
+          @original_position = nil
         end
 
-        def scroll_while_possible(direction = :down)
-          previous_y_pos = nil
-          while (element = get_scrollable_element).top != previous_y_pos
-            yield(element) if block_given?
-            previous_y_pos = element.top
-            direction == :up ? scroll_up_once : scroll_down_once
-            sleep DEFAULT_SLEEP_INTERVAL
-          end
+        def scroll_it!
+          scroll_vertical = true
+          begin
+            scrollable = get_scrollable_element if scroll_vertical
+            vertical_offset = element.location.offset_negative(scrollable.location).top
+            scroll_vertical = false if vertical_offset + 1 >= scrollable.height - element.height
+            yield(scrollable) if block_given?
+            context.query(element.element_query, {scrollBy: [0, element.height]}) if scroll_vertical
+          end while scroll_vertical
         end
 
         def create_entire_image
