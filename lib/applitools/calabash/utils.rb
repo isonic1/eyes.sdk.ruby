@@ -47,7 +47,7 @@ module Applitools
       end
 
       def grub_ios_class_name(context, element)
-
+        request_element(context, element, :className)
       end
 
       def get_android_element(context, query, index)
@@ -62,8 +62,12 @@ module Applitools
         end
       end
 
-      def get_ios_element(query, index)
-
+      def get_ios_element(context, query, index)
+        hash = context.query(query, :hash)[index.to_i]
+        return unless hash
+        element_query = "* hash:#{hash}"
+        element = context.query(element_query).first
+        Applitools::Calabash::CalabashElement.new(element, element_query)
       end
     end
   end
