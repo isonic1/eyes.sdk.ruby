@@ -314,7 +314,7 @@ module Applitools::Utils
         Applitools::EyesLogger.error 'Zoom workaround failed.'
       end
 
-      raise Applitools::TestFailedError.new 'Failed to set viewport size'
+      raise Applitools::TestFailedError.new "Failed to set viewport size (#{viewport_size})"
     end
 
     def set_browser_size(executor, required_size)

@@ -54,6 +54,7 @@ module Applitools::Selenium
 
     def force_offset
       Applitools::Location.from_any_attribute last_state_position
+      # Applitools::Location::TOP_LEFT
     end
 
     alias scroll_to position=

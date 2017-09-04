@@ -7,6 +7,7 @@ module Applitools
     attr_accessor :image
 
     COORDINATE_TYPES = {
+      context_as_is: 'CONTEXT_AS_IS',
       screenshot_as_is: 'SCREENSHOT_AS_IS',
       context_relative: 'CONTEXT_RELATIVE'
     }.freeze

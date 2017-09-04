@@ -195,6 +195,11 @@ module Applitools
         return false
       end
 
+      if open?
+        abort_if_not_closed
+        raise Applitools::EyesError.new 'A test is already running'
+      end
+
       Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
       default_options = { session_type: 'SEQUENTIAL' }
       options = default_options.merge options
@@ -214,18 +219,30 @@ module Applitools
 
       raise Applitools::EyesError.new 'API key is missing! Please set it using api_key=' if api_key.nil?
 
-      if open?
-        abort_if_not_closed
-        raise Applitools::EyesError.new 'A test is already running'
-      end
-
       self.viewport_size = options[:viewport_size]
       self.session_type = options[:session_type]
+
+      yield if block_given?
 
       self.open = true
     rescue Applitools::EyesError => e
       logger.error e.message
       raise e
+    end
+
+    def ensure_running_session
+      return if running_session
+
+      logger.info 'No running session, calling start session..'
+      start_session
+      logger.info 'Done!'
+      @match_window_task = Applitools::MatchWindowTask.new(
+        logger,
+        running_session,
+        match_timeout,
+        app_output_provider,
+        server_connector
+      )
     end
 
     def check_window_base(region_provider, retry_timeout, match_window_data)
@@ -246,18 +263,7 @@ module Applitools
 
       tag = '' if tag.nil?
 
-      if running_session.nil?
-        logger.info 'No running session, calling start session..'
-        start_session
-        logger.info 'Done!'
-        @match_window_task = Applitools::MatchWindowTask.new(
-          logger,
-          running_session,
-          match_timeout,
-          app_output_provider,
-          server_connector
-        )
-      end
+      ensure_running_session
 
       match_window_data.user_inputs = user_inputs
 
@@ -551,7 +557,7 @@ module Applitools
       logger.info 'start_session()'
 
       if viewport_size
-        set_viewport_size(viewport_size)
+        set_viewport_size(viewport_size, true)
       else
         self.viewport_size = get_viewport_size
       end
