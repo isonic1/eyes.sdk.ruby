@@ -103,6 +103,7 @@ module Applitools::Selenium
       self.disable_horizontal_scrolling = false
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil
+      self.force_driver_resolution_as_viewport_size = false
     end
 
     # Starts a test
@@ -131,6 +132,8 @@ module Applitools::Selenium
       end
 
       @driver = self.class.eyes_driver(driver, self)
+      perform_driver_specific_settings(driver)
+
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
       self.position_provider = self.class.position_provider(
         stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
@@ -142,10 +145,23 @@ module Applitools::Selenium
         )
       end
 
-      open_base(options) { ensure_running_session }
+      open_base(options) do
+        self.viewport_size = nil if force_driver_resolution_as_viewport_size
+        ensure_running_session
+      end
       @driver
     end
 
+    def perform_driver_specific_settings(driver)
+      modifier = driver.class.to_s.downcase.gsub(/::/, '_')
+      method_name = "perform_driver_settings_for_#{modifier}"
+      send(method_name) if respond_to? method_name
+    end
+
+    def perform_driver_settings_for_appium_driver
+      self.region_visibility_strategy = NopRegionVisibilityStrategy.new
+      self.force_driver_resolution_as_viewport_size = true
+    end
     # Sets the stitch mode.
     #
     # @param [Hash] value The desired type of stitching (:SCROLL is default).
@@ -489,7 +505,7 @@ module Applitools::Selenium
 
     attr_accessor :check_frame_or_element, :region_to_check, :dont_get_title,
       :device_pixel_ratio, :position_provider, :scale_provider, :tag_for_debug,
-      :region_visibility_strategy, :eyes_screenshot_factory
+      :region_visibility_strategy, :eyes_screenshot_factory, :force_driver_resolution_as_viewport_size
 
     def capture_screenshot
       image_provider = Applitools::Selenium::TakesScreenshotImageProvider.new driver,
