@@ -120,10 +120,10 @@ module Applitools::Selenium
     # @return [Applitools::Selenium::Driver] A wrapped web driver which enables Eyes
     #   trigger recording and frame handling
     def open(options = {})
-      driver = options.delete(:driver)
+      original_driver = options.delete(:driver)
       options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size] if
           options[:viewport_size]
-      Applitools::ArgumentGuard.not_nil driver, 'options[:driver]'
+      Applitools::ArgumentGuard.not_nil original_driver, 'options[:driver]'
       Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
 
       if disabled?
@@ -131,8 +131,8 @@ module Applitools::Selenium
         return driver
       end
 
-      @driver = self.class.eyes_driver(driver, self)
-      perform_driver_specific_settings(driver)
+      @driver = self.class.eyes_driver(original_driver, self)
+      perform_driver_specific_settings(original_driver)
 
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
       self.position_provider = self.class.position_provider(
@@ -152,16 +152,19 @@ module Applitools::Selenium
       @driver
     end
 
-    def perform_driver_specific_settings(driver)
-      modifier = driver.class.to_s.downcase.gsub(/::/, '_')
+    def perform_driver_specific_settings(original_driver)
+      modifier = original_driver.class.to_s.downcase.gsub(/::/, '_')
       method_name = "perform_driver_settings_for_#{modifier}"
-      send(method_name) if respond_to? method_name
+      send(method_name) if respond_to?(method_name, :include_private)
     end
 
     def perform_driver_settings_for_appium_driver
       self.region_visibility_strategy = NopRegionVisibilityStrategy.new
       self.force_driver_resolution_as_viewport_size = true
     end
+
+    private :perform_driver_settings_for_appium_driver
+    private :perform_driver_specific_settings
 
     # Sets the stitch mode.
     #
