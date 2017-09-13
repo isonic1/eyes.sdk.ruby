@@ -103,6 +103,7 @@ module Applitools::Selenium
       self.disable_horizontal_scrolling = false
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil
+      self.force_driver_resolution_as_viewport_size = false
     end
 
     # Starts a test
@@ -131,6 +132,8 @@ module Applitools::Selenium
       end
 
       @driver = self.class.eyes_driver(driver, self)
+      perform_driver_specific_settings(driver)
+
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
       self.position_provider = self.class.position_provider(
         stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
@@ -142,8 +145,22 @@ module Applitools::Selenium
         )
       end
 
-      open_base options
+      open_base(options) do
+        self.viewport_size = nil if force_driver_resolution_as_viewport_size
+        ensure_running_session
+      end
       @driver
+    end
+
+    def perform_driver_specific_settings(driver)
+      modifier = driver.class.to_s.downcase.gsub(/::/, '_')
+      method_name = "perform_driver_settings_for_#{modifier}"
+      send(method_name) if respond_to? method_name
+    end
+
+    def perform_driver_settings_for_appium_driver
+      self.region_visibility_strategy = NopRegionVisibilityStrategy.new
+      self.force_driver_resolution_as_viewport_size = true
     end
 
     # Sets the stitch mode.
@@ -211,16 +228,15 @@ module Applitools::Selenium
       original_overflow = nil
       original_position_provider = position_provider
       original_force_full_page_screenshot = force_full_page_screenshot
-
       eyes_element = nil
       timeout = target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
-
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::EyesWebDriverScreenshot.new(
           image, driver: driver, force_offset: position_provider.force_offset
         )
       end
 
+      # rubocop:disable BlockLength
       check_in_frame target_frames: target.frames do
         begin
           match_data = Applitools::MatchWindowData.new
@@ -228,8 +244,11 @@ module Applitools::Selenium
           update_default_settings(match_data)
           match_data.read_target(target, driver)
           eyes_element = target.region_to_check.call(driver)
-          region_visibility_strategy.move_to_region original_position_provider,
-            Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+
+          unless force_full_page_screenshot
+            region_visibility_strategy.move_to_region original_position_provider,
+              Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+          end
 
           check_window = false
           if !target.frames.empty? && eyes_element.is_a?(Applitools::Region)
@@ -241,8 +260,17 @@ module Applitools::Selenium
             # check_element
             logger.info 'check_region(' \
               "#{Applitools::Region.from_location_size(eyes_element.location, eyes_element.size)})"
+
+            use_coordinates =
+              if position_provider.is_a?(Applitools::Selenium::CssTranslatePositionProvider) &&
+                  driver.frame_chain.empty?
+                Applitools::EyesScreenshot::COORDINATE_TYPES[:context_as_is]
+              else
+                target.coordinate_type
+              end
+
             region_provider = Applitools::RegionProvider.new(
-              region_for_element(eyes_element), target.coordinate_type
+              region_for_element(eyes_element), use_coordinates
             )
           else
             # check_window
@@ -263,6 +291,8 @@ module Applitools::Selenium
               eyes_element.overflow = 'hidden'
             end
 
+            region_provider = Applitools::RegionProvider.new(region_provider.region, target.coordinate_type)
+
             self.region_to_check = region_provider
 
             region_provider = Applitools::RegionProvider.new(
@@ -282,6 +312,7 @@ module Applitools::Selenium
           self.region_to_check = nil
           region_visibility_strategy.return_to_original_position position_provider
         end
+        # rubocop:enable BlockLength
       end
     end
 
@@ -475,7 +506,7 @@ module Applitools::Selenium
 
     attr_accessor :check_frame_or_element, :region_to_check, :dont_get_title,
       :device_pixel_ratio, :position_provider, :scale_provider, :tag_for_debug,
-      :region_visibility_strategy, :eyes_screenshot_factory
+      :region_visibility_strategy, :eyes_screenshot_factory, :force_driver_resolution_as_viewport_size
 
     def capture_screenshot
       image_provider = Applitools::Selenium::TakesScreenshotImageProvider.new driver,
@@ -547,7 +578,7 @@ module Applitools::Selenium
             logger.info 'Done switching!'
           end
           logger.info 'Creating EyesWebDriver screenshot instance..'
-          ewd_screenshot = Applitools::Selenium::EyesWebDriverScreenshot.new full_page_image, driver: driver
+          ewd_screenshot = Applitools::Selenium::EyesFullPageScreenshot.new(full_page_image)
           logger.info 'Done creating EyesWebDriver screenshot instance!'
           ewd_screenshot
         else
@@ -567,16 +598,16 @@ module Applitools::Selenium
       end
     end
 
-    def vp_size=(value)
-      raise Applitools::EyesNotOpenException.new 'set_viewport_size: Eyes not open!' unless open?
+    def vp_size=(value, skip_check_if_open = false)
+      raise Applitools::EyesNotOpenException.new 'set_viewport_size: Eyes not open!' unless skip_check_if_open || open?
       original_frame = driver.frame_chain
       driver.switch_to.default_content
       begin
         Applitools::Utils::EyesSeleniumUtils.set_viewport_size driver, value
       rescue => e
-        logger.error e.class
+        logger.error e.class.to_s
         logger.error e.message
-        raise Applitools::TestFailedError.new 'Failed to set viewport size!'
+        raise Applitools::TestFailedError.new "#{e.class} - #{e.message}"
       ensure
         driver.switch_to.frames(frame_chain: original_frame)
       end

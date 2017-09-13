@@ -195,31 +195,40 @@ describe Applitools::EyesBase do
   context 'open_base()' do
     before do
       allow(subject).to receive(:base_agent_id).and_return nil
+      allow(subject).to receive(:get_viewport_size).and_return(width: 800, height: 600)
+      allow(subject).to receive(:app_environment).and_return(
+        Applitools::AppEnvironment.new(
+          :os => :host_os,
+          :hosting_app => :host_app,
+          :display_size => Applitools::RectangleSize.new(800, 600),
+          :inferred => :inferred_environment
+        )
+      )
     end
 
     it_behaves_like 'can be disabled', :open_base, [:test_name => :test_name]
 
     context 'when api_key present' do
       before do
-        expect(subject).to receive(:api_key).and_return :value
+        allow(subject).to receive(:api_key).and_return :value
       end
 
       it 'validates presence of app_name' do
         expect { subject.open_base(:test_name => :test_name) }.to raise_error(Applitools::EyesIllegalArgument)
-        expect(subject).to receive(:viewport_size=)
+        expect(subject).to receive(:viewport_size=).at_least(:once)
         subject.app_name = :test
         subject.open_base(:test_name => :test)
         expect(subject.send(:test_name)).to eq :test
       end
 
       it 'validates presence of test_name' do
-        expect(subject).to receive(:viewport_size=)
+        expect(subject).to receive(:viewport_size=).at_least(:once)
         expect { subject.open_base(:app_name => :app_name) }.to raise_error(Applitools::EyesIllegalArgument)
         subject.open_base(:app_name => :app_name, :test_name => :test)
       end
 
       it 'set open? to true' do
-        expect(subject).to receive(:viewport_size=)
+        expect(subject).to receive(:viewport_size=).at_least(:once)
         subject.send(:open=, false)
         subject.open_base :app_name => :a, :test_name => :b, :viewport_size => :c, :session_type => :d
         expect(subject.open?).to eq true

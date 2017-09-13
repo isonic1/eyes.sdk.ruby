@@ -219,6 +219,13 @@ module Applitools::Selenium
         else
           raise Applitools::EyesCoordinateTypeConversionException.new "Can't convert coordinates from #{from} to #{to}"
         end
+      when Applitools::EyesScreenshot::COORDINATE_TYPES[:context_as_is]
+        case to
+        when Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
+          result.offset_negative(frame_location_in_screenshot).offset(force_offset)
+        else
+          raise Applitools::EyesCoordinateTypeConversionException.new "Can't convert coordinates from #{from} to #{to}"
+        end
       else
         raise Applitools::EyesCoordinateTypeConversionException.new "Can't convert coordinates from #{from} to #{to}"
       end
@@ -244,12 +251,11 @@ module Applitools::Selenium
         region, original_coordinate_types, Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
       )
       case original_coordinate_types
-      when Applitools::EyesScreenshot::COORDINATE_TYPES[:context_as_is]
-        nil
-      when Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative]
+      when Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
+        Applitools::EyesScreenshot::COORDINATE_TYPES[:context_as_is]
         intersected_region.intersect frame_window
       when Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
-        intersected_region.intersect Applitools::Region.new(0, 0, image.width, image.height)
+        intersected_region.intersect(Applitools::Region.new(0, 0, image.width, image.height))
       else
         raise Applitools::EyesCoordinateTypeConversionException.new(
           "Unknown coordinates type: #{original_coordinate_types}"

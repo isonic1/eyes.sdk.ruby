@@ -13,7 +13,7 @@ module Applitools
       {
         'os' => @os,
         'hostingApp' => @hosting_app,
-        'displaySize' => @display_size.to_hash,
+        'displaySize' => @display_size && @display_size.to_hash,
         'inferred' => @inferred
       }
     end
