@@ -162,6 +162,7 @@ module Applitools::Selenium
       self.region_visibility_strategy = NopRegionVisibilityStrategy.new
       self.force_driver_resolution_as_viewport_size = true
     end
+
     # Sets the stitch mode.
     #
     # @param [Hash] value The desired type of stitching (:SCROLL is default).
