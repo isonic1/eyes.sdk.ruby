@@ -26,6 +26,10 @@ EYES_GEM_SPECS = {
     spec.add_development_dependency 'net-ssh', ['<= 3.0.0']
     spec.add_development_dependency 'net-http-persistent', ['< 3.0.0']
     spec.add_development_dependency 'sauce'
+    spec.add_development_dependency 'public_suffix', ['<= 1.4.6']
+    spec.add_development_dependency 'oj', ['<= 3.3.4']
+    spec.add_development_dependency 'nokogiri', ['<= 1.6.8.1']
+    spec.add_development_dependency 'selenium-webdriver', ['<= 2.53.4']
   end,
   RUBY_2_0_0 => proc do |spec|
     spec.add_development_dependency 'rack', ['~> 1.6.0']
