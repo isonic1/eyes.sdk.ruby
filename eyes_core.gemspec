@@ -73,7 +73,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec', '>= 3'
 
-  EYES_GEM_SPECS[RUBY_KEY].call spec
+  EYES_GEM_SPECS[RUBY_KEY].call(spec)
 
   # Exclude debugging support on Travis CI, due to its incompatibility with jruby and older rubies.
   unless ENV['TRAVIS'] || CURRENT_RUBY_VERSION < Gem::Version.new('2.0.0')
