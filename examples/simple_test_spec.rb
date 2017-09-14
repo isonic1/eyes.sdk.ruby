@@ -44,11 +44,11 @@ RSpec.describe 'Simple examples for eyes_selenium' do
 
         it('full page test') do
           eyes.force_full_page_screenshot = true
-          eyes.check_window
+          eyes.check_window('check_window, full page, stitch_mode: scroll')
         end
 
         it('viewport test') do
-          eyes.check_window
+          eyes.check_window('check_window, viewport screenshot, stitch_mode: scroll')
         end
       end
 
@@ -56,18 +56,27 @@ RSpec.describe 'Simple examples for eyes_selenium' do
         let(:vp_size) { { width: 800, height: 270 } }
 
         it 'inside viewport' do
-          eyes.check_region(:css, 'div#overflowing-div')
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            tag: 'check_region (inside viewport), stitch_mode: scroll, force_fullpage_screenshot = false'
+          )
         end
 
         it 'outside viewport' do
-          eyes.check_region(:id, 'overflowing-div-image')
+          eyes.check_region(
+            :id, 'overflowing-div-image',
+            tag: 'check_region (outside viewport), stitch_mode: scroll, force_fullpage_screenshot = false'
+          )
         end
       end
 
       context 'check_region' do
         let(:vp_size) { { width: 800, height: 240 } }
         it 'partially outside' do
-          eyes.check_region(:css, 'div#overflowing-div')
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            tag: 'check_region (partially outside viewport), stitch_mode: scroll, force_fullpage_screenshot = false'
+          )
         end
       end
 
@@ -79,18 +88,27 @@ RSpec.describe 'Simple examples for eyes_selenium' do
           let(:vp_size) { { width: 800, height: 270 } }
 
           it 'inside viewport' do
-            eyes.check_region(:css, 'div#overflowing-div')
+            eyes.check_region(
+              :css, 'div#overflowing-div',
+              tag: 'check_region (inside viewport), stitch_mode: scroll, force_fullpage_screenshot = true'
+            )
           end
 
           it 'outside viewport' do
-            eyes.check_region(:id, 'overflowing-div-image')
+            eyes.check_region(
+              :id, 'overflowing-div-image',
+              tag: 'check_region (outside viewport), stitch_mode: scroll, force_fullpage_screenshot = true'
+            )
           end
         end
 
         context 'check_region' do
           let(:vp_size) { { width: 800, height: 240 } }
           it 'partially outside' do
-            eyes.check_region(:css, 'div#overflowing-div')
+            eyes.check_region(
+              :css, 'div#overflowing-div',
+              tag: 'check_region (partially outside viewport), stitch_mode: scroll, force_fullpage_screenshot = true'
+            )
           end
         end
       end
@@ -98,33 +116,55 @@ RSpec.describe 'Simple examples for eyes_selenium' do
       context 'check overflowing region' do
         let(:vp_size) { { width: 800, height: 270 } }
         it 'overflowing region inside viewport' do
-          eyes.check_region(:css, 'div#overflowing-div', stitch_content: true)
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            stitch_content: true,
+            tag: 'check_region, (inside viewport), stitch_content: true, stitch_mode: scroll, ' \
+              'force_fullpage_screenshot = false'
+          )
         end
         it 'overflowing region outside viewport' do
-          eyes.check_region(:id, 'overflowing-div-image', stitch_content: true)
+          eyes.check_region(
+            :id, 'overflowing-div-image',
+            stitch_content: true,
+            tag: 'check_region, (outside viewport), stitch_content: true, stitch_mode: scroll, ' \
+              'force_fullpage_screenshot = false'
+          )
         end
       end
 
       context 'check overflowing region' do
         let(:vp_size) { { width: 800, height: 240 } }
         it 'overflowing region partially outside' do
-          eyes.check_region(:css, 'div#overflowing-div', stitch_content: true)
+          eyes.check_region(
+            :css, 'div#overflowing-div', stitch_content: true,
+            tag: 'check_region, (partially outside viewport), stitch_content: true, stitch_mode: scroll, ' \
+              'force_fullpage_screenshot = false'
+          )
         end
       end
 
       context 'check_frame' do
         let(:vp_size) { { width: 800, height: 700 } }
         it 'full frame' do
-          eyes.check_frame(name_or_id: 'frame1')
+          eyes.check_frame(name_or_id: 'frame1', tag: 'check_frame')
         end
 
         context 'check region in frame' do
           let(:vp_size) { { width: 800, height: 600 } }
           it 'visible region' do
-            eyes.check_region_in_frame(name_or_id: 'frame1', by: [:id, 'inner-frame-div'], stitch_content: false)
+            eyes.check_region_in_frame(
+              name_or_id: 'frame1', by: [:id, 'inner-frame-div'],
+              stitch_content: false,
+              tag: 'check_region_in_frame, stitch_content: false, stitch_mode: scroll'
+            )
           end
           it 'stitched region' do
-            eyes.check_region_in_frame(name_or_id: 'frame1', by: [:id, 'inner-frame-div'], stitch_content: true)
+            eyes.check_region_in_frame(
+              name_or_id: 'frame1', by: [:id, 'inner-frame-div'],
+              stitch_content: true,
+              tag: 'check_region_in_frame, stitch_content: true, stitch_mode: scroll'
+            )
           end
         end
       end
@@ -148,11 +188,11 @@ RSpec.describe 'Simple examples for eyes_selenium' do
 
         it('full page test') do
           eyes.force_full_page_screenshot = true
-          eyes.check_window
+          eyes.check_window('check_window, full page, stitch_mode: :css')
         end
 
         it('viewport test') do
-          eyes.check_window
+          eyes.check_window('check_window, viewport screenshot, stitch_mode: :css')
         end
       end
 
@@ -160,18 +200,27 @@ RSpec.describe 'Simple examples for eyes_selenium' do
         let(:vp_size) { { width: 800, height: 270 } }
 
         it 'inside viewport' do
-          eyes.check_region(:css, 'div#overflowing-div')
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            tag: 'check_region (inside viewport), stitch_mode: :css, force_fullpage_screenshot = false'
+          )
         end
 
         it 'outside viewport' do
-          eyes.check_region(:id, 'overflowing-div-image')
+          eyes.check_region(
+            :id, 'overflowing-div-image',
+            tag: 'check_region (outside viewport), stitch_mode: :css, force_fullpage_screenshot = false'
+          )
         end
       end
 
       context 'check_region' do
         let(:vp_size) { { width: 800, height: 240 } }
         it 'partially outside' do
-          eyes.check_region(:css, 'div#overflowing-div')
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            tag: 'check_region (partially outside viewport), stitch_mode: :css, force_fullpage_screenshot = false'
+          )
         end
       end
 
@@ -183,18 +232,27 @@ RSpec.describe 'Simple examples for eyes_selenium' do
           let(:vp_size) { { width: 800, height: 270 } }
 
           it 'inside viewport' do
-            eyes.check_region(:css, 'div#overflowing-div')
+            eyes.check_region(
+              :css, 'div#overflowing-div',
+              tag: 'check_region (inside viewport), stitch_mode: :css, force_fullpage_screenshot = true'
+            )
           end
 
           it 'outside viewport' do
-            eyes.check_region(:id, 'overflowing-div-image')
+            eyes.check_region(
+              :id, 'overflowing-div-image',
+              tag: 'check_region (outside viewport), stitch_mode: :css, force_fullpage_screenshot = true'
+            )
           end
         end
 
         context 'check_region' do
           let(:vp_size) { { width: 800, height: 240 } }
           it 'partially outside' do
-            eyes.check_region(:css, 'div#overflowing-div')
+            eyes.check_region(
+              :css, 'div#overflowing-div',
+              tag: 'check_region (partially outside viewport), stitch_mode: :css, force_fullpage_screenshot = true'
+            )
           end
         end
       end
@@ -202,33 +260,56 @@ RSpec.describe 'Simple examples for eyes_selenium' do
       context 'check overflowing region' do
         let(:vp_size) { { width: 800, height: 270 } }
         it 'overflowing region inside viewport' do
-          eyes.check_region(:css, 'div#overflowing-div', stitch_content: true)
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            stitch_content: true,
+            tag: 'check_region, (inside viewport), stitch_content: true, stitch_mode: :css, ' \
+              'force_fullpage_screenshot = false'
+          )
         end
         it 'overflowing region outside viewport' do
-          eyes.check_region(:id, 'overflowing-div-image', stitch_content: true)
+          eyes.check_region(
+            :id, 'overflowing-div-image',
+            stitch_content: true,
+            tag: 'check_region, (outside viewport), stitch_content: true, stitch_mode: :css, ' \
+              'force_fullpage_screenshot = false'
+          )
         end
       end
 
       context 'check overflowing region' do
         let(:vp_size) { { width: 800, height: 240 } }
         it 'overflowing region partially outside' do
-          eyes.check_region(:css, 'div#overflowing-div', stitch_content: true)
+          eyes.check_region(
+            :css, 'div#overflowing-div',
+            stitch_content: true,
+            tag: 'check_region, (partially outside viewport), stitch_content: true, ' \
+              'stitch_mode: :css, force_fullpage_screenshot = false'
+          )
         end
       end
 
       context 'check_frame' do
         let(:vp_size) { { width: 800, height: 700 } }
         it 'full frame' do
-          eyes.check_frame(name_or_id: 'frame1')
+          eyes.check_frame(name_or_id: 'frame1', tag: 'check frame')
         end
 
         context 'check region in frame' do
           let(:vp_size) { { width: 800, height: 600 } }
           it 'visible region' do
-            eyes.check_region_in_frame(name_or_id: 'frame1', by: [:id, 'inner-frame-div'], stitch_content: false)
+            eyes.check_region_in_frame(
+              name_or_id: 'frame1', by: [:id, 'inner-frame-div'],
+              stitch_content: false,
+              tag: 'check_region_in_frame, stitch_content: false, stitch_mode: :css'
+            )
           end
           it 'stitched region' do
-            eyes.check_region_in_frame(name_or_id: 'frame1', by: [:id, 'inner-frame-div'], stitch_content: true)
+            eyes.check_region_in_frame(
+              name_or_id: 'frame1', by: [:id, 'inner-frame-div'],
+              stitch_content: true,
+              tag: 'check_region_in_frame, stitch_content: true, stitch_mode: :css'
+            )
           end
         end
       end
