@@ -141,7 +141,7 @@ module Applitools
         environment = Applitools::Calabash::EnvironmentDetector.current_environment
         element_class = Applitools::Calabash::Utils.send("grub_#{environment}_class_name", context, element).first
         logger.info "Trying to get FullPageCaptureAlgorithm for #{element_class}..."
-        algo = Applitools::Calabash::FullPageCaptureAlgorithm.get_algorithm_class(element_class)
+        algo = Applitools::Calabash::FullPageCaptureAlgorithm.get_algorithm_class(environment, element_class)
         if algo
           logger.info "Using #{algo}"
           algo = algo.new(screenshot_provider, element)
