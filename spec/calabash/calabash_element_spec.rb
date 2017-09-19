@@ -13,23 +13,23 @@ RSpec.describe 'Applitools::Calabash::CalabashElement' do
       }
     }
   end
-  subject { Applitools::Calabash::CalabashElement.new(valid_original_hash) }
+  subject { Applitools::Calabash::CalabashElement.new(valid_original_hash, '*') }
 
   describe 'validates input hash' do
     it 'calls valid? on creation and raises an error on invalid data' do
       expect_any_instance_of(Applitools::Calabash::CalabashElement).to receive(:valid_element?).with(Hash).and_return(false)
-      expect { Applitools::Calabash::CalabashElement.new({}) }.to raise_error Applitools::EyesError
+      expect { Applitools::Calabash::CalabashElement.new({}, '*') }.to raise_error Applitools::EyesError
     end
     describe 'validation:' do
       before do
         allow_any_instance_of(Applitools::Calabash::CalabashElement).to receive(:valid_element?).and_call_original
       end
       it 'passes on valid data' do
-        expect { Applitools::Calabash::CalabashElement.new(valid_original_hash) }.to_not raise_error
+        expect { Applitools::Calabash::CalabashElement.new(valid_original_hash, '*') }.to_not raise_error
       end
       context do
         after do
-          expect { Applitools::Calabash::CalabashElement.new(valid_original_hash) }.to raise_error Applitools::EyesError
+          expect { Applitools::Calabash::CalabashElement.new(valid_original_hash, '*') }.to raise_error Applitools::EyesError
         end
         it 'fails on "rect"' do
           valid_original_hash.delete('rect')
