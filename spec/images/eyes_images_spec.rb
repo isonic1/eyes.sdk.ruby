@@ -3,7 +3,18 @@ require 'spec_helper'
 RSpec.describe Applitools::Images::Eyes do
   let(:image) { ChunkyPNG::Image.new(5, 5) }
   let(:target) { Applitools::Images::Target.any(image) }
-  before(:each) { subject.default_match_settings = { :match_level => :layout } }
+  before(:each) do
+    subject.default_match_settings = { :match_level => :layout }
+    allow(subject).to receive(:get_viewport_size).and_return(width: 800, height: 600)
+    allow(subject).to receive(:app_environment).and_return(
+      Applitools::AppEnvironment.new(
+        :os => :host_os,
+        :hosting_app => :host_app,
+        :display_size => Applitools::RectangleSize.new(800, 600),
+        :inferred => :inferred_environment
+      )
+    )
+  end
   describe ':check_image' do
     it 'passes match_level to base' do
       expect(subject).to receive(:check_window_base) do |*opts|

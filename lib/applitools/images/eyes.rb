@@ -203,7 +203,8 @@ module Applitools::Images
       viewport_size
     end
 
-    def vp_size=(value)
+    def vp_size=(value, skip_check_if_open = false)
+      raise Applitools::EyesNotOpenException.new 'set_viewport_size: Eyes not open!' unless skip_check_if_open || open?
       Applitools::ArgumentGuard.not_nil 'value', value
       @viewport_size = Applitools::RectangleSize.for value
     end

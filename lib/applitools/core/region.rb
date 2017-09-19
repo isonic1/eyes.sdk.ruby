@@ -78,6 +78,7 @@ module Applitools
       @top = i_top
       @width = i_right - i_left
       @height = i_bottom - i_top
+      self
     end
 
     def contains?(other_left, other_top)

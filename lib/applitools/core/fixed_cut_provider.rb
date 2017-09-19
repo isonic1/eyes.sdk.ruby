@@ -4,9 +4,9 @@ module Applitools
     # Creates a FixedCutProvider instance
     # @param [Applitools::Region] crop_region Outside space of the region will be cropped
     # @param [Integer] header A top field to crop
+    # @param [Integer] footer A bottom field to crop
     # @param [Integer] left A left field to crop
     # @param [Integer] right A right field to crop
-    # @param [Integer] footer A bottom field to crop
     # @example Creates cut provider by a Region
     #   Applitools::FixedCutProvider.new Applitools::Region.new(20,20, 300, 300)
     # @example Creates cut provider by a set of fields
