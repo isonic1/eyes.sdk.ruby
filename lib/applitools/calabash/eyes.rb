@@ -1,12 +1,18 @@
 module Applitools
   module Calabash
-    class Eyes < Applitools::Images::Eyes
-      attr_accessor :density, :full_page_capture_algorithm
+    class Eyes < Applitools::EyesBase
+      attr_accessor :density, :full_page_capture_algorithm, :base_agent_id, :title
       attr_reader :context
 
       def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
         super
         self.base_agent_id = "eyes.calabash.ruby/#{Applitools::VERSION}".freeze
+      end
+
+      def open(options = {})
+        Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
+        # options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size]
+        open_base options
       end
 
       def check(name, target)
@@ -116,6 +122,19 @@ module Applitools
           end
         end
       end
+
+      def vp_size
+        viewport_size
+      end
+
+      def vp_size=(value, skip_check_if_open = false)
+        raise Applitools::EyesNotOpenException.new 'set_viewport_size: Eyes not open!' unless skip_check_if_open || open?
+        Applitools::ArgumentGuard.not_nil 'value', value
+        @viewport_size = Applitools::RectangleSize.for value
+      end
+
+      alias get_viewport_size vp_size
+      alias set_viewport_size vp_size=
 
       def get_full_page_capture_algorithm(element)
         logger.info "Trying to get full page capture algorithm for element #{element}..."

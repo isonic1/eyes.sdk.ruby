@@ -1,4 +1,4 @@
-require 'eyes_images'
+require 'eyes_core'
 
 module Applitools
   module Calabash
