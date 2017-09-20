@@ -11,7 +11,7 @@ RSpec::Matchers.define :match_baseline do |expected|
   end
 end
 
-RSpec::Matchers.define :be_success do |expected|
+RSpec::Matchers.define :be_success do
   match do |actual|
     actual.as_expected? == true
   end

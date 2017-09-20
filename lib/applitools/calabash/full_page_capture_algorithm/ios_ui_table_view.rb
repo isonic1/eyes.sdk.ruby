@@ -12,7 +12,6 @@ module Applitools
           @stitched_image = nil
           @original_position = nil
         end
-
       end
     end
   end

@@ -28,7 +28,7 @@ module Applitools
         Applitools::Calabash::Utils.using_screenshot(context) do |screenshot_path|
           result = Applitools::Calabash::EyesCalabashAndroidScreenshot.new(
             Applitools::Screenshot.from_image(
-             ::ChunkyPNG::Image.from_file(screenshot_path)
+              ::ChunkyPNG::Image.from_file(screenshot_path)
             ),
             density: density
           )

@@ -6,7 +6,5 @@ RSpec.describe Applitools::Calabash::EyesCalabashAndroidScreenshot do
   end
 
   describe 'coordinates transitions' do
-
-
   end
 end

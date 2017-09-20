@@ -11,7 +11,7 @@ module Applitools
     def self.require_environment(requirement, env)
       dirname = File.dirname(requirement)
       filename = File.basename(requirement)
-      filename += '.rb' unless /^.*\.rb$/.match(filename)
+      filename += '.rb' unless /^.*\.rb$/ =~ filename
       file_to_require = File.join(load_dir, dirname, filename)
       env_dependent_requirement = File.join(load_dir, dirname, "#{env}_#{filename}")
       require file_to_require if File.exist?(file_to_require)
@@ -21,5 +21,3 @@ module Applitools
 end
 
 Applitools::Calabash.require_dir 'calabash'
-
-

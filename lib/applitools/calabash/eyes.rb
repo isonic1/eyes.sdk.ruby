@@ -41,10 +41,10 @@ module Applitools
       def screenshot_provider
         env = Applitools::Calabash::EnvironmentDetector.current_environment
         case env
-          when :android
-            Applitools::Calabash::AndroidScreenshotProvider.instance.with_density(density).using_context(context)
-          when :ios
-            Applitools::Calabash::IosScreenshotProvider.instance.with_density(density).using_context(context)
+        when :android
+          Applitools::Calabash::AndroidScreenshotProvider.instance.with_density(density).using_context(context)
+        when :ios
+          Applitools::Calabash::IosScreenshotProvider.instance.with_density(density).using_context(context)
         end
       end
 
@@ -53,13 +53,14 @@ module Applitools
 
         logger.info 'Full element requested' if target.options[:stitch_content]
 
-        self.full_page_capture_algorithm = target.options[:stitch_content] && get_full_page_capture_algorithm(target.region_to_check)
+        self.full_page_capture_algorithm = target.options[:stitch_content] &&
+          get_full_page_capture_algorithm(target.region_to_check)
 
-        if full_page_capture_algorithm
-          region_provider = entire_screenshot_region
-        else
-          region_provider = get_region_provider(target)
-        end
+        region_provider = if full_page_capture_algorithm
+                            entire_screenshot_region
+                          else
+                            get_region_provider(target)
+                          end
 
         match_window_data.tag = name
         update_default_settings(match_window_data)
@@ -69,16 +70,16 @@ module Applitools
 
         if match_window_data.is_a? Applitools::MatchSingleCheckData
           return check_single_base(
-              region_provider,
-              target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
-              match_window_data
+            region_provider,
+            target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+            match_window_data
           )
         end
 
         check_window_base(
-            region_provider,
-            target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
-            match_window_data
+          region_provider,
+          target.options[:timeout] || Applitools::EyesBase::USE_DEFAULT_TIMEOUT,
+          match_window_data
         )
       end
 
@@ -128,7 +129,9 @@ module Applitools
       end
 
       def vp_size=(value, skip_check_if_open = false)
-        raise Applitools::EyesNotOpenException.new 'set_viewport_size: Eyes not open!' unless skip_check_if_open || open?
+        unless skip_check_if_open || open?
+          raise Applitools::EyesNotOpenException.new 'set_viewport_size: Eyes not open!'
+        end
         Applitools::ArgumentGuard.not_nil 'value', value
         @viewport_size = Applitools::RectangleSize.for value
       end

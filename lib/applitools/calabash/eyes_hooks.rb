@@ -2,17 +2,17 @@ if respond_to? :Before
   Before('@eyes') do |scenario|
     eyes_settings = Applitools::Calabash::EyesSettings.instance
 
-    step %{eyes API key "#{ENV['APPLITOOLS_API_KEY']}"} unless eyes_settings.applitools_api_key
+    step %(eyes API key "#{ENV['APPLITOOLS_API_KEY']}") unless eyes_settings.applitools_api_key
 
-    step %{eyes application name is "#{scenario.feature.name}"}
+    step %(eyes application name is "#{scenario.feature.name}")
 
-    step %{eyes test name is "#{scenario.name}"}
+    step %(eyes test name is "#{scenario.name}")
 
-    step %{eyes tag is ""}
+    step %(eyes tag is "")
 
-    step %{set it up} if eyes_settings.needs_setting_up
+    step %(set it up) if eyes_settings.needs_setting_up
 
-    step %{open eyes}
+    step %(open eyes)
   end
 
   Before('@eyes') do |_scenario|
@@ -22,7 +22,7 @@ end
 
 if respond_to? :After
   After('@eyes', '@close') do |_scenario|
-    step %{terminate eyes session}
+    step %(terminate eyes session)
   end
 
   After('@eyes') do |_scenario|

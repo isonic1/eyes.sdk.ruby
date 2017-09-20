@@ -1,4 +1,4 @@
-Then /^open eyes$/ do
+Then(/^open eyes$/) do
   eyes_settings = Applitools::Calabash::EyesSettings.instance
   eyes_settings.eyes ||= Applitools::Calabash::Eyes.new.tap do |eyes|
     eyes.api_key = eyes_settings.applitools_api_key
@@ -7,9 +7,9 @@ Then /^open eyes$/ do
   end
 
   unless eyes_settings.eyes.open?
-    step %{set OS}
-    step %{set density}
-    step %{set device size}
+    step %(set OS)
+    step %(set density)
+    step %(set device size)
     eyes_settings.eyes.open eyes_settings.options_for_open
   end
 end
@@ -27,9 +27,9 @@ Then(/^applitools link should be reported$/) do
   puts @test_result
 end
 
-Then /^terminate eyes session$/ do
-  step %{I close eyes session}
-  step %{test result should be positive}
-  step %{applitools link should be reported}
+Then(/^terminate eyes session$/) do
+  step %(I close eyes session)
+  step %(test result should be positive)
+  step %(applitools link should be reported)
   @test_results = nil
 end

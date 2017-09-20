@@ -28,16 +28,18 @@ module Applitools
         end
 
         sub_screenshot_image = Applitools::Screenshot.from_any_image(
-            image.crop(
-                sub_screen_region.left, sub_screen_region.top, sub_screen_region.width, sub_screen_region.height
-            ).to_datastream.to_blob
+          image.crop(
+            sub_screen_region.left, sub_screen_region.top, sub_screen_region.width, sub_screen_region.height
+          ).to_datastream.to_blob
         )
 
         self.class.new sub_screenshot_image, scale_factor: scale_factor
       end
 
-      def location_in_screenshot(location, coordinates_type)
-        raise Applitools::EyesError 'Call to :convert_location is prohibited for Applitools::Calabash::EyesCalabashScreenshot'
+      def location_in_screenshot(_location, _coordinates_type)
+        raise Applitools::EyesError(
+          'Call to :convert_location is prohibited for Applitools::Calabash::EyesCalabashScreenshot'
+        )
       end
 
       def intersected_region(region, from, to = CONTEXT_RELATIVE)
@@ -49,17 +51,17 @@ module Applitools
         intersected_region
       end
 
-      def convert_location(location, from, to)
-        raise Applitools::EyesError 'Call to :convert_location is prohibited for Applitools::Calabash::EyesCalabashScreenshot'
+      def convert_location(_location, _from, _to)
+        raise Applitools::EyesError(
+          'Call to :convert_location is prohibited for Applitools::Calabash::EyesCalabashScreenshot'
+        )
       end
 
       abstract_method :convert_region_location, false
 
       def scale_it!
-        width = (image.width.to_f/scale_factor).to_i
-        height = (image.height.to_f/scale_factor).to_i
-#        require 'pry'
-#        binding.pry
+        width = (image.width.to_f / scale_factor).to_i
+        height = (image.height.to_f / scale_factor).to_i
         image.resample_bicubic!(width, height)
         self
       end

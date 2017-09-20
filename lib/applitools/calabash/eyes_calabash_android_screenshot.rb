@@ -22,35 +22,31 @@ module Applitools
 
       def convert_region_location(region, from, to)
         case from
-          when DRIVER
-            case to
-              when SCREENSHOT_AS_IS
-                region
-              else
-                raise Applitools::EyesError, "from: #{from}, to: #{to}"
-            end
-          when CONTEXT_RELATIVE
-            case to
-              when SCREENSHOT_AS_IS
-                region.scale_it!(1.to_f/scale_factor) #!!!!!!
-              region
-              else
-                raise Applitools::EyesError, "from: #{from}, to: #{to}"
-            end
+        when DRIVER
+          case to
+          when SCREENSHOT_AS_IS
+            region
           else
             raise Applitools::EyesError, "from: #{from}, to: #{to}"
+          end
+        when CONTEXT_RELATIVE
+          case to
+          when SCREENSHOT_AS_IS
+            region.scale_it!(1.to_f / scale_factor) # !!!!!!
+            region
+          else
+            raise Applitools::EyesError, "from: #{from}, to: #{to}"
+          end
+        else
+          raise Applitools::EyesError, "from: #{from}, to: #{to}"
         end
-        return region
+        region
       end
 
       def density=(value)
         raise Applitools::EyesIllegalArgument, "Unknown density = #{value}" unless ANDROID_DENSITY[value.to_i]
         @scale_factor = ANDROID_DENSITY[value.to_i]
       end
-
-      private
-
-
     end
   end
 end

@@ -17,7 +17,9 @@ RSpec.describe 'Applitools::Calabash::CalabashElement' do
 
   describe 'validates input hash' do
     it 'calls valid? on creation and raises an error on invalid data' do
-      expect_any_instance_of(Applitools::Calabash::CalabashElement).to receive(:valid_element?).with(Hash).and_return(false)
+      expect_any_instance_of(Applitools::Calabash::CalabashElement).to(
+        receive(:valid_element?).with(Hash).and_return(false)
+      )
       expect { Applitools::Calabash::CalabashElement.new({}, '*') }.to raise_error Applitools::EyesError
     end
     describe 'validation:' do
@@ -29,7 +31,9 @@ RSpec.describe 'Applitools::Calabash::CalabashElement' do
       end
       context do
         after do
-          expect { Applitools::Calabash::CalabashElement.new(valid_original_hash, '*') }.to raise_error Applitools::EyesError
+          expect { Applitools::Calabash::CalabashElement.new(valid_original_hash, '*') }.to(
+            raise_error Applitools::EyesError
+          )
         end
         it 'fails on "rect"' do
           valid_original_hash.delete('rect')
@@ -57,7 +61,9 @@ RSpec.describe 'Applitools::Calabash::CalabashElement' do
   end
 
   it 'delegates :[] calls to original element' do
-    expect(subject['rect']).to include('x' => 10, 'y' => 11, 'width' => 12, 'height' => 13, 'center_x' => 5, 'center_y'=> 6)
+    expect(subject['rect']).to(
+      include('x' => 10, 'y' => 11, 'width' => 12, 'height' => 13, 'center_x' => 5, 'center_y' => 6)
+    )
   end
 
   it 'provides :left' do

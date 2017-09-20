@@ -3,7 +3,9 @@ require 'spec_helper'
 RSpec.describe Applitools::Calabash::Eyes do
   context 'Screenshot class' do
     it 'respects EnvironmentDetector.current_environment' do
-      allow_any_instance_of(Applitools::Calabash::EnvironmentDetector).to receive(:current_environment).and_return :android
+      allow_any_instance_of(Applitools::Calabash::EnvironmentDetector).to(
+        receive(:current_environment).and_return(:android)
+      )
       expect(subject.screenshot_provider).to be_a(Applitools::Calabash::AndroidScreenshotProvider)
       allow_any_instance_of(Applitools::Calabash::EnvironmentDetector).to receive(:current_environment).and_return :ios
       expect(subject.screenshot_provider).to be_a(Applitools::Calabash::IosScreenshotProvider)

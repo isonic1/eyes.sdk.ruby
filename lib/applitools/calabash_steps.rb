@@ -12,4 +12,3 @@ Applitools::Calabash.require_environment(
   'applitools/calabash/steps/eyes_session',
   Applitools::Calabash::EnvironmentDetector.current_environment
 )
-

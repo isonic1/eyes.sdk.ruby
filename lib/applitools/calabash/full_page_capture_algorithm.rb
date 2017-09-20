@@ -8,16 +8,14 @@ module Applitools
       }.freeze
       IOS_ALGORITHMS = {
         'UITableView' => nil
-      }
+      }.freeze
       class << self
         def get_algorithm_class(env, klass)
           case env
-            when :ios
-              IOS_ALGORITHMS[klass]
-            when :android
-              ANDROID_ALGORITHMS[klass]
-            else
-              nil
+          when :ios
+            IOS_ALGORITHMS[klass]
+          when :android
+            ANDROID_ALGORITHMS[klass]
           end
         end
       end

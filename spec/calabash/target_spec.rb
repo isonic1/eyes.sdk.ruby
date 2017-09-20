@@ -13,7 +13,7 @@ RSpec.describe 'Applitools::Calabash::Target' do
       }
     }
   end
-  let(:calabash_element) { Applitools::Calabash::CalabashElement.new valid_region, '*'}
+  let(:calabash_element) { Applitools::Calabash::CalabashElement.new valid_region, '*' }
   subject { Applitools::Calabash::Target.new }
   describe 'accepts Applitools::Calabash::Element for' do
     it ':region' do

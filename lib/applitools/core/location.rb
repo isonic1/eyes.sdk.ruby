@@ -82,7 +82,7 @@ module Applitools
     end
 
     def scale_it!(scale_factor)
-      raise Applitools::EyesIllegalArgument, 'scale_factor must be an integer' unless scale_factor.is_a? Fixnum
+      raise Applitools::EyesIllegalArgument, 'scale_factor must be an integer' unless scale_factor.is_a? Integer
       @x *= scale_factor
       @y *= scale_factor
     end

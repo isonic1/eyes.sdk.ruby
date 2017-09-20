@@ -3,7 +3,6 @@ require 'securerandom'
 module Applitools
   module Calabash
     class EyesSettings
-
       attr_accessor :eyes, :applitools_api_key, :app_name, :test_name, :viewport_size
       attr_accessor :tmp_dir, :screenshot_dir, :log_dir, :log_file
       attr_accessor :needs_setting_up
@@ -35,7 +34,7 @@ module Applitools
       def screenshot_names
         @names ||= Enumerator.new do |y|
           loop do
-            y << {prefix: screenshot_prefix, name: "#{SecureRandom.uuid}.png"}
+            y << { prefix: screenshot_prefix, name: "#{SecureRandom.uuid}.png" }
           end
         end
       end

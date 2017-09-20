@@ -11,10 +11,10 @@ module Applitools
           @original_position = nil
         end
 
-        def get_stitched_region
+        def get_stitched_region(scroll_to_top = true)
           create_entire_image
           store_original_position
-          scroll_top
+          scroll_top if scroll_to_top
 
           scroll_it! do |scrollable_element|
             put_it_on_canvas!(
@@ -24,7 +24,7 @@ module Applitools
                 false,
                 false
               ).image,
-            element.location.offset_negative(scrollable_element.location)
+              element.location.offset_negative(scrollable_element.location)
             )
           end
 
@@ -43,15 +43,15 @@ module Applitools
         end
 
         def entire_content
-          @entire_content ||= get_scrollable_element
+          @entire_content ||= scrollable_element
         end
 
-        def get_scrollable_element
+        def scrollable_element
           child_query = "#{element.element_query} child * index:0"
           Applitools::Calabash::Utils.get_android_element(context, child_query, 0)
         end
 
-        def get_entire_size
+        def entire_size
           entire_content.size
         end
 
@@ -62,31 +62,32 @@ module Applitools
         end
 
         def store_original_position
-          scrollable_element = get_scrollable_element
+          scrollable_element = scrollable_element
           @original_position = Applitools::Location.new(scrollable_element.left, scrollable_element.top)
         end
 
         def restore_original_position
           return unless @original_position
-          offset = @original_position.offset_negative(get_scrollable_element.location)
+          offset = @original_position.offset_negative(scrollable_element.location)
           context.query(element.element_query, scrollBy: [-offset.x, -offset.y])
           @original_position = nil
         end
 
         def scroll_it!
           scroll_vertical = true
-          begin
-            scrollable = get_scrollable_element if scroll_vertical
+          loop do
+            scrollable = scrollable_element if scroll_vertical
             vertical_offset = element.location.offset_negative(scrollable.location).top
             scroll_vertical = false if vertical_offset + 1 >= scrollable.height - element.height
             yield(scrollable) if block_given?
-            context.query(element.element_query, {scrollBy: [0, element.height]}) if scroll_vertical
-          end while scroll_vertical
+            context.query(element.element_query, scrollBy: [0, element.height]) if scroll_vertical
+            return unless scroll_vertical
+          end
         end
 
         def create_entire_image
-          entire_size = get_entire_size
-          @stitched_image = ::ChunkyPNG::Image.new(entire_size.width, entire_size.height)
+          current_entire_size = entire_size
+          @stitched_image = ::ChunkyPNG::Image.new(current_entire_size.width, current_entire_size.height)
         end
 
         def eyes_window

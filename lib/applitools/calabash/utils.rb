@@ -31,7 +31,7 @@ module Applitools
           element['rect']['x'],
           element['rect']['y'],
           element['rect']['width'],
-          element['rect']['height'],
+          element['rect']['height']
         )
         return region if Applitools::Calabash::EnvironmentDetector.android?
         region.scale_it!(Applitools::Calabash::EyesSettings.instance.eyes.density)
@@ -51,15 +51,13 @@ module Applitools
       end
 
       def get_android_element(context, query, index)
-        if (id = context.query(query, :getId)[index.to_i]) > 0
-          element_query = "* id:#{id}"
-          element = context.query(element_query).first
-          Applitools::Calabash::CalabashElement.new(element, element_query)
-        else
-          element_query = query + " index:#{index.to_i}"
-          element = context.query(element_query).first
-          Applitools::Calabash::CalabashElement.new(element, element_query)
-        end
+        element_query = if (id = context.query(query, :getId)[index.to_i]) > 0
+                          "* id:#{id}"
+                        else
+                          query + " index:#{index.to_i}"
+                        end
+        element = context.query(element_query).first
+        Applitools::Calabash::CalabashElement.new(element, element_query)
       end
 
       def get_ios_element(context, query, index)

@@ -9,7 +9,7 @@ module Applitools
         self.ignored_regions = []
         self.floating_regions = []
         self.options = {
-            trim: false
+          trim: false
         }
       end
 

@@ -59,12 +59,12 @@ module Applitools
         self.max_bottom_offset = args[7]
       else
         raise(
-            Applitools::EyesIllegalArgument,
-            'Expected Applitools::FloatingRegion.new to be called as ' \
-        'Applitools::FloatingRegion.new(region, floating_bounds)' \
-        'or ' \
-        'Applitools::FloatingRegion.new(left, top, width, height, ' \
-        'bounds_leeft, bounds_top, bounds_right, bounds_bottom)'
+          Applitools::EyesIllegalArgument,
+          'Expected Applitools::FloatingRegion.new to be called as ' \
+             'Applitools::FloatingRegion.new(region, floating_bounds)' \
+             'or ' \
+             'Applitools::FloatingRegion.new(left, top, width, height, ' \
+             'bounds_leeft, bounds_top, bounds_right, bounds_bottom)'
         )
       end
     end

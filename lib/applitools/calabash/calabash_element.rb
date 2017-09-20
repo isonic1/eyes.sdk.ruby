@@ -15,13 +15,13 @@ module Applitools
         self['rect']['x']
       end
 
-      alias_method :x, :left
+      alias x left
 
       def top
         self['rect']['y']
       end
 
-      alias_method :y, :top
+      alias y top
 
       def width
         self['rect']['width']
@@ -52,7 +52,7 @@ module Applitools
       def valid_element?(element)
         result = true
         result &&= element.is_a?(Hash)
-        result &&= element.has_key?('rect')
+        result &&= element.key?('rect')
         result &&= (rect = element['rect']).is_a?(Hash)
         result &&= (%w(height width y x center_x center_y) - rect.keys).empty?
         result
