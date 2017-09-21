@@ -62,8 +62,8 @@ module Applitools
         end
 
         def store_original_position
-          scrollable_element = scrollable_element
-          @original_position = Applitools::Location.new(scrollable_element.left, scrollable_element.top)
+          current_scrollable_element = scrollable_element
+          @original_position = Applitools::Location.new(current_scrollable_element.left, current_scrollable_element.top)
         end
 
         def restore_original_position
