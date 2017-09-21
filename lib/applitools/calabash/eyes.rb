@@ -92,9 +92,10 @@ module Applitools
       end
 
       def get_app_output_with_screenshot(*args)
-        super do |screenshot|
-          screenshot.scale_it!
-        end
+        # super do |screenshot|
+        #   screenshot.scale_it!
+        # end
+        super(*args, &:scale_it!)
       end
 
       def entire_screenshot_region
