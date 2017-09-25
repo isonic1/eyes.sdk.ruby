@@ -356,7 +356,7 @@ describe Applitools::EyesBase do
       expect(result.url).to eq :session_url
     end
 
-    context 'throws an exception for failed test if called like close(true)' do
+    context 'throws an exception for failed test if called like close(true) (save_new_tests = false)' do
       before do
         expect(subject).to receive(:session_start_info).and_return(
           Applitools::SessionStartInfo.new(
@@ -369,6 +369,7 @@ describe Applitools::EyesBase do
             :environment => :g
           )
         ).at_least 1
+        allow(subject).to receive(:save_new_tests).and_return(false)
       end
 
       it 'failed test close(true)' do
@@ -376,7 +377,7 @@ describe Applitools::EyesBase do
         obj = Object.new
         expect(subject).to receive(:server_connector).and_return obj
         expect(obj).to receive(:stop_session).and_return(failed_old_results)
-        expect { subject.close(true) }.to raise_error Applitools::TestFailedError
+        expect { subject.close(true) }.to raise_error Applitools::DiffsFoundError
       end
 
       it 'new test close(true)' do
@@ -385,7 +386,41 @@ describe Applitools::EyesBase do
         obj = Object.new
         expect(subject).to receive(:server_connector).and_return obj
         expect(obj).to receive(:stop_session).and_return(new_results)
-        expect { subject.close(true) }.to raise_error Applitools::TestFailedError
+        expect { subject.close(true) }.to raise_error Applitools::NewTestError
+      end
+    end
+
+    context 'throws an exception for failed test if called like close(true) (save_new_tests = true)' do
+      before do
+        expect(subject).to receive(:session_start_info).and_return(
+          Applitools::SessionStartInfo.new(
+            :agent_id => :a,
+            :app_id_or_name => :b,
+            :ver_id => :c,
+            :scenario_id_or_name => :d,
+            :batch_info => :e,
+            :env_name => :f,
+            :environment => :g
+          )
+        ).at_least 1
+        allow(subject).to receive(:save_new_tests).and_return(true)
+      end
+
+      it 'failed test close(true)' do
+        expect(subject).to receive(:open?).and_return(true).at_least 1
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+        expect(obj).to receive(:stop_session).and_return(failed_old_results)
+        expect { subject.close(true) }.to raise_error Applitools::DiffsFoundError
+      end
+
+      it 'new test close(true)' do
+        expect(subject).to receive(:open?).and_return(true).at_least 1
+        expect(subject).to receive(:running_session).and_return(r_session_new).at_least 1
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+        expect(obj).to receive(:stop_session).and_return(new_results)
+        expect { subject.close(true) }.to_not raise_error
       end
     end
 

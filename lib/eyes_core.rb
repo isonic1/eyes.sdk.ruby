@@ -54,6 +54,7 @@ module Applitools
 
   # @!visibility private
   class NewTestError < TestFailedError; end
+  class DiffsFoundError < TestFailedError; end
 end
 
 require_relative 'applitools/method_tracer'

@@ -421,9 +421,9 @@ module Applitools
 
       if results.failed?
         logger.error "--- Failed test ended. see details at #{session_results_url}"
-        error_message = "#{session_start_info.scenario_id_or_name} of #{session_start_info.app_id_or_name}. " \
-            "See details at #{session_results_url}."
-        raise Applitools::TestFailedError.new error_message, results if throw_exception
+        error_message = "Test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
+            "detected differences! See details at #{session_results_url}."
+        raise Applitools::DiffsFoundError.new error_message, results if throw_exception
         return results
       end
 
@@ -432,7 +432,9 @@ module Applitools
         logger.info "--- New test ended. #{instructions}"
         error_message = "#{session_start_info.scenario_id_or_name} of #{session_start_info.app_id_or_name}. " \
             "#{instructions}"
-        raise Applitools::TestFailedError.new error_message, results if throw_exception
+        if throw_exception && !save_new_tests
+          raise Applitools::NewTestError.new error_message, results
+        end
         return results
       end
 
