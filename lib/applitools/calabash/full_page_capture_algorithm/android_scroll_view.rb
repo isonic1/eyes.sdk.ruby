@@ -42,17 +42,10 @@ module Applitools
           stitched_image.replace!(image, offset.x, offset.y)
         end
 
-        def entire_content
-          @entire_content ||= scrollable_element
-        end
 
         def scrollable_element
           child_query = "#{element.element_query} child * index:0"
           Applitools::Calabash::Utils.get_android_element(context, child_query, 0)
-        end
-
-        def entire_size
-          entire_content.size
         end
 
         def scroll_top
@@ -83,11 +76,6 @@ module Applitools
             context.query(element.element_query, scrollBy: [0, element.height]) if scroll_vertical
             return unless scroll_vertical
           end
-        end
-
-        def create_entire_image
-          current_entire_size = entire_size
-          @stitched_image = ::ChunkyPNG::Image.new(current_entire_size.width, current_entire_size.height)
         end
 
         def eyes_window
