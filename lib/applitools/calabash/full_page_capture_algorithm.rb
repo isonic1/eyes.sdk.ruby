@@ -7,7 +7,7 @@ module Applitools
         'android.widget.ScrollView' => Applitools::Calabash::FullPageCaptureAlgorithm::AndroidScrollView
       }.freeze
       IOS_ALGORITHMS = {
-        'UITableView' => nil
+        'UITableView' => Applitools::Calabash::FullPageCaptureAlgorithm::IosUITableView
       }.freeze
       class << self
         def get_algorithm_class(env, klass)

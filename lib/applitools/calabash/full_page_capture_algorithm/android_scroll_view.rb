@@ -3,7 +3,6 @@ module Applitools
   module Calabash
     module FullPageCaptureAlgorithm
       class AndroidScrollView < Base
-        attr_reader :stitched_image
         def initialize(*args)
           super
           @entire_content = nil
@@ -23,7 +22,7 @@ module Applitools
                 Applitools::Calabash::EyesCalabashScreenshot::DRIVER,
                 false,
                 false
-              ).image,
+              ).image.image,
               element.location.offset_negative(scrollable_element.location)
             )
           end
@@ -37,11 +36,6 @@ module Applitools
         end
 
         private
-
-        def put_it_on_canvas!(image, offset)
-          stitched_image.replace!(image, offset.x, offset.y)
-        end
-
 
         def scrollable_element
           child_query = "#{element.element_query} child * index:0"
@@ -76,6 +70,10 @@ module Applitools
             context.query(element.element_query, scrollBy: [0, element.height]) if scroll_vertical
             return unless scroll_vertical
           end
+        end
+
+        def entire_size
+          entire_content.size
         end
 
         def eyes_window
