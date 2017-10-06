@@ -8,7 +8,10 @@ RSpec.describe Applitools::Calabash::EyesCalabashScreenshot do
     described_class.new(Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)))
   end
 
-  it_behaves_like 'has abstract method', :convert_region_location => [Applitools::Location::TOP_LEFT, Applitools::Calabash::EyesCalabashScreenshot::DRIVER]
+  it_behaves_like(
+    'has abstract method',
+    convert_region_location: [Applitools::Location::TOP_LEFT, Applitools::Calabash::EyesCalabashScreenshot::DRIVER]
+  )
 
   it_behaves_like 'has private method', [:bounds]
 
@@ -21,10 +24,10 @@ RSpec.describe Applitools::Calabash::EyesCalabashScreenshot do
   end
 
   it ':location_in_screenshot is prohibited' do
-    expect { subject.location_in_screenshot(0,0) }.to raise_error Applitools::EyesError
+    expect { subject.location_in_screenshot(0, 0) }.to raise_error Applitools::EyesError
   end
   it ':convert_location is prohibited' do
-    expect { subject.convert_location(0,0,0) }.to raise_error Applitools::EyesError
+    expect { subject.convert_location(0, 0, 0) }.to raise_error Applitools::EyesError
   end
 
   context 'Scale factor' do
@@ -33,7 +36,9 @@ RSpec.describe Applitools::Calabash::EyesCalabashScreenshot do
     end
 
     it 'accepts scale_factor on creation' do
-      instance = described_class.new(Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)), scale_factor: 3)
+      instance = described_class.new(
+        Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)), scale_factor: 3
+      )
       expect(instance.instance_variable_get(:@scale_factor)).to eq 3
     end
   end
@@ -76,8 +81,12 @@ RSpec.describe Applitools::Calabash::EyesCalabashScreenshot do
     let(:clipped_region) { Applitools::Region.new(0, 0, 12, 4) }
     it_behaves_like 'responds to method', [:sub_screenshot]
     it 'throw_if_clipped' do
-      allow(subject).to receive(:convert_region_location).with(out_of_bounds_region, any_args).and_return(clipped_region)
-      expect { subject.sub_screenshot(out_of_bounds_region, described_class::DRIVER, true, false) }.to raise_error Applitools::OutOfBoundsException
+      allow(subject).to(
+        receive(:convert_region_location).with(out_of_bounds_region, any_args).and_return(clipped_region)
+      )
+      expect { subject.sub_screenshot(out_of_bounds_region, described_class::DRIVER, true, false) }.to(
+        raise_error Applitools::OutOfBoundsException
+      )
     end
     it 'force_nil_if_clipped' do
       allow(subject).to receive(:convert_region_location).with(out_of_bounds_region, any_args).and_return(empty_region)
