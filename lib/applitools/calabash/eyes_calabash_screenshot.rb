@@ -23,7 +23,7 @@ module Applitools
 
         if sub_screen_region.empty? || (throw_if_clipped && !region.size_equals?(sub_screen_region))
           return nil if force_nil_if_clipped
-          Applitools::OutOfBoundsException.new "Region #{sub_screen_region} (#{coordinates_type}) is out of " \
+          raise Applitools::OutOfBoundsException, "Region #{sub_screen_region} (#{coordinates_type}) is out of " \
           " screenshot bounds #{bounds}"
         end
 
@@ -37,7 +37,8 @@ module Applitools
       end
 
       def location_in_screenshot(_location, _coordinates_type)
-        raise Applitools::EyesError(
+        raise(
+          Applitools::EyesError,
           'Call to :convert_location is prohibited for Applitools::Calabash::EyesCalabashScreenshot'
         )
       end
@@ -52,7 +53,8 @@ module Applitools
       end
 
       def convert_location(_location, _from, _to)
-        raise Applitools::EyesError(
+        raise(
+          Applitools::EyesError,
           'Call to :convert_location is prohibited for Applitools::Calabash::EyesCalabashScreenshot'
         )
       end

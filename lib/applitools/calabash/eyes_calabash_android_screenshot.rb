@@ -12,7 +12,11 @@ module Applitools
       }.freeze
 
       def initialize(*args)
-        options = args.pop
+        options = if args.last.is_a? Hash
+                    args.pop
+                  else
+                    {}
+                  end
         super(*args)
         @scale_factor = nil
         self.density = options[:density] if options[:density]
