@@ -240,6 +240,10 @@ describe Applitools::EyesBase do
         expect { subject.open_base(:app_name => :app, :test_name => :test) }.to raise_error(Applitools::EyesError,
           'A test is already running')
       end
+
+      it 'yields a block' do
+        expect { |b| subject.open_base(:app_name => :app, :test_name => :test, &b) }.to yield_control
+      end
     end
 
     it 'throws exception without API key' do
