@@ -11,6 +11,8 @@ module Applitools::Selenium
 
     USE_DEFAULT_MATCH_TIMEOUT = -1
 
+    DEFAULT_STITCHING_OVERLAP = 50 # Pixels
+
     extend Forwardable
     # @!visibility public
 
@@ -75,7 +77,7 @@ module Applitools::Selenium
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
-      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider
+      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -104,6 +106,7 @@ module Applitools::Selenium
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil
       self.force_driver_resolution_as_viewport_size = false
+      self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
     end
 
     # Starts a test
@@ -538,7 +541,8 @@ module Applitools::Selenium
             scale_provider: scale_provider,
             cut_provider: cut_provider,
             wait_before_screenshots: wait_before_screenshots,
-            eyes_screenshot_factory: eyes_screenshot_factory
+            eyes_screenshot_factory: eyes_screenshot_factory,
+            stitching_overlap: stitching_overlap
           )
 
           logger.info 'Building screenshot object...'
@@ -570,7 +574,8 @@ module Applitools::Selenium
                                   scale_provider: scale_provider,
                                   cut_provider: cut_provider,
                                   wait_before_screenshots: wait_before_screenshots,
-                                  eyes_screenshot_factory: eyes_screenshot_factory
+                                  eyes_screenshot_factory: eyes_screenshot_factory,
+                                  stitching_overlap: stitching_overlap
 
           unless driver.frame_chain.empty?
             logger.info 'Switching back to original frame...'
