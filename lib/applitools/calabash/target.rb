@@ -30,8 +30,16 @@ module Applitools
 
       def region(region = nil)
         if region
-          Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Calabash::CalabashElement
-          self.region_to_check = region
+          case region
+          when Applitools::Calabash::CalabashElement, Applitools::Region
+            self.region_to_check = region
+          else
+            self.region_to_check = nil
+            raise(
+              Applitools::EyesIllegalArgument,
+              'Expected region to be instance of Applitools::Calabash::CalabashElement or Applitools::Region'
+            )
+          end
         else
           self.region_to_check = nil
         end

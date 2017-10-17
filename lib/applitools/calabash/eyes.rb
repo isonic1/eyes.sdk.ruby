@@ -126,7 +126,15 @@ module Applitools
         Object.new.tap do |prov|
           prov.instance_eval do
             define_singleton_method :region do
-              region_to_check.region
+              case region_to_check
+              when Applitools::Calabash::CalabashElement
+                region_to_check.region
+              when Applitools::Region
+                region_to_check
+              else
+                raise Applitools::EyesError, "Incompatible region type: #{region_to_check.class}"
+              end
+              # region_to_check.respond_to?(:region) ? region_to_check.region : region_to_check
             end
             define_singleton_method :coordinate_type do
               Applitools::Calabash::EyesCalabashScreenshot::DRIVER

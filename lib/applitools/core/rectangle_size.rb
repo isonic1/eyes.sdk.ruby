@@ -19,7 +19,7 @@ module Applitools
       end
 
       def from_hash(value)
-        new value[:width], value[:height]
+        new value[:width].to_i, value[:height].to_i
       end
 
       def from_struct(value)

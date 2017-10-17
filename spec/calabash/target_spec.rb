@@ -35,4 +35,11 @@ RSpec.describe 'Applitools::Calabash::Target' do
       expect(result.height).to eq valid_region['rect']['height']
     end
   end
+
+  describe ':region' do
+    let(:region) { Applitools.region.new(0, 0, 10, 10) }
+    it 'accepts Applitools::Region' do
+      expect { subject.region }.to_not raise_error
+    end
+  end
 end
