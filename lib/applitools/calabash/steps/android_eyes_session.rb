@@ -5,11 +5,11 @@ Then(/^set OS$/) do
   end
 end
 
-Then(/^set density$/) do
+Then(/^set device pixel ratio$/) do
   display_info = `#{default_device.adb_command} shell dumpsys display`
   # size_match = /deviceWidth=(?<width>\d+), deviceHeight=(?<height>\d+)/.match(display_info)
   density_match = /DisplayDeviceInfo.*density (?<density>\d+)/.match(display_info)
-  Applitools::Calabash::EyesSettings.instance.eyes.density = density_match[:density].to_i
+  Applitools::Calabash::EyesSettings.instance.eyes.device_pixel_ratio = density_match[:density].to_i
 end
 
 Then(/^set device size$/) do

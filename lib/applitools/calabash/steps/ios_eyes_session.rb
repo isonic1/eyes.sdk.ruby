@@ -2,9 +2,9 @@ Then(/^set OS$/) do
   Applitools::Calabash::EyesSettings.instance.eyes.host_os = "iOS(#{default_device.ios_version})"
 end
 
-Then(/^set density$/) do
+Then(/^set device pixel ratio$/) do
   dimensions = default_device.screen_dimensions
-  Applitools::Calabash::EyesSettings.instance.eyes.density = dimensions[:scale] #:native_scale?
+  Applitools::Calabash::EyesSettings.instance.eyes.device_pixel_ratio = dimensions[:scale] #:native_scale?
 end
 
 Then(/^set device size$/) do

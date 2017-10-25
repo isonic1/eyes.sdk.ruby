@@ -1,7 +1,7 @@
 module Applitools
   module Calabash
     class Eyes < Applitools::EyesBase
-      attr_accessor :density, :full_page_capture_algorithm, :base_agent_id, :title,
+      attr_accessor :device_pixel_ratio, :full_page_capture_algorithm, :base_agent_id, :title,
         :debug_screenshot, :debug_screenshot_provider, :tag_for_debug
       attr_reader :context
 
@@ -27,8 +27,8 @@ module Applitools
 
       def inferred_environment
         return @inferred_environment unless @inferred_environment.nil?
-        return unless density
-        "density: #{density}"
+        return unless device_pixel_ratio
+        "device pixel ratio: #{device_pixel_ratio}"
       end
 
       def add_context(value)
@@ -48,11 +48,11 @@ module Applitools
         env = Applitools::Calabash::EnvironmentDetector.current_environment
         case env
         when :android
-          Applitools::Calabash::AndroidScreenshotProvider.instance.with_density(density)
+          Applitools::Calabash::AndroidScreenshotProvider.instance.with_density(device_pixel_ratio)
                                                          .using_context(context)
                                                          .with_debug_screenshot_provider(debug_screenshot_provider)
         when :ios
-          Applitools::Calabash::IosScreenshotProvider.instance.with_density(density)
+          Applitools::Calabash::IosScreenshotProvider.instance.with_density(device_pixel_ratio)
                                                      .using_context(context)
                                                      .with_debug_screenshot_provider(debug_screenshot_provider)
         end

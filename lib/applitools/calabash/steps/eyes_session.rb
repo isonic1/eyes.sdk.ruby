@@ -8,7 +8,7 @@ Then(/^open eyes$/) do
 
   unless eyes_settings.eyes.open?
     step %(set OS)
-    step %(set density)
+    step %(set device pixel ratio)
     step %(set device size)
     eyes_settings.eyes.open eyes_settings.options_for_open
   end
