@@ -419,22 +419,26 @@ module Applitools
 
       logger.info results.to_s(verbose_results)
 
-      if results.failed?
-        logger.error "--- Failed test ended. see details at #{session_results_url}"
-        error_message = "Test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
+      if results.unresolved?
+        if results.new?
+          logger.error "--- New test ended. see details at #{session_results_url}"
+          error_message = "New test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
+            "Please approve the baseline at #{session_results_url}."
+          raise Applitools::NewTestError.new error_message, results if throw_exception
+        else
+          logger.error "--- Differences are found. see details at #{session_results_url}"
+          error_message = "Test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
             "detected differences! See details at #{session_results_url}."
-        raise Applitools::DiffsFoundError.new error_message, results if throw_exception
+          raise Applitools::DiffsFoundError.new error_message, results if throw_exception
+        end
         return results
       end
 
-      if results.new?
-        instructions = "Please approve the new baseline at #{session_results_url}"
-        logger.info "--- New test ended. #{instructions}"
-        error_message = "#{session_start_info.scenario_id_or_name} of #{session_start_info.app_id_or_name}. " \
-            "#{instructions}"
-        if throw_exception && !save_new_tests
-          raise Applitools::NewTestError.new error_message, results
-        end
+      if results.failed?
+        logger.error "--- Failed test ended. see details at #{session_results_url}"
+        error_message = "Test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
+            "is failed! See details at #{session_results_url}."
+        raise Applitools::FailedTestError.new error_message, results if throw_exception
         return results
       end
 
