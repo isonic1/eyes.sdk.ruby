@@ -422,12 +422,14 @@ module Applitools
       if results.unresolved?
         if results.new?
           logger.error "--- New test ended. see details at #{session_results_url}"
-          error_message = "New test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
+          error_message = "New test '#{session_start_info.scenario_id_or_name}' " \
+            "of '#{session_start_info.app_id_or_name}' " \
             "Please approve the baseline at #{session_results_url}."
           raise Applitools::NewTestError.new error_message, results if throw_exception
         else
           logger.error "--- Differences are found. see details at #{session_results_url}"
-          error_message = "Test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
+          error_message = "Test '#{session_start_info.scenario_id_or_name}' " \
+            "of '#{session_start_info.app_id_or_name}' " \
             "detected differences! See details at #{session_results_url}."
           raise Applitools::DiffsFoundError.new error_message, results if throw_exception
         end

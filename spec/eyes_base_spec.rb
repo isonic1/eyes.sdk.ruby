@@ -289,25 +289,25 @@ describe Applitools::EyesBase do
 
     let(:failed_test_results) do
       Applitools::TestResults.new(
-          'steps' => 5,
-          'matches' => 1,
-          'mismatches' => 2,
-          'missing' => 2,
-          'isNew' => false,
-          'isDifferent' => true,
-          'status' => 'Failed'
+        'steps' => 5,
+        'matches' => 1,
+        'mismatches' => 2,
+        'missing' => 2,
+        'isNew' => false,
+        'isDifferent' => true,
+        'status' => 'Failed'
       )
     end
 
     let(:new_results) do
-      new = Applitools::TestResults.new('isNew' => true, 'isDifferent' => false, 'status' => 'Unresolved').tap do |r|
+      Applitools::TestResults.new('isNew' => true, 'isDifferent' => false, 'status' => 'Unresolved').tap do |r|
         r.is_new = true
         r.url = 'http://see.results.url'
       end
     end
 
     let(:new_saved_results) do
-      new = Applitools::TestResults.new('isNew' => true, 'isDifferent' => false, 'status' => 'Passed').tap do |r|
+      Applitools::TestResults.new('isNew' => true, 'isDifferent' => false, 'status' => 'Passed').tap do |r|
         r.is_new = true
         r.url = 'http://see.results.url'
       end
