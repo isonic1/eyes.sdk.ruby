@@ -438,7 +438,7 @@ module Applitools
         logger.error "--- Failed test ended. see details at #{session_results_url}"
         error_message = "Test '#{session_start_info.scenario_id_or_name}' of '#{session_start_info.app_id_or_name}' " \
             "is failed! See details at #{session_results_url}."
-        raise Applitools::FailedTestError.new error_message, results if throw_exception
+        raise Applitools::TestFailedError.new error_message, results if throw_exception
         return results
       end
 
