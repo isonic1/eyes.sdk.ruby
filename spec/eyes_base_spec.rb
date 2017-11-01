@@ -270,7 +270,8 @@ describe Applitools::EyesBase do
         'mismatches' => 0,
         'missing' => 0,
         'isNew' => false,
-        'isDifferent' => false
+        'isDifferent' => false,
+        'status' => 'Passed'
       )
     end
 
@@ -281,15 +282,35 @@ describe Applitools::EyesBase do
         'mismatches' => 2,
         'missing' => 2,
         'isNew' => false,
-        'isDifferent' => true
+        'isDifferent' => true,
+        'status' => 'Unresolved'
+      )
+    end
+
+    let(:failed_test_results) do
+      Applitools::TestResults.new(
+        'steps' => 5,
+        'matches' => 1,
+        'mismatches' => 2,
+        'missing' => 2,
+        'isNew' => false,
+        'isDifferent' => true,
+        'status' => 'Failed'
       )
     end
 
     let(:new_results) do
-      new = Applitools::TestResults.new('isNew' => true, 'isDifferent' => false)
-      new.is_new = true
-      new.url = 'http://see.results.url'
-      new
+      Applitools::TestResults.new('isNew' => true, 'isDifferent' => false, 'status' => 'Unresolved').tap do |r|
+        r.is_new = true
+        r.url = 'http://see.results.url'
+      end
+    end
+
+    let(:new_saved_results) do
+      Applitools::TestResults.new('isNew' => true, 'isDifferent' => false, 'status' => 'Passed').tap do |r|
+        r.is_new = true
+        r.url = 'http://see.results.url'
+      end
     end
 
     let(:r_session) { Applitools::Session.new :session_id, :session_url, false }
@@ -376,6 +397,14 @@ describe Applitools::EyesBase do
         allow(subject).to receive(:save_new_tests).and_return(false)
       end
 
+      it 'generally failed test' do
+        expect(subject).to receive(:open?).and_return(true).at_least 1
+        obj = Object.new
+        expect(subject).to receive(:server_connector).and_return obj
+        expect(obj).to receive(:stop_session).and_return(failed_test_results)
+        expect { subject.close(true) }.to raise_error Applitools::TestFailedError
+      end
+
       it 'failed test close(true)' do
         expect(subject).to receive(:open?).and_return(true).at_least 1
         obj = Object.new
@@ -396,7 +425,7 @@ describe Applitools::EyesBase do
 
     context 'throws an exception for failed test if called like close(true) (save_new_tests = true)' do
       before do
-        expect(subject).to receive(:session_start_info).and_return(
+        allow(subject).to receive(:session_start_info).and_return(
           Applitools::SessionStartInfo.new(
             :agent_id => :a,
             :app_id_or_name => :b,
@@ -423,7 +452,7 @@ describe Applitools::EyesBase do
         expect(subject).to receive(:running_session).and_return(r_session_new).at_least 1
         obj = Object.new
         expect(subject).to receive(:server_connector).and_return obj
-        expect(obj).to receive(:stop_session).and_return(new_results)
+        expect(obj).to receive(:stop_session).and_return(new_saved_results)
         expect { subject.close(true) }.to_not raise_error
       end
     end
