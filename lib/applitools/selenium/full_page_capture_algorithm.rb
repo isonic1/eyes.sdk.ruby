@@ -36,6 +36,7 @@ module Applitools::Selenium
       cut_provider = options[:cut_provider]
       wait_before_screenshot = options[:wait_before_screenshots]
       eyes_screenshot_factory = options[:eyes_screenshot_factory]
+      stitching_overlap = options[:stitching_overlap] || MAX_SCROLL_BAR_SIZE
 
       logger.info "Region to check: #{region_provider.region}"
       logger.info "Coordinates type: #{region_provider.coordinate_type}"
@@ -100,7 +101,7 @@ module Applitools::Selenium
       end
 
       part_image_size = Applitools::RectangleSize.new image.width,
-        [image.height - MAX_SCROLL_BAR_SIZE, MIN_SCREENSHOT_PART_HEIGHT].max
+        [image.height - stitching_overlap, MIN_SCREENSHOT_PART_HEIGHT].max
 
       logger.info "Total size: #{entire_size}, image_part_size: #{part_image_size}"
 

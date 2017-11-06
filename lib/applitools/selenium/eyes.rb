@@ -11,6 +11,8 @@ module Applitools::Selenium
 
     USE_DEFAULT_MATCH_TIMEOUT = -1
 
+    DEFAULT_STITCHING_OVERLAP = 50 # Pixels
+
     extend Forwardable
     # @!visibility public
 
@@ -75,7 +77,7 @@ module Applitools::Selenium
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
-      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider
+      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -104,6 +106,7 @@ module Applitools::Selenium
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil
       self.force_driver_resolution_as_viewport_size = false
+      self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
     end
 
     # Starts a test
@@ -120,10 +123,10 @@ module Applitools::Selenium
     # @return [Applitools::Selenium::Driver] A wrapped web driver which enables Eyes
     #   trigger recording and frame handling
     def open(options = {})
-      driver = options.delete(:driver)
+      original_driver = options.delete(:driver)
       options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size] if
           options[:viewport_size]
-      Applitools::ArgumentGuard.not_nil driver, 'options[:driver]'
+      Applitools::ArgumentGuard.not_nil original_driver, 'options[:driver]'
       Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
 
       if disabled?
@@ -131,8 +134,8 @@ module Applitools::Selenium
         return driver
       end
 
-      @driver = self.class.eyes_driver(driver, self)
-      perform_driver_specific_settings(driver)
+      @driver = self.class.eyes_driver(original_driver, self)
+      perform_driver_specific_settings(original_driver)
 
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
       self.position_provider = self.class.position_provider(
@@ -152,16 +155,19 @@ module Applitools::Selenium
       @driver
     end
 
-    def perform_driver_specific_settings(driver)
-      modifier = driver.class.to_s.downcase.gsub(/::/, '_')
+    def perform_driver_specific_settings(original_driver)
+      modifier = original_driver.class.to_s.downcase.gsub(/::/, '_')
       method_name = "perform_driver_settings_for_#{modifier}"
-      send(method_name) if respond_to? method_name
+      send(method_name) if respond_to?(method_name, :include_private)
     end
 
     def perform_driver_settings_for_appium_driver
       self.region_visibility_strategy = NopRegionVisibilityStrategy.new
       self.force_driver_resolution_as_viewport_size = true
     end
+
+    private :perform_driver_settings_for_appium_driver
+    private :perform_driver_specific_settings
 
     # Sets the stitch mode.
     #
@@ -538,7 +544,8 @@ module Applitools::Selenium
             scale_provider: scale_provider,
             cut_provider: cut_provider,
             wait_before_screenshots: wait_before_screenshots,
-            eyes_screenshot_factory: eyes_screenshot_factory
+            eyes_screenshot_factory: eyes_screenshot_factory,
+            stitching_overlap: stitching_overlap
           )
 
           logger.info 'Building screenshot object...'
@@ -570,7 +577,8 @@ module Applitools::Selenium
                                   scale_provider: scale_provider,
                                   cut_provider: cut_provider,
                                   wait_before_screenshots: wait_before_screenshots,
-                                  eyes_screenshot_factory: eyes_screenshot_factory
+                                  eyes_screenshot_factory: eyes_screenshot_factory,
+                                  stitching_overlap: stitching_overlap
 
           unless driver.frame_chain.empty?
             logger.info 'Switching back to original frame...'

@@ -15,5 +15,10 @@ RSpec::Core::RakeTask.new('spec')
 
 RuboCop::RakeTask.new
 
-task perform_tests: [:spec, :rubocop]
+if Gem::Version.new(RUBY_VERSION) < Gem::Version.new('2.0.0')
+  task perform_tests: [:spec]
+else
+  task perform_tests: [:spec, :rubocop]
+end
+
 task :default => :perform_tests
