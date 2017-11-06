@@ -37,9 +37,9 @@ RSpec.describe Applitools::Calabash::Eyes do
   end
   context ':region_for_element' do
     let(:calabash_element) { Applitools::Calabash::Element.new }
-    let(:region) {  }
+    # let(:region) {  }
     xit 'Accepts Applitools::Calabash::CalabashElement' do
-      expect { subject.send(:region_for_element, )}
+      expect { subject.send(:region_for_element) }
     end
     it 'Accepts Applitools::Region'
     it 'Rejects unknown argument'
