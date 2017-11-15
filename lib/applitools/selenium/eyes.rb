@@ -350,6 +350,7 @@ module Applitools::Selenium
       return yield if block_given? && frames.empty?
 
       original_frame_chain = driver.frame_chain
+
       logger.info 'Switching to target frame according to frames path...'
       driver.switch_to.frames(frames_path: frames)
       logger.info 'Done!'
