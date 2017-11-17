@@ -322,6 +322,7 @@ module Applitools::Selenium
               nil
             )
           end
+
           check_window_base(
             region_provider, timeout, match_data
           )
