@@ -79,7 +79,8 @@ module Applitools::Selenium
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
-      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap
+      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
+      :full_page_capture_algorithm_left_top_offset
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -109,6 +110,7 @@ module Applitools::Selenium
       self.explicit_entire_size = nil
       self.force_driver_resolution_as_viewport_size = false
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
+      self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
     end
 
     # Starts a test
@@ -332,6 +334,7 @@ module Applitools::Selenium
           self.force_full_page_screenshot = original_force_full_page_screenshot
           self.position_provider = original_position_provider
           self.region_to_check = nil
+          self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
           region_visibility_strategy.return_to_original_position position_provider
         end
         # rubocop:enable BlockLength
@@ -564,7 +567,8 @@ module Applitools::Selenium
             cut_provider: cut_provider,
             wait_before_screenshots: wait_before_screenshots,
             eyes_screenshot_factory: eyes_screenshot_factory,
-            stitching_overlap: stitching_overlap
+            stitching_overlap: stitching_overlap,
+            top_left_position: full_page_capture_algorithm_left_top_offset
           )
 
           logger.info 'Building screenshot object...'
