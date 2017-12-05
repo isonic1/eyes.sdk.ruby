@@ -19,7 +19,7 @@ module Applitools
       end
 
       def from_hash(value)
-        new value[:width], value[:height]
+        new value[:width].to_i, value[:height].to_i
       end
 
       def from_struct(value)
@@ -45,6 +45,12 @@ module Applitools
     def +(other)
       self.width = width + other.width
       self.height = height + other.height
+      self
+    end
+
+    def scale_it!(scale_factor)
+      self.width *= scale_factor
+      self.height *= scale_factor
       self
     end
 
