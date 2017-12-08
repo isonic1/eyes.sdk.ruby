@@ -31,6 +31,7 @@ module Applitools
       private
 
       def save_debug_screenshot(screenshot, suffix)
+        suffix = suffix.join('_') if suffix.respond_to? :join
         debug_screenshot_provider.save(screenshot, suffix || '') if debug_screenshot_provider
       end
     end
@@ -43,7 +44,10 @@ module Applitools
         result = nil
         Applitools::Calabash::Utils.using_screenshot(context) do |screenshot_path|
           screenshot = ::ChunkyPNG::Image.from_file(screenshot_path)
-          save_debug_screenshot(screenshot, options[:debug_suffix])
+          save_debug_screenshot(screenshot, ['original', options[:debug_suffix]])
+          viewport_size = Applitools::Calabash::EyesSettings.instance.viewport_size
+          screenshot.crop!(0, 0, viewport_size[:width], viewport_size[:height])
+          save_debug_screenshot(screenshot, ['cropped', options[:debug_suffix]])
           result = Applitools::Calabash::EyesCalabashAndroidScreenshot.new(
             Applitools::Screenshot.from_image(
               screenshot

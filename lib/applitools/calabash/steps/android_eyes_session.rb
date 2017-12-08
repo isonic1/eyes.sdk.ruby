@@ -12,9 +12,17 @@ Then(/^set device pixel ratio$/) do
   Applitools::Calabash::EyesSettings.instance.eyes.device_pixel_ratio = density_match[:density].to_i
 end
 
-Then(/^set device size$/) do
+Then(/^set device physical size$/) do
   result = /mDefaultViewport=.*deviceWidth=(?<width>\d+).*deviceHeight=(?<height>\d+).*\n/.match(
-    `#{default_device.adb_command} shell dumpsys display mDefaultViewport`
+    `#{default_device.adb_command} shell dumpsys display |grep mDefaultViewport`
   )
   step %(eyes viewport size is "#{result[:width].to_i}x#{result[:height].to_i}")
 end
+
+Then(/^set device size$/) do
+  result = /^.*app=(?<width>\d+)x(?<height>\d+)/.match(
+      `#{default_device.adb_command} shell dumpsys window displays |grep cur | tr -d ' '`
+  )
+  step %(eyes viewport size is "#{result[:width].to_i}x#{result[:height].to_i}")
+end
+

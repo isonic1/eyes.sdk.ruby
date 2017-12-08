@@ -15,7 +15,7 @@ module Applitools
 
       def from_string(value)
         width, height = value.split(/x/)
-        new width, height
+        new width.to_i, height.to_i
       end
 
       def from_hash(value)
