@@ -238,7 +238,11 @@ module Applitools::Selenium
       timeout = target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::EyesWebDriverScreenshot.new(
-          image, driver: driver, force_offset: position_provider.force_offset
+          image, driver: driver,
+          force_offset: position_provider.force_offset,
+          position_provider: self.class.position_provider(
+            :SCROLL, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
+          )
         )
       end
 
