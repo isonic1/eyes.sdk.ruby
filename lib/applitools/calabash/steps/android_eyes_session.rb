@@ -1,5 +1,11 @@
 Then(/^set OS$/) do
-  sdk_version = perform_action('android_sdk_version')
+  sdk_version = begin
+                  perform_action('android_sdk_version')
+                rescue HTTPClient::KeepAliveDisconnected
+                  reinstall_apps
+                  start_test_server_in_background
+                  perform_action('android_sdk_version')
+                end
   if sdk_version['success']
     Applitools::Calabash::EyesSettings.instance.eyes.host_os = "Android (SDK version #{sdk_version['message']})"
   end
@@ -21,8 +27,7 @@ end
 
 Then(/^set device size$/) do
   result = /^.*app=(?<width>\d+)x(?<height>\d+)/.match(
-      `#{default_device.adb_command} shell dumpsys window displays |grep cur | tr -d ' '`
+    `#{default_device.adb_command} shell dumpsys window displays |grep cur | tr -d ' '`
   )
   step %(eyes viewport size is "#{result[:width].to_i}x#{result[:height].to_i}")
 end
-

@@ -51,7 +51,7 @@ module Applitools
       end
 
       def get_android_element(context, query, index)
-        element_query = if (id = context.query(query, :getId)[index.to_i]) > 0
+        element_query = if (id = context.query(query, :getId)[index.to_i]) && id > 0
                           "* id:#{id}"
                         else
                           query + " index:#{index.to_i}"

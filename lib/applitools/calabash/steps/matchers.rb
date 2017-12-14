@@ -26,3 +26,24 @@ end
 Then(/^query element "([^"]*)"$/) do |query|
   step %(query element "#{query}" and take 0)
 end
+
+Then(/^I check viewport window$/) do
+  step %(the whole screen should match a baseline)
+end
+
+Then(/^I check window$/) do
+  step %(check for scrollable)
+  if @present_scrollable
+    step %(the entire element "#{@present_scrollable.element_query}" should match a baseline)
+  else
+    step %(I check viewport window)
+  end
+end
+
+Then(/^I check viewport element "([^"]*)"$/) do |selector|
+  step %(the element "#{selector}" should match a baseline)
+end
+
+Then(/^I check element "([^"]*)"$/) do |selector|
+  step %(the entire element "#{selector}" should match a baseline)
+end
