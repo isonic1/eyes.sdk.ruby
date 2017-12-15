@@ -7,7 +7,9 @@ Then(/^set OS$/) do
                   perform_action('android_sdk_version')
                 end
   if sdk_version['success']
-    Applitools::Calabash::EyesSettings.instance.eyes.host_os = "Android (SDK version #{sdk_version['message']})"
+    Applitools::Calabash::EyesSettings.instance.eyes.host_os = Applitools::Calabash::OsVersions::Android.os_version(
+      sdk_version['message']
+    )
   end
 end
 
