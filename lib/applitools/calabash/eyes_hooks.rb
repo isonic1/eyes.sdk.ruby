@@ -1,18 +1,16 @@
-if respond_to?(:Around)
-  Around('@eyes') do |scenario, block|
+if respond_to?(:Before)
+  Before do |scenario|
     get_scenario_tags(scenario)
-
     before_feature(scenario) if scenario.feature.children.first == scenario.source.last
-
     step %(eyes tag is "#{@eyes_current_tags[:tag] || scenario.name}")
-
     Applitools::Calabash::EyesSettings.instance.eyes.add_context(self)
+  end
+end
 
-    block.call
-
+if respond_to?(:After)
+  After do |scenario|
     eyes = Applitools::Calabash::EyesSettings.instance.eyes
     Applitools::Calabash::EyesSettings.instance.eyes.remove_context if eyes && eyes.open?
-
     after_feature(scenario) if scenario.feature.children.last == scenario.source.last
   end
 end
@@ -43,6 +41,6 @@ def get_scenario_tags(scenario)
     match_data = t.name.match eyes_tag_name_regexp
     @eyes_current_tags[match_data[:tag_name].to_sym] = match_data[:value] if match_data
   end
-  raise "Application name is not set! Please use tag '@eyes_application_name = \"Application Name\"'" unless
+  raise "Application name is not set! Please use tag '@eyes_app_name \"Application Name\"'" unless
     @eyes_current_tags[:app_name]
 end
