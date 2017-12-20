@@ -18,6 +18,11 @@ Given(/^eyes tag is "([^"]*)"$/) do |tag|
   @tag = tag
 end
 
+Given(/^set batch/) do
+  ENV['current_batch'] ||= Marshal.dump(Applitools::Calabash::EyesSettings.instance.eyes.batch)
+  Applitools::Calabash::EyesSettings.instance.eyes.batch = Marshal.load(ENV['current_batch'])
+end
+
 Given(/^calabash screenshot dir is "([^"]*)"$/) do |path|
   Applitools::Calabash::EyesSettings.instance.screenshot_dir = path
 end

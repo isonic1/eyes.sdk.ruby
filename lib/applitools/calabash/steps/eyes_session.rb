@@ -7,6 +7,7 @@ Then(/^open eyes$/) do
   end
 
   unless eyes_settings.eyes.open?
+    step %(set batch)
     step %(set OS)
     step %(set device pixel ratio)
     step %(set device size)

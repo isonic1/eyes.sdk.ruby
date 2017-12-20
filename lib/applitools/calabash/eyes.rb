@@ -76,7 +76,7 @@ module Applitools
         update_default_settings(match_window_data)
         match_window_data.read_target(target, nil)
 
-        self.viewport_size = Applitools::Calabash::EyesSettings.instane.viewport_size if viewport_size.nil?
+        self.viewport_size = Applitools::Calabash::EyesSettings.instance.viewport_size if viewport_size.nil?
 
         if match_window_data.is_a? Applitools::MatchSingleCheckData
           return check_single_base(

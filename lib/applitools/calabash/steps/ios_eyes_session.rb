@@ -1,5 +1,5 @@
 Then(/^set OS$/) do
-  Applitools::Calabash::EyesSettings.instance.eyes.host_os = "iOS(#{default_device.ios_version})"
+  Applitools::Calabash::EyesSettings.instance.eyes.host_os = "iOS #{default_device.ios_major_version})"
 end
 
 Then(/^set device pixel ratio$/) do

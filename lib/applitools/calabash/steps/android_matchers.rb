@@ -26,3 +26,9 @@ Then(/^query element "([^"]*)" and take (\d+)$/) do |query, index|
   @current_element = nil
   @current_element = Applitools::Calabash::Utils.get_android_element(self, query, index)
 end
+
+Then(/^check for scrollable$/) do
+  unless query('ScrollView').empty?
+    @present_scrollable = Applitools::Calabash::Utils.get_android_element(self, 'ScrollView', 0)
+  end
+end
