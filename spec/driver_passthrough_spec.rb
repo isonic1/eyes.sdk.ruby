@@ -8,6 +8,10 @@ describe 'passthrough methods' do
   let(:web_driver) { Selenium::WebDriver.for :phantomjs }
 
   before do
+    pending('phantomJS is no longer supported by Selenium')
+  end
+
+  before do
     pending('phantomJS is no longer supported by Selenium') unless RUBY_KEY == RUBY_1_9_3
   end
 
