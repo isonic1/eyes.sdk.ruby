@@ -18,12 +18,11 @@ Given(/^eyes tag is "([^"]*)"$/) do |tag|
   @tag = tag
 end
 
-Given(/^set batch/) do
-  @current_batch ||= begin
-    batch = Applitools::Calabash::EyesSettings.instance.eyes.batch
-    batch.name = Applitools::Calabash::EyesSettings.instance.app_name
-    batch
+Given(/^set batch "([^"]*)"/) do |name|
+  @current_batch ||= Applitools::Calabash::EyesSettings.instance.eyes.batch.tap do |batch|
+    batch.name = name
   end
+
   Applitools::Calabash::EyesSettings.instance.eyes.batch = @current_batch
 end
 

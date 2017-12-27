@@ -24,6 +24,7 @@ if respond_to?(:After)
 end
 
 def before_feature(scenario)
+  @before_hook_scenario = scenario
   eyes_settings = Applitools::Calabash::EyesSettings.instance
 
   step %(eyes API key "#{@eyes_current_tags[:api_key] || ENV['APPLITOOLS_API_KEY']}") unless

@@ -7,7 +7,7 @@ Then(/^create eyes$/) do
   end
 
   unless eyes_settings.eyes.open?
-    step %(set batch)
+    step %(set batch "#{@before_hook_scenario.feature.name}")
     step %(set OS)
     step %(set device pixel ratio)
     step %(set device size)
