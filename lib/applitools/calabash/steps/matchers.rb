@@ -5,7 +5,7 @@ end
 
 Then(/^target should match a baseline$/) do
   raise Applitools::EyesError, '@target is not set' unless @target
-  raise Applitools::EyesError, '@tag is not set' unless @tag
+  @tag ||= ''
   expect(@target).to match_baseline(@tag)
 end
 
@@ -31,6 +31,11 @@ Then(/^I check viewport window$/) do
   step %(the whole screen should match a baseline)
 end
 
+Then(/^I check viewport window with description "([^"]*)"$/) do |description|
+  step %(eyes tag is "#{description}")
+  step %(I check viewport window)
+end
+
 Then(/^I check window$/) do
   step %(check for scrollable)
   if @present_scrollable
@@ -40,10 +45,25 @@ Then(/^I check window$/) do
   end
 end
 
+Then(/^I check window with description "([^"]*)"$/) do |description|
+  step %(eyes tag is "#{description}")
+  step %(I check window)
+end
+
 Then(/^I check viewport element "([^"]*)"$/) do |selector|
   step %(the element "#{selector}" should match a baseline)
 end
 
+Then(/^I check viewport element "([^"]*)" with description "([^"]*)"$/) do |selector, description|
+  step %(eyes tag is "#{description}")
+  step %(I check viewport element "#{selector}")
+end
+
 Then(/^I check element "([^"]*)"$/) do |selector|
   step %(the entire element "#{selector}" should match a baseline)
+end
+
+Then(/^I check element "([^"]*)" with description "([^"]*)"$/) do |selector, description|
+  step %(eyes tag is "#{description}")
+  step %(I check element "#{selector}")
 end

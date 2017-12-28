@@ -1,4 +1,4 @@
-Then(/^open eyes$/) do
+Then(/^create eyes$/) do
   eyes_settings = Applitools::Calabash::EyesSettings.instance
   eyes_settings.eyes ||= Applitools::Calabash::Eyes.new.tap do |eyes|
     eyes.api_key = eyes_settings.applitools_api_key
@@ -7,12 +7,16 @@ Then(/^open eyes$/) do
   end
 
   unless eyes_settings.eyes.open?
-    step %(set batch)
+    step %(set batch "#{@before_hook_scenario.feature.name}")
     step %(set OS)
     step %(set device pixel ratio)
     step %(set device size)
-    eyes_settings.eyes.open eyes_settings.options_for_open
   end
+end
+
+Then(/^open eyes$/) do
+  eyes_settings = Applitools::Calabash::EyesSettings.instance
+  eyes_settings.eyes.open eyes_settings.options_for_open unless eyes_settings.eyes.open?
 end
 
 When(/^I close eyes session$/) do
