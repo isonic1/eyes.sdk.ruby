@@ -37,9 +37,7 @@ def before_feature(scenario)
   step %(create eyes)
 end
 
-def after_feature(_scenario)
-
-end
+def after_feature(_scenario) end
 
 def get_scenario_tags(scenario)
   @eyes_current_tags = {}
