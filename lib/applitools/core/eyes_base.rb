@@ -155,6 +155,10 @@ module Applitools
       @open
     end
 
+    def running_session?
+      running_session.nil? ? false : true
+    end
+
     def app_name
       !current_app_name.nil? && !current_app_name.empty? ? current_app_name : @app_name
     end
