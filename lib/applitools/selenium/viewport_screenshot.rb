@@ -2,7 +2,7 @@
 require_relative 'eyes_screenshot'
 module Applitools::Selenium
   # @!visibility private
-  class EyesWebDriverScreenshot < Applitools::Selenium::EyesScreenshot
+  class ViewportScreenshot < Applitools::Selenium::EyesScreenshot
     attr_accessor :top_left_location
 
     def sub_screenshot(region, coordinate_type, throw_if_clipped = false, force_nil_if_clipped = false)
