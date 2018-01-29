@@ -77,7 +77,7 @@ module Applitools::Selenium
     protected
 
     def ids
-      map {|i| i.reference.ref}
+      map { |i| i.reference.ref }
     end
   end
 end
