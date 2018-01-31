@@ -20,7 +20,7 @@ module Applitools
               'MatchLevel' => 'Strict',
               'SplitTopHeight' => 0,
               'SplitBottomHeight' => 0,
-              'IgnoreCaret' => false,
+              'IgnoreCaret' => true,
               'Ignore' => [],
               'Floating' => [],
               'Exact' => {
