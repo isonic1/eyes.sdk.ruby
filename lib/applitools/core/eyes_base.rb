@@ -570,15 +570,14 @@ module Applitools
         self.viewport_size = get_viewport_size
       end
 
-      logger.info "Batch is #{batch}"
-      test_batch = batch
+      logger.info "Batch is #{@batch}" if @batch
 
       app_env = app_environment
 
       logger.info "Application environment is #{app_env}"
 
       self.session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
-                                                scenario_id_or_name: test_name, batch_info: test_batch,
+                                                scenario_id_or_name: test_name, batch_info: @batch,
                                                 env_name: baseline_name, environment: app_env,
                                                 default_match_settings: default_match_settings,
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name,
