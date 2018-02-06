@@ -48,7 +48,9 @@ describe Applitools::EyesBase do
     :cut_provider=,
     :default_match_settings,
     :default_match_settings=,
-    :add_property
+    :add_property,
+    :compare_with_parent_branch,
+    :compare_with_parent_branch=
   ]
 
   it_should_behave_like 'has private method', [

@@ -35,7 +35,8 @@ module Applitools
     attr_accessor :app_name, :baseline_name, :branch_name, :parent_branch_name, :batch, :agent_id, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :host_os, :host_app, :base_line_name, :position_provider, :viewport_size, :verbose_results,
-      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact
+      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
+      :compare_with_parent_branch
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -74,6 +75,7 @@ module Applitools
       self.match_level = Applitools::MATCH_LEVEL[:strict]
       self.server_scale = 0
       self.server_remainder = 0
+      self.compare_with_parent_branch = false
     end
 
     def match_level=(value)
@@ -449,6 +451,10 @@ module Applitools
     ensure
       self.running_session = nil
       self.current_app_name = nil
+    end
+
+    def compare_with_parent_branch=(value)
+      @compare_with_parent_branch = value ? true : false
     end
 
     private
