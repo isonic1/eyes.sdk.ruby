@@ -127,8 +127,8 @@ module Applitools::Utils
 
     # true if test is running on mobile device
     def mobile_device?
+      return nil unless defined?(Appium::Driver)
       return $driver if $driver && $driver.is_a?(Appium::Driver)
-      nil
     end
 
     # true if test is running on Android device
