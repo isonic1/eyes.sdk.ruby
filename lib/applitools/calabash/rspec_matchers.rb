@@ -2,8 +2,9 @@ require 'rspec/expectations'
 
 RSpec::Matchers.define :match_baseline do |expected|
   match do |actual|
-    result = Applitools::Calabash::EyesSettings.instance.eyes.check(expected, actual)
-    result.as_expected?
+    eyes = Applitools::Calabash::EyesSettings.instance.eyes
+    result = eyes.check(expected, actual)
+    eyes.new_session? || result.as_expected?
   end
 
   failure_message do |_actual|

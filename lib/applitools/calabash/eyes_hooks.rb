@@ -19,7 +19,7 @@ if respond_to?(:After)
   After('@eyes') do |_scenario|
     eyes = Applitools::Calabash::EyesSettings.instance.eyes
     Applitools::Calabash::EyesSettings.instance.eyes.remove_context if eyes && eyes.open?
-    step %(terminate eyes session)
+    step %(terminate eyes session) if eyes && eyes.running_session?
   end
 end
 
