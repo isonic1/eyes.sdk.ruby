@@ -8,7 +8,7 @@ module Applitools
       def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
         super
         self.base_agent_id = "eyes.calabash.ruby/#{Applitools::VERSION}".freeze
-        self.debug_screenshot = true
+        self.debug_screenshot = false
         self.debug_screenshot_provider = Applitools::DebugScreenshotProvider.new
                                                                             .tag_access { tag_for_debug }
                                                                             .debug_flag_access { debug_screenshot }
