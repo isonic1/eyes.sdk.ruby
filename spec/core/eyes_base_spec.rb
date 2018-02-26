@@ -49,7 +49,9 @@ describe Applitools::EyesBase do
     :cut_provider=,
     :default_match_settings,
     :default_match_settings=,
-    :add_property
+    :add_property,
+    :compare_with_parent_branch,
+    :compare_with_parent_branch=
   ]
 
   it_should_behave_like 'has private method', [
@@ -259,6 +261,32 @@ describe Applitools::EyesBase do
   end
 
   context 'start_session()' do
+    before do
+      allow(subject).to receive(:get_viewport_size).and_return(nil)
+      allow(subject).to receive(:base_agent_id).and_return(nil)
+    end
+    it 'batch info is nil unless it was set explicitly' do
+      expect(subject.send(:server_connector)).to receive(:start_session) do |*args|
+        expect(args.first.to_hash[:batch_info]).to be nil
+      end.and_return(
+        Applitools::Session.new(:a, :b, :c)
+      )
+      subject.send(:start_session)
+    end
+    it 'batch is created by calling eyes.batch' do
+      expect(subject.batch).to be_a Applitools::BatchInfo
+      expect(subject.instance_variable_get(:@batch)).to be_a Applitools::BatchInfo
+    end
+    it 'start_session uses @batch' do
+      subject.instance_variable_set(:@batch, Applitools::BatchInfo.new('MyUniqueName'))
+      expect(subject).to_not receive(:batch)
+      expect(subject.send(:server_connector)).to receive(:start_session) do |*args|
+        expect(args.first.to_hash[:batch_info]['name']).to eq('MyUniqueName')
+      end.and_return(
+        Applitools::Session.new(:a, :b, :c)
+      )
+      subject.send(:start_session)
+    end
   end
 
   context 'close()' do

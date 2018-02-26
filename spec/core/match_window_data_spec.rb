@@ -298,7 +298,7 @@ RSpec.describe Applitools::MatchWindowData do
         end
 
         it 'has default values' do
-          expect(subject['IgnoreCaret']).to eq false
+          expect(subject['IgnoreCaret']).to eq true
           expect(subject['MatchLevel']).to eq 'Strict'
           expect(subject['SplitBottomHeight']).to be_zero
           expect(subject['SplitTopHeight']).to be_zero

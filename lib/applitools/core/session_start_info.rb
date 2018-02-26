@@ -14,6 +14,7 @@ module Applitools
       @branch_name = options[:branch_name]
       @parent_branch_name = options[:parent_branch_name]
       @properties = options[:properties]
+      @compare_with_parent_branch = options[:compare_with_parent_branch]
     end
 
     def to_hash
@@ -22,12 +23,13 @@ module Applitools
         app_id_or_name: @app_id_or_name,
         ver_id: @ver_id,
         scenario_id_or_name: @scenario_id_or_name,
-        batch_info: @batch_info.to_hash,
+        batch_info: @batch_info && @batch_info.to_hash,
         env_name: @env_name,
         environment: @environment.to_hash,
         default_match_settings: @default_match_settings,
         branch_name: @branch_name,
         parent_branch_name: @parent_branch_name,
+        compare_with_parent_branch: @compare_with_parent_branch,
         properties: @properties
       }
     end
