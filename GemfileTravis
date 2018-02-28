@@ -1,6 +1,9 @@
 source :rubygems
 
-gem 'eyes_selenium', source: 'file://./pkg'
-gem 'eyes_images', source: 'file://./pkg'
-gem 'eyes_calabash', source: 'file://./pkg'
-gem 'eyes_core', source: 'file://./pkg'
+source "file://#{ENV['PWD']}/pkg" do
+  gem 'eyes_selenium'
+  gem 'eyes_images'
+  gem 'eyes_calabash'
+  gem 'eyes_core'
+end
+
