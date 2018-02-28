@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 CURRENT_RUBY_VERSION = Gem::Version.new RUBY_VERSION
 
 RUBY_1_9_3 = Gem::Version.new '1.9.3'

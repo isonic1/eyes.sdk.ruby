@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
@@ -37,7 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '>= 3'
 
   # Exclude debugging support on Travis CI, due to its incompatibility with jruby and older rubies.
-  unless ENV['TRAVIS'] || CURRENT_RUBY_VERSION < Gem::Version.new('2.0.0')
+  unless ENV['TRAVIS']
     spec.add_development_dependency 'pry'
     spec.add_development_dependency 'pry-byebug'
     spec.add_development_dependency 'byebug'
