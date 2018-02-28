@@ -1,6 +1,7 @@
 source :rubygems
 
-gem rake
+gem 'rake'
+gem 'rspec'
 
 source "file://#{ENV['PWD']}/pkg" do
   gem 'eyes_selenium'
