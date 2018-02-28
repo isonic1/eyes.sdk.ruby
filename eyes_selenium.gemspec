@@ -23,5 +23,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'selenium-webdriver'
   spec.add_dependency 'capybara'
   spec.add_dependency 'watir'
-  Applitools::Selenium::EYES_GEM_SPECS[Applitools::Selenium::RUBY_KEY].call spec
 end
