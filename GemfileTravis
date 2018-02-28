@@ -2,6 +2,7 @@ source :rubygems
 
 gem 'rake'
 gem 'rspec'
+gem 'rubocop'
 
 source "file://#{ENV['PWD']}/pkg" do
   gem 'eyes_selenium'
