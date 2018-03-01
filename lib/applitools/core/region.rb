@@ -126,7 +126,10 @@ module Applitools
     def ==(other)
       return false unless other.is_a? self.class
       size_location_match = left == other.left && top == other.top && width == other.width && height == other.height
-      padding_match = padding_left == other.padding_left && padding_top == other.padding_top && padding_right == other.padding_right && padding_bottom == other.padding_bottom
+      padding_match = padding_left == other.padding_left &&
+        padding_top == other.padding_top &&
+        padding_right == other.padding_right &&
+        padding_bottom == other.padding_bottom
       size_location_match && padding_match
     end
 

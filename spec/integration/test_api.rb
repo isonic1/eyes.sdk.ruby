@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 $batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
 
 require_relative 'eyes_test_result'
@@ -7,18 +9,17 @@ RSpec.shared_context 'eyes integration test' do
   let(:selenium_server_url) { @selenium_server_url }
   let(:web_driver) { Selenium::WebDriver.for :remote, url: selenium_server_url, desired_capabilities: caps }
 
-  let(:driver) {
+  let(:driver) do
     eyes.open(
       driver: web_driver,
       app_name: test_suit_name,
       test_name: test_name,
       viewport_size: { width: 800, height: 600 }
     )
-  }
+  end
 
   let(:test_name) { example_name + (force_fullpage_screenshot ? '_FPS' : '') }
-
-  let(:example_name) { |example| example.description }
+  let(:example_name, &:description)
 
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
@@ -146,10 +147,14 @@ RSpec.shared_examples 'test fluent API' do
   end
 
   it 'TestCheckWindowWithFloatingByRegion_Fluent' do
-    target = Applitools::Selenium::Target.window.floating(::Applitools::FloatingRegion.new(10, 10, 20, 20, 3, 3, 20, 30))
+    target = Applitools::Selenium::Target.window.floating(
+      ::Applitools::FloatingRegion.new(10, 10, 20, 20, 3, 3, 20, 30)
+    )
     eyes.check('Fluent - Window with floating region by region', target)
     res = Applitools::EyesTestResult.new(eyes.close(true), eyes)
-    expect(res.actual_floating).to floating_array_match([::Applitools::FloatingRegion.new(10, 10, 20, 20, 4, 4, 21, 31)])
+    expect(res.actual_floating).to floating_array_match(
+      [::Applitools::FloatingRegion.new(10, 10, 20, 20, 4, 4, 21, 31)]
+    )
   end
 
   it 'TestCheckElementFully_Fluent' do
@@ -176,7 +181,7 @@ RSpec.shared_examples 'test special cases' do
   include_context 'eyes integration test'
 
   it 'TestCheckRegionInAVeryBigFrame' do
-    eyes.check('map', Applitools::Selenium::Target.frame("frame1").region(:tag_name, 'img'));
+    eyes.check('map', Applitools::Selenium::Target.frame('frame1').region(:tag_name, 'img'))
   end
 
   it 'TestCheckRegionInAVeryBigFrameAfterManualSwitchToFrame' do

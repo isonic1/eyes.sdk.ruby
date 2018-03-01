@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'eyes_selenium'
 
 module Applitools
@@ -5,17 +7,21 @@ module Applitools
     attr_accessor :close_output, :eyes, :proxy
 
     def initialize(close_output, eyes)
-      raise EyesIllegalArgument, "Expected :close_output to be a Applitools::TestResults, but got #{close_output.class}" unless
-          close_output.is_a? Applitools::TestResults
-      raise EyesIllegalArgument, "Expected :eyes to be a Applitools::EyesBase, but got #{close_output.class}" unless
-          eyes.is_a? Applitools::EyesBase
+      unless close_output.is_a? Applitools::TestResults
+        raise EyesIllegalArgument, 'Expected :close_output to be a Applitools::TestResults, ' \
+        "but got #{close_output.class}"
+      end
+      unless eyes.is_a? Applitools::EyesBase
+        raise EyesIllegalArgument, 'Expected :eyes to be a Applitools::EyesBase, ' \
+        "but got #{close_output.class}"
+      end
 
       self.close_output = close_output
       self.eyes = eyes
       self.index = 0
     end
 
-    def actual_floating(index=0)
+    def actual_floating(index = 0)
       result['actualAppOutput'][index]['imageMatchSettings']['floating'].map do |floating_region|
         FloatingRegion.new(
           floating_region['left'],
@@ -35,14 +41,14 @@ module Applitools
     attr_accessor :result, :index
 
     def result
-      @result ||= Oj.load(get_result.body)
+      @result ||= Oj.load(obtain_result.body)
     end
 
-    def get_result
+    def obtain_result
       Faraday::Connection.new(
-          result_url,
-          ssl: { ca_file: Applitools::Connectivity::ServerConnector::SSL_CERT },
-          proxy: @proxy.nil? ? nil : @proxy.to_hash
+        result_url,
+        ssl: { ca_file: Applitools::Connectivity::ServerConnector::SSL_CERT },
+        proxy: @proxy.nil? ? nil : @proxy.to_hash
       ).send(:get) do |req|
         req.headers['Content-Type'] = 'application/json'
       end
@@ -51,7 +57,13 @@ module Applitools
     def result_url
       results = close_output.original_results
       URI.parse(results['apiUrls']['session']).tap do |q|
-        q.query = URI.encode_www_form([['format', 'json'], ['AccessToken', results['secretToken']], ['apiKey', eyes.api_key]])
+        q.query = URI.encode_www_form(
+          [
+            %w(format json),
+            ['AccessToken', results['secretToken']],
+            ['apiKey', eyes.api_key]
+          ]
+        )
       end
     end
   end

@@ -286,7 +286,7 @@ module Applitools::Selenium
             )
 
             region_provider = Applitools::RegionProvider.new(
-                Applitools::Region.from_location_size(eyes_element.location, eyes_element.size), use_coordinates
+              Applitools::Region.from_location_size(eyes_element.location, eyes_element.size), use_coordinates
             )
 
           else
@@ -308,7 +308,10 @@ module Applitools::Selenium
               eyes_element.overflow = 'hidden'
             end
 
-            region_provider = Applitools::RegionProvider.new((stitch_region_provider || region_provider).region, target.coordinate_type)
+            region_provider = Applitools::RegionProvider.new(
+              (stitch_region_provider || region_provider).region,
+              target.coordinate_type
+            )
 
             self.region_to_check = region_provider
 

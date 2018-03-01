@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec::Matchers.define :include_floating do |expected|
   match do |actual|
     result = false
@@ -10,7 +12,6 @@ RSpec::Matchers.define :include_floating do |expected|
     result
   end
 end
-
 
 RSpec::Matchers.define :floating_array_match do |expected|
   match do |actual|

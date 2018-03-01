@@ -1,4 +1,6 @@
 #!/usr/bin/env rake
+# frozen_string_literal: true
+
 require 'rake/clean'
 CLOBBER.include 'pkg'
 
@@ -12,11 +14,11 @@ unless ENV['BUILD_ONLY']
   require 'rspec/core/rake_task'
   require 'rubocop/rake_task'
   RSpec::Core::RakeTask.new(:spec) do |t|
-    t.rspec_opts = "--tag ~integration"
+    t.rspec_opts = '--tag ~integration'
   end
 
   RSpec::Core::RakeTask.new(:spec_integration) do |t|
-    t.rspec_opts = "--tag integration"
+    t.rspec_opts = '--tag integration'
   end
 
   RuboCop::RakeTask.new

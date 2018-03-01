@@ -85,10 +85,10 @@ module Applitools
 
     def ==(other)
       super(other) &&
-          max_left_offset == other.max_left_offset &&
-          max_top_offset == other.max_top_offset &&
-          max_right_offset == other.max_right_offset &&
-          max_bottom_offset == other.max_bottom_offset
+        max_left_offset == other.max_left_offset &&
+        max_top_offset == other.max_top_offset &&
+        max_right_offset == other.max_right_offset &&
+        max_bottom_offset == other.max_bottom_offset
     end
 
     def to_hash

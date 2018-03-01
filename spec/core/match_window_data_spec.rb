@@ -229,7 +229,6 @@ RSpec.describe Applitools::MatchWindowData do
     end
   end
 
-
   context 'ignore_caret=' do
     it 'sets a value in result hash' do
       subject.ignore_caret = true
