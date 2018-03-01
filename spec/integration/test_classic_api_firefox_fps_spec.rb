@@ -7,6 +7,13 @@ RSpec.describe 'TestClassicApi_Firefox', integration: true do
   let(:test_suit_name) { 'Eyes Selenium SDK - Classic API - ForceFPS' }
   let(:tested_page_url) { 'http://applitools.github.io/demo/TestPages/FramesTestPage/' }
   let(:force_fullpage_screenshot) { true }
-  let(:caps) { Selenium::WebDriver::Remote::Capabilities.firefox }
+  let(:caps) do
+    caps = Selenium::WebDriver::Remote::Capabilities.firefox
+    if 'http://ondemand.saucelabs.com/wd/hub'.casecmp(selenium_server_url).zero?
+      caps[:username] = ENV['SAUCE_USERNAME']
+      caps[:accesskey] = ENV['SAUCE_ACCESS_KEY']
+    end
+    caps
+  end
   include_context 'test classic API'
 end
