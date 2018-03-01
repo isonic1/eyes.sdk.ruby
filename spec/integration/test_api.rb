@@ -31,7 +31,7 @@ RSpec.shared_context 'eyes integration test' do
     @selenium_server_url = ENV['SELENIUM_SERVER_URL']
     @eyes.batch = $batch_info if $batch_info
     # TODO: check if it real works with sauce
-    if selenium_server_url.downcase == 'http://ondemand.saucelabs.com/wd/hub'.downcase
+    if 'http://ondemand.saucelabs.com/wd/hub'.casecmp(selenium_server_url).zero?
       caps[:username] = ENV['SAUCE_USERNAME']
       caps[:accesskey] = ENV['SAUCE_ACCESS_KEY']
     end
