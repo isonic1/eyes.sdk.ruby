@@ -28,7 +28,7 @@ RSpec.shared_context 'eyes integration test' do
     @eyes = Applitools::Selenium::Eyes.new
     @eyes.api_key = ENV['APPLITOOLS_API_KEY']
     @eyes.log_handler = Logger.new(STDOUT).tap do |l|
-      l.level = Logger::DEBUG
+      l.level = Logger::ERROR
     end
     @eyes.stitch_mode = :css
     @selenium_server_url = ENV['SELENIUM_SERVER_URL']
