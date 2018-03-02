@@ -19,7 +19,10 @@ RSpec.shared_context 'eyes integration test' do
   end
 
   let(:test_name) { example_name + (force_fullpage_screenshot ? '_FPS' : '') }
-  let(:example_name, &:description)
+
+  # rubocop:disable Style/SymbolProc
+  let(:example_name) { |e| e.description }
+  # rubocop:enable Style/SymbolProc
 
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
