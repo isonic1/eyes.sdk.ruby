@@ -281,9 +281,14 @@ module Applitools::Selenium
                 target.coordinate_type
               end
 
-            region_provider = Applitools::RegionProvider.new(
+            stitch_region_provider = Applitools::RegionProvider.new(
               region_for_element(eyes_element), use_coordinates
             )
+
+            region_provider = Applitools::RegionProvider.new(
+              Applitools::Region.from_location_size(eyes_element.location, eyes_element.size), use_coordinates
+            )
+
           else
             # check_window
             logger.info "check_window(match_timeout: #{timeout}, tag: #{match_data.tag})"
@@ -303,7 +308,10 @@ module Applitools::Selenium
               eyes_element.overflow = 'hidden'
             end
 
-            region_provider = Applitools::RegionProvider.new(region_provider.region, target.coordinate_type)
+            region_provider = Applitools::RegionProvider.new(
+              (stitch_region_provider || region_provider).region,
+              target.coordinate_type
+            )
 
             self.region_to_check = region_provider
 
