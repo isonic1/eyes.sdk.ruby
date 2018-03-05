@@ -2,14 +2,15 @@ require 'spec_helper'
 
 RSpec.describe Applitools::Calabash::EyesCalabashAndroidScreenshot do
   it 'Android densities table' do
-    expect(described_class::ANDROID_DENSITY.keys).to contain_exactly(120, 160, 213, 240, 320, 480)
+    expect(described_class::ANDROID_DENSITY.keys).to contain_exactly(120, 160, 213, 240, 320, 480, 640)
     expect(described_class::ANDROID_DENSITY).to include(
       120 => 0.75,
       160 => 1,
       213 => 1.33,
       240 => 1.5,
       320 => 2,
-      480 => 3
+      480 => 3,
+      640 => 4
     )
   end
 
