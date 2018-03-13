@@ -13,8 +13,8 @@ module Applitools
           new
         end
 
-        def region(element)
-          new.region(element)
+        def region(*args)
+          new.region(*args)
         end
       end
 
