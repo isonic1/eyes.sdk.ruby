@@ -167,10 +167,17 @@ module Applitools::Selenium
 
         logger.info 'Stitching part into the image container...'
 
-        stitched_image.replace! a_screenshot.image, part_region.x + intersection.location.x, part_region.y + intersection.location.y
+        stitched_image.replace!(
+          a_screenshot.image,
+          part_region.x + intersection.location.x,
+          part_region.y + intersection.location.y
+        )
         logger.info 'Done!'
 
-        last_successful_location = Applitools::Location.for part_region.x + intersection.location.x, part_region.y + intersection.location.y
+        last_successful_location = Applitools::Location.for(
+          part_region.x + intersection.location.x,
+          part_region.y + intersection.location.y
+        )
         next unless a_screenshot
         last_successful_part_size = Applitools::RectangleSize.new(
           a_screenshot.image.width,

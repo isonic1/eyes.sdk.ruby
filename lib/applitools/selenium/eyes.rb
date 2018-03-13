@@ -392,7 +392,6 @@ module Applitools::Selenium
     def region_provider_for_frame
       Object.new.tap do |provider|
         current_frame_size = lambda do
-
           frame_region = Applitools::Region.from_location_size(
             Applitools::Location.new(0, 0), driver.frame_chain!.current_frame.size
           )
@@ -1029,12 +1028,12 @@ module Applitools::Selenium
       nil
     end
 
-    def ensure_frame_visible()
+    def ensure_frame_visible
       original_fc = driver.frame_chain
-      return original_fc if original_fc.size == 0
+      return original_fc if original_fc.empty?
       fc = Applitools::Selenium::FrameChain.new other: original_fc
-      while fc.size > 0
-        driver.switch_to.parent_frame()
+      until fc.empty?
+        driver.switch_to.parent_frame
         position_provider.position = fc.pop.location
       end
       driver.switch_to.frames(frame_chain: original_fc)

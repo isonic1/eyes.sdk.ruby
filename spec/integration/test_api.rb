@@ -4,22 +4,26 @@ $batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
 
 require_relative 'eyes_test_result'
 
-# PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12']
-PLATFORMS = ['Linux']
+PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12'].freeze
+# PLATFORMS = ['Linux']
 
 RSpec.shared_context 'eyes integration test' do
   let(:eyes) { @eyes }
   let(:selenium_server_url) { @selenium_server_url }
   let(:web_driver) do
     begin
-    drv = Selenium::WebDriver.for :remote, url: selenium_server_url, desired_capabilities: caps.merge!(platform: platform)
-    if drv.capabilities.platform.to_sym != symbol_platform
-      drv.quit
-      raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
-    end
-    drv
-    rescue Exception => ex
-      raise Exception, ex.message + ' ' + caps.inspect
+      drv = Selenium::WebDriver.for(
+        :remote,
+        url: selenium_server_url,
+        desired_capabilities: caps.merge!(platform: platform)
+      )
+      if drv.capabilities.platform.to_sym != symbol_platform
+        drv.quit
+        raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
+      end
+      drv
+    rescue StandardError => ex
+      raise StandardError, ex.message + ' ' + caps.inspect
     end
   end
 
@@ -86,10 +90,10 @@ RSpec.shared_context 'test classic API' do
 
     it 'TestCheckRegionInFrame' do
       eyes.check_region_in_frame(
-          name_or_id: 'frame1',
-          by: [:id, 'inner-frame-div'],
-          tag: 'Inner frame div',
-          stitch_content: true
+        name_or_id: 'frame1',
+        by: [:id, 'inner-frame-div'],
+        tag: 'Inner frame div',
+        stitch_content: true
       )
     end
 
@@ -106,23 +110,23 @@ RSpec.shared_examples 'test fluent API' do
     end
     it 'TestCheckWindowWithIgnoreRegion_Fluent' do
       eyes.check(
-          'Fluent - Window with Ignore region',
-          Applitools::Selenium::Target.window
-              .fully
-              .timeout(5)
-              .ignore(
-                  Applitools::Region.new(50, 50, 100, 100)
-              )
+        'Fluent - Window with Ignore region',
+        Applitools::Selenium::Target.window
+          .fully
+          .timeout(5)
+          .ignore(
+            Applitools::Region.new(50, 50, 100, 100)
+          )
       )
     end
 
     it 'TestCheckRegionWithIgnoreRegion_Fluent' do
       eyes.check(
-          'Fluent - Region with Ignore region',
-          Applitools::Selenium::Target.region(:id, 'overflowing-div')
-              .ignore(
-                  Applitools::Region.new(50, 50, 100, 100)
-              )
+        'Fluent - Region with Ignore region',
+        Applitools::Selenium::Target.region(:id, 'overflowing-div')
+          .ignore(
+            Applitools::Region.new(50, 50, 100, 100)
+          )
       )
     end
 
@@ -152,8 +156,8 @@ RSpec.shared_examples 'test fluent API' do
     it 'TestCheckFrameInFrame_Fully_Fluent2' do
       eyes.check('Fluent - Window with Ignore region 2', Applitools::Selenium::Target.window.fully)
       eyes.check(
-          'Fluent - Full Frame in Frame 2',
-          Applitools::Selenium::Target.frame('frame1').frame('frame1-1').fully
+        'Fluent - Full Frame in Frame 2',
+        Applitools::Selenium::Target.frame('frame1').frame('frame1-1').fully
       )
     end
 
@@ -167,16 +171,16 @@ RSpec.shared_examples 'test fluent API' do
       eyes.check('Fluent - Window with floating region by selector', target)
     end
 
-  it 'TestCheckWindowWithFloatingByRegion_Fluent' do
-    target = Applitools::Selenium::Target.window.floating(
-      ::Applitools::FloatingRegion.new(10, 10, 20, 20, 3, 3, 20, 30)
-    )
-    eyes.check('Fluent - Window with floating region by region', target)
-    res = Applitools::EyesTestResult.new(eyes.close(true), eyes)
-    expect(res.actual_floating).to floating_array_match(
-      [::Applitools::FloatingRegion.new(10, 10, 20, 20, 4, 4, 21, 31)]
-    )
-  end
+    it 'TestCheckWindowWithFloatingByRegion_Fluent' do
+      target = Applitools::Selenium::Target.window.floating(
+        ::Applitools::FloatingRegion.new(10, 10, 20, 20, 3, 3, 20, 30)
+      )
+      eyes.check('Fluent - Window with floating region by region', target)
+      res = Applitools::EyesTestResult.new(eyes.close(true), eyes)
+      expect(res.actual_floating).to floating_array_match(
+        [::Applitools::FloatingRegion.new(10, 10, 20, 20, 4, 4, 21, 31)]
+      )
+    end
 
     it 'TestCheckElementFully_Fluent' do
       element = driver.find_element(:id, 'overflowing-div-image')
@@ -187,8 +191,8 @@ RSpec.shared_examples 'test fluent API' do
       element = driver.find_element(:id, 'overflowing-div-image')
       ignore_element = driver.find_element(:id, 'overflowing-div')
       eyes.check(
-          'Fluent - Region by element - fully',
-          Applitools::Selenium::Target.region(element).ignore(ignore_element)
+        'Fluent - Region by element - fully',
+        Applitools::Selenium::Target.region(element).ignore(ignore_element)
       )
     end
 
@@ -205,9 +209,9 @@ RSpec.shared_examples 'test special cases' do
       let(:platform) { platform_name }
     end
 
-  it 'TestCheckRegionInAVeryBigFrame' do
-    eyes.check('map', Applitools::Selenium::Target.frame('frame1').region(:tag_name, 'img'))
-  end
+    it 'TestCheckRegionInAVeryBigFrame' do
+      eyes.check('map', Applitools::Selenium::Target.frame('frame1').region(:tag_name, 'img'))
+    end
 
     it 'TestCheckRegionInAVeryBigFrameAfterManualSwitchToFrame' do
       # driver.switchTo().frame("frame1");

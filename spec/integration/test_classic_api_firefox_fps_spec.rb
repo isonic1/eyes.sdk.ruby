@@ -9,7 +9,7 @@ RSpec.describe 'TestClassicApi_Firefox', integration: true do
   let(:force_fullpage_screenshot) { true }
   let(:caps) do
     caps = Selenium::WebDriver::Remote::Capabilities.firefox 'moz:firefoxOptions' => {
-        profile: Selenium::WebDriver::Firefox::Profile.new.as_json['zip']
+      profile: Selenium::WebDriver::Firefox::Profile.new.as_json['zip']
     }
     if 'http://ondemand.saucelabs.com/wd/hub'.casecmp(selenium_server_url).zero?
       caps[:username] = ENV['SAUCE_USERNAME']
