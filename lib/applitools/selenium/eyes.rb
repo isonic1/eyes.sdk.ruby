@@ -352,6 +352,7 @@ module Applitools::Selenium
       logger.info 'Switching to target frame according to frames path...'
       driver.switch_to.frames(frames_path: frames)
       logger.info 'Done!'
+      ensure_frame_visible
 
       yield if block_given?
 
@@ -378,8 +379,8 @@ module Applitools::Selenium
       border_bottom_width = element.border_bottom_width
 
       Applitools::Region.new(
-        p.x + border_left_width,
-        p.y + border_top_width,
+        p.x.round + border_left_width,
+        p.y.round + border_top_width,
         d.width - border_left_width - border_right_width,
         d.height - border_top_width - border_bottom_width
       )
@@ -391,6 +392,7 @@ module Applitools::Selenium
     def region_provider_for_frame
       Object.new.tap do |provider|
         current_frame_size = lambda do
+
           frame_region = Applitools::Region.from_location_size(
             Applitools::Location.new(0, 0), driver.frame_chain!.current_frame.size
           )
@@ -1025,6 +1027,18 @@ module Applitools::Selenium
       return "useragent: #{user_agent}" if user_agent && !user_agent.empty?
 
       nil
+    end
+
+    def ensure_frame_visible()
+      original_fc = driver.frame_chain
+      return original_fc if original_fc.size == 0
+      fc = Applitools::Selenium::FrameChain.new other: original_fc
+      while fc.size > 0
+        driver.switch_to.parent_frame()
+        position_provider.position = fc.pop.location
+      end
+      driver.switch_to.frames(frame_chain: original_fc)
+      original_fc
     end
 
     class << self
