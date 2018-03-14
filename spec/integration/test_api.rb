@@ -5,7 +5,7 @@ $batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
 require_relative 'eyes_test_result'
 
 # PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12'].freeze
-PLATFORMS = ['Linux']
+PLATFORMS = ['Linux'].freeze
 
 RSpec.shared_context 'eyes integration test' do
   let(:eyes) { @eyes }
