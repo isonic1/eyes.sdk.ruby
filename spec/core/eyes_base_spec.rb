@@ -197,7 +197,7 @@ describe Applitools::EyesBase, mock_connection: true do
     end
   end
 
-  context 'open_base()' do
+  context 'open_base()', clear_environment: true do
     before do
       allow(subject).to receive(:base_agent_id).and_return nil
       allow(subject).to receive(:get_viewport_size).and_return(width: 800, height: 600)
@@ -267,7 +267,7 @@ describe Applitools::EyesBase, mock_connection: true do
       allow(subject).to receive(:get_viewport_size).and_return(nil)
       allow(subject).to receive(:base_agent_id).and_return(nil)
     end
-    it 'batch info is nil unless it was set explicitly' do
+    it 'batch info is nil unless it was set explicitly', pending: 'conflict to java implementation' do
       expect(subject.send(:server_connector)).to receive(:start_session) do |*args|
         expect(args.first.to_hash[:batch_info]).to be nil
       end.and_return(
@@ -279,7 +279,12 @@ describe Applitools::EyesBase, mock_connection: true do
       expect(subject.batch).to be_a Applitools::BatchInfo
       expect(subject.instance_variable_get(:@batch)).to be_a Applitools::BatchInfo
     end
-    it 'start_session uses @batch' do
+    it 'start_session craetes BatchInfo implicitly' do
+      expect(subject.instance_variable_get(:@batch)).to be nil
+      expect(subject).to receive(:batch).and_return(Applitools::BatchInfo.new)
+      subject.send(:start_session)
+    end
+    it 'start_session uses @batch', pending: 'conflict to java implementation' do
       subject.instance_variable_set(:@batch, Applitools::BatchInfo.new('MyUniqueName'))
       expect(subject).to_not receive(:batch)
       expect(subject.send(:server_connector)).to receive(:start_session) do |*args|

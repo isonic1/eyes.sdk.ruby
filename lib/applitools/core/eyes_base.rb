@@ -46,6 +46,8 @@ module Applitools
     abstract_method :set_viewport_size, true
     abstract_method :get_viewport_size, true
 
+    environment_attribute :jopa, 'JOPA'
+
     def initialize(server_url = nil)
       self.server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
       self.disabled = false
@@ -594,7 +596,7 @@ module Applitools
       logger.info "Application environment is #{app_env}"
 
       self.session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
-                                                scenario_id_or_name: test_name, batch_info: @batch,
+                                                scenario_id_or_name: test_name, batch_info: batch,
                                                 env_name: baseline_name, environment: app_env,
                                                 default_match_settings: default_match_settings,
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name,
