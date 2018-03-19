@@ -4,8 +4,13 @@ $batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
 
 require_relative 'eyes_test_result'
 
-# PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12'].freeze
-PLATFORMS = ['Linux'].freeze
+PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12'].freeze
+SAUCE_PLATFORMS = {
+  'macOS 10.12' => [:mac_os_x],
+  'Linux' => [:linux],
+  'Windows 10' => [:windows_nt]
+}.freeze
+# PLATFORMS = ['Windows 10'].freeze
 
 RSpec.shared_context 'eyes integration test' do
   let(:eyes) { @eyes }
@@ -17,10 +22,10 @@ RSpec.shared_context 'eyes integration test' do
         url: selenium_server_url,
         desired_capabilities: caps.merge!(platform: platform)
       )
-      # if drv.capabilities.platform.to_sym != symbol_platform
-      #   drv.quit
-      #   raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
-      # end
+      unless SAUCE_PLATFORMS[platform].include?(drv.capabilities.platform)
+        drv.quit
+        raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
+      end
       drv
     rescue StandardError => ex
       raise StandardError, ex.message + ' ' + caps.inspect
