@@ -41,8 +41,8 @@ describe Applitools::EyesBase, mock_connection: true do
     :host_os=,
     :host_app,
     :host_app=,
-    :base_line_name,
-    :base_line_name=,
+    :baseline_env_name,
+    :baseline_env_name=,
     :position_provider,
     :position_provider=,
     :open_base,
@@ -78,6 +78,10 @@ describe Applitools::EyesBase, mock_connection: true do
   it_should_behave_like 'proxy method', Applitools::EyesLogger, [:logger, :log_handler, :log_handler=]
 
   it_should_behave_like 'has abstract method', [:base_agent_id]
+
+  it_behaves_like 'has environment attribute', :branch_name, 'APPLITOOLS_BRANCH'
+  it_behaves_like 'has environment attribute', :parent_branch_name, 'APPLITOOLS_PARENT_BRANCH'
+  it_behaves_like 'has environment attribute', :baseline_env_name, 'APPLITOOLS_BASELINE_BRANCH'
 
   it 'initializes variables' do
     expect(subject.send(:disabled?)).to eq false

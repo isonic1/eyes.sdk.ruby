@@ -22,6 +22,6 @@ RSpec.configure do |config|
   end
 
   config.before clear_environment: true do
-    Applitools::Helpers.class_variable_set :@@environment_variables, {}
+    Applitools::Helpers.instance_variable_set :@environment_variables, {}
   end
 end

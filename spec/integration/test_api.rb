@@ -3,26 +3,35 @@
 $batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
 
 require_relative 'eyes_test_result'
-
-PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12'].freeze
+PLATFORMS = if ENV['PLATFORM_LINUX']
+              ['Linux'].freeze
+            else
+              ['Windows 10', 'Linux', 'macOS 10.13'].freeze
+            end
 SAUCE_PLATFORMS = {
   'macOS 10.12' => [:mac_os_x],
   'Linux' => [:linux],
   'Windows 10' => [:windows_nt]
 }.freeze
-# PLATFORMS = ['Windows 10'].freeze
 
 RSpec.shared_context 'eyes integration test' do
   let(:eyes) { @eyes }
   let(:selenium_server_url) { @selenium_server_url }
+  let(:desired_caps) do
+    if selenium_server_url.casecmp('http://ondemand.saucelabs.com/wd/hub').zero?
+      caps[:username] = ENV['SAUCE_USERNAME']
+      caps[:accesskey] = ENV['SAUCE_ACCESS_KEY']
+    end
+    caps
+  end
   let(:web_driver) do
     begin
       drv = Selenium::WebDriver.for(
         :remote,
         url: selenium_server_url,
-        desired_capabilities: caps.merge!(platform: platform)
+        desired_capabilities: desired_caps.merge!(platform: platform)
       )
-      unless SAUCE_PLATFORMS[platform].include?(drv.capabilities.platform)
+      unless SAUCE_PLATFORMS[platform].include?(drv.capabilities.platform.to_sym)
         drv.quit
         raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
       end
@@ -50,7 +59,6 @@ RSpec.shared_context 'eyes integration test' do
 
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
-    @eyes.api_key = ENV['APPLITOOLS_API_KEY']
     @eyes.log_handler = Logger.new(STDOUT).tap do |l|
       l.level = Logger::ERROR
     end

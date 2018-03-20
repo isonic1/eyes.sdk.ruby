@@ -61,7 +61,9 @@ RSpec.shared_examples 'has environment attribute' do |m, env_key|
   end
   it ":#{m} checks env_key #{env_key}" do
     subject.instance_variable_set("@#{m}".to_sym, nil)
-    allow(Applitools::Helpers.class_variable_get(:@@environment_variables)).to receive('[]').with(env_key.to_sym).and_return("ENV#{m}")
+    allow(Applitools::Helpers.instance_variable_get(:@environment_variables)).to(
+      receive('[]').with(env_key.to_sym).and_return("ENV#{m}")
+    )
     expect(subject.send(m)).to eq "ENV#{m}"
   end
 end

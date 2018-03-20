@@ -2,7 +2,11 @@
 
 module Applitools
   module Helpers
-    @@environment_variables = {}
+    @environment_variables = {}
+
+    def self.environment_variables
+      @environment_variables
+    end
 
     def abstract_attr_accessor(*names)
       names.each do |method_name|
@@ -21,13 +25,13 @@ module Applitools
 
     def environment_attribute(attribute_name, environment_variable)
       class_eval do
-        @@environment_variables[environment_variable.to_sym] = ENV[environment_variable.to_s] if
+        Applitools::Helpers.environment_variables[environment_variable.to_sym] = ENV[environment_variable.to_s] if
             ENV[environment_variable.to_s]
         attr_accessor attribute_name
         define_method(attribute_name) do
           current_value = instance_variable_get "@#{attribute_name}".to_sym
           return current_value if current_value
-          @@environment_variables[environment_variable.to_sym]
+          Applitools::Helpers.environment_variables[environment_variable.to_sym]
         end
       end
     end
