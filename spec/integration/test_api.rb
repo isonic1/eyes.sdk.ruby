@@ -1,29 +1,36 @@
 # frozen_string_literal: true
 
-$batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
+$batch_info ||= Applitools::BatchInfo.new "Ruby tests (#{RUBY_VERSION})"
 
 require_relative 'eyes_test_result'
 
-# PLATFORMS = ['Windows 10', 'Linux', 'macOS 10.12'].freeze
-PLATFORMS = ['Linux'].freeze
+PLATFORMS = if ENV['TEST_PLATFORM'].casecmp('linux').zero?
+              ['Linux'].freeze
+            elsif ENV['TEST_PLATFORM'].casecmp('windows').zero?
+              ['Windows 10'].freeze
+            elsif ENV['TEST_PLATFORM'].casecmp('macos').zero?
+              ['macOS 10.13'].freeze
+            else
+              ['Windows 10', 'Linux', 'macOS 10.13'].freeze
+            end
 
 RSpec.shared_context 'eyes integration test' do
   let(:eyes) { @eyes }
   let(:selenium_server_url) { @selenium_server_url }
+  let(:desired_caps) do
+    if selenium_server_url.casecmp('http://ondemand.saucelabs.com/wd/hub').zero?
+      caps[:username] = ENV['SAUCE_USERNAME']
+      caps[:accesskey] = ENV['SAUCE_ACCESS_KEY']
+    end
+    caps
+  end
   let(:web_driver) do
     begin
-      drv = Selenium::WebDriver.for(
+      Selenium::WebDriver.for(
         :remote,
         url: selenium_server_url,
-        desired_capabilities: caps.merge!(platform: platform)
+        desired_capabilities: desired_caps.merge!(platform: platform)
       )
-      # if drv.capabilities.platform.to_sym != symbol_platform
-      #   drv.quit
-      #   raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
-      # end
-      drv
-    rescue StandardError => ex
-      raise StandardError, ex.message + ' ' + caps.inspect
     end
   end
 
@@ -45,7 +52,6 @@ RSpec.shared_context 'eyes integration test' do
 
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
-    @eyes.api_key = ENV['APPLITOOLS_API_KEY']
     @eyes.log_handler = Logger.new(STDOUT).tap do |l|
       l.level = Logger::ERROR
     end
