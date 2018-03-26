@@ -4,11 +4,11 @@ $batch_info ||= Applitools::BatchInfo.new "Ruby tests (#{RUBY_VERSION})"
 
 require_relative 'eyes_test_result'
 
-PLATFORMS = if ENV['TEST_PLATFORM'].casecmp('linux').zero?
+PLATFORMS = if ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('linux').zero?
               ['Linux'].freeze
-            elsif ENV['TEST_PLATFORM'].casecmp('windows').zero?
+            elsif ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('windows').zero?
               ['Windows 10'].freeze
-            elsif ENV['TEST_PLATFORM'].casecmp('macos').zero?
+            elsif ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('macos').zero?
               ['macOS 10.13'].freeze
             else
               ['Windows 10', 'Linux', 'macOS 10.13'].freeze
