@@ -37,6 +37,6 @@ before_install:
   - "BUILD_ONLY=true rake clean build"
   - "cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd .."
 before_script:
-  - "export APPLITOOLS_BATCH_ID=$(java UUIDFromString $(git log --pretty=format:'%H' -n 1)#{RUBY_VERSION})"
+  - "export APPLITOOLS_BATCH_ID=$(java UUIDFromString $(git log --pretty=format:'%H' -n 1)$TRAVIS_RUBY_VERSION)"
 script:
   - bundle exec rake
