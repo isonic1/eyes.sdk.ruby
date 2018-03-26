@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
-$batch_info ||= Applitools::BatchInfo.new 'Ruby tests'
+$batch_info ||= Applitools::BatchInfo.new "Ruby tests (#{RUBY_VERSION})"
 
 require_relative 'eyes_test_result'
-PLATFORMS = if ENV['PLATFORM_LINUX']
+
+PLATFORMS = if ENV['TEST_PLATFORM'].casecmp('linux').zero?
               ['Linux'].freeze
+            elsif ENV['TEST_PLATFORM'].casecmp('windows').zero?
+              ['Windows 10'].freeze
+            elsif ENV['TEST_PLATFORM'].casecmp('macos').zero?
+              ['macOS 10.13'].freeze
             else
               ['Windows 10', 'Linux', 'macOS 10.13'].freeze
             end
-SAUCE_PLATFORMS = {
-  'macOS 10.12' => [:mac_os_x],
-  'Linux' => [:linux],
-  'Windows 10' => [:windows_nt]
-}.freeze
 
 RSpec.shared_context 'eyes integration test' do
   let(:eyes) { @eyes }
@@ -26,18 +26,11 @@ RSpec.shared_context 'eyes integration test' do
   end
   let(:web_driver) do
     begin
-      drv = Selenium::WebDriver.for(
+      Selenium::WebDriver.for(
         :remote,
         url: selenium_server_url,
         desired_capabilities: desired_caps.merge!(platform: platform)
       )
-      unless SAUCE_PLATFORMS[platform].include?(drv.capabilities.platform.to_sym)
-        drv.quit
-        raise Applitools::EyesError, "Wrong platform #{drv.capabilities.platform}, expected #{symbol_platform}"
-      end
-      drv
-    rescue StandardError => ex
-      raise StandardError, ex.message + ' ' + caps.inspect
     end
   end
 

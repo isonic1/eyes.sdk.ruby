@@ -31,5 +31,15 @@ RSpec.describe 'Applitools::Helpers' do
       end
       expect(Foo1.new.bar).to eq 'Y'
     end
+
+    it 'sets the instance variable after the first access' do
+      class Foo2
+        extend Applitools::Helpers
+        environment_attribute :bar, :X
+      end
+      instance = Foo2.new
+      expect(instance.bar).to eq 'Y'
+      expect(instance.instance_variable_get(:@bar)).to eq 'Y'
+    end
   end
 end

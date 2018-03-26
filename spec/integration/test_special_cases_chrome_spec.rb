@@ -3,7 +3,7 @@
 require 'spec_helper'
 require_relative 'test_api'
 
-RSpec.describe 'TestClassicApi_Chrome', integration: true do
+RSpec.describe 'TestClassicApi_Chrome', :integration => true, :browser => :chrome, :api => :none do
   let(:test_suit_name) { 'Eyes Selenium SDK - Special Cases' }
   let(:tested_page_url) { 'http://applitools.github.io/demo/TestPages/WixLikeTestPage/index.html' }
   let(:force_fullpage_screenshot) { false }

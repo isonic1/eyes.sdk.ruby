@@ -31,7 +31,10 @@ module Applitools
         define_method(attribute_name) do
           current_value = instance_variable_get "@#{attribute_name}".to_sym
           return current_value if current_value
-          Applitools::Helpers.environment_variables[environment_variable.to_sym]
+          instance_variable_set(
+            "@#{attribute_name}".to_sym,
+            Applitools::Helpers.environment_variables[environment_variable.to_sym]
+          )
         end
       end
     end

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require_relative 'test_api'
 
-RSpec.describe 'TestFluentApi_Chrome', integration: true do
+RSpec.describe 'TestFluentApi_Chrome', :integration => true, :browser => :chrome, :api => :fluent do
   let(:test_suit_name) { 'Eyes Selenium SDK - Fluent API - ForceFPS' }
   let(:tested_page_url) { 'http://applitools.github.io/demo/TestPages/FramesTestPage/' }
   let(:force_fullpage_screenshot) { true }

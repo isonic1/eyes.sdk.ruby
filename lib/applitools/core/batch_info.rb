@@ -19,8 +19,8 @@ module Applitools
 
     def to_hash
       {
-        'id' => @id,
-        'name' => @name,
+        'id' => id,
+        'name' => name,
         'startedAt' => @started_at.iso8601
       }
     end
