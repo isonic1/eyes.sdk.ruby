@@ -14,8 +14,9 @@ unless ENV['BUILD_ONLY']
   require 'rspec/core/rake_task'
   require 'rubocop/rake_task'
 
-  options = ["api:#{ENV['TEST_API']}", "browser:#{ENV['TEST_IN_BROWSER']}"]
-
+  browsers = %w(chrome firefox)
+  browsers.delete(ENV['TEST_IN_BROWSER'])
+  options = ["api:#{ENV['TEST_API']}"] + browsers.map { |b| "~browser:#{b}" }
   RSpec::Core::RakeTask.new(:spec) do |t|
     t.rspec_opts = '--tag ~integration'
   end
@@ -43,7 +44,7 @@ unless ENV['BUILD_ONLY']
     task perform_tests: [:rubocop, :spec]
   end
 
-  if ENV['END_TO_END_TESTS']
+  if ENV['END_TO_END_TESTS'] && ENV['END_TO_END_TESTS'] == 'true'
     task :default => :spec_integration
   else
     task :default => :perform_tests
