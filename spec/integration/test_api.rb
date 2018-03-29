@@ -11,7 +11,7 @@ PLATFORMS = if ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('linux').zer
             elsif ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('macos').zero?
               ['macOS 10.13'].freeze
             else
-              ['Windows 10', 'Linux', 'macOS 10.13'].freeze
+              [Gem::Platform.local.os].freeze
             end
 
 RSpec.shared_context 'eyes integration test' do
@@ -115,6 +115,7 @@ RSpec.shared_examples 'test fluent API' do
       let(:platform) { platform_name }
     end
     it 'TestCheckWindowWithIgnoreRegion_Fluent' do
+      web_driver.find_element(tag_name: 'input').send_keys('My Input')
       eyes.check(
         'Fluent - Window with Ignore region',
         Applitools::Selenium::Target.window
@@ -159,8 +160,17 @@ RSpec.shared_examples 'test fluent API' do
       eyes.check('Fluent - Region in Frame in Frame', target)
     end
 
+    it 'TestScrollbarsHiddenAndReturned_Fluent' do
+      eyes.check('Fluent - Window (Before)', Applitools::Selenium::Target.window.fully)
+      eyes.check(
+        'Fluent - Inner frame div',
+        Applitools::Selenium::Target.frame('frame1').region(id: 'inner-frame-div').fully
+      )
+      eyes.check('Fluent - Window (After)', Applitools::Selenium::Target.window.fully)
+    end
+
     it 'TestCheckFrameInFrame_Fully_Fluent2' do
-      eyes.check('Fluent - Window with Ignore region 2', Applitools::Selenium::Target.window.fully)
+      eyes.check('Fluent - Window', Applitools::Selenium::Target.window.fully)
       eyes.check(
         'Fluent - Full Frame in Frame 2',
         Applitools::Selenium::Target.frame('frame1').frame('frame1-1').fully
@@ -193,7 +203,7 @@ RSpec.shared_examples 'test fluent API' do
       eyes.check('Fluent - Region by element - fully', Applitools::Selenium::Target.region(element).fully)
     end
 
-    it 'TestCheckElementWithIgnoreRegionByElement_Fluent' do
+    it 'TestCheckElementWithIgnoreRegionByElementOutsideTheViewport_Fluent' do
       element = driver.find_element(:id, 'overflowing-div-image')
       ignore_element = driver.find_element(:id, 'overflowing-div')
       eyes.check(
@@ -202,9 +212,13 @@ RSpec.shared_examples 'test fluent API' do
       )
     end
 
-    it 'TestCheckElement_Fluent' do
+    it 'TestCheckElementWithIgnoreRegionBySameElement_Fluent' do
       element = driver.find_element(:id, 'overflowing-div-image')
-      eyes.check('Fluent - Region by element', Applitools::Selenium::Target.region(element))
+      eyes.check('Fluent - Region by element', Applitools::Selenium::Target.region(element).ignore(element))
+      res = Applitools::EyesTestResult.new(eyes.close(true), eyes)
+      expect(res.actual_ignore).to ignore_array_match(
+        [::Applitools::Region.new(0, 0, 304, 184)]
+      )
     end
   end
 end
