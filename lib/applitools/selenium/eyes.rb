@@ -236,6 +236,7 @@ module Applitools::Selenium
       original_overflow = nil
       original_position_provider = position_provider
       original_force_full_page_screenshot = force_full_page_screenshot
+      self.force_full_page_screenshot = false
       eyes_element = nil
       timeout = target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
       self.eyes_screenshot_factory = lambda do |image|
@@ -263,6 +264,7 @@ module Applitools::Selenium
           end
 
           check_window = false
+
           if !target.frames.empty? && eyes_element.is_a?(Applitools::Region)
             # check_current_frame
             logger.info "check_region_in_frame(#{eyes_element})"
@@ -299,7 +301,7 @@ module Applitools::Selenium
             check_window = true
           end
 
-          if target.options[:stitch_content]
+          if target.options[:stitch_content] || original_force_full_page_screenshot
             check_window ? self.force_full_page_screenshot = true : self.check_frame_or_element = true
             if eyes_element.is_a? Applitools::Selenium::Element
               self.position_provider = Applitools::Selenium::ElementPositionProvider.new driver, eyes_element
@@ -320,7 +322,6 @@ module Applitools::Selenium
               nil
             )
           end
-
           check_window_base(
             region_provider, timeout, match_data
           )
@@ -352,6 +353,7 @@ module Applitools::Selenium
       logger.info 'Switching to target frame according to frames path...'
       driver.switch_to.frames(frames_path: frames)
       logger.info 'Done!'
+
       ensure_frame_visible
 
       yield if block_given?
@@ -595,11 +597,13 @@ module Applitools::Selenium
                                   eyes_screenshot_factory: eyes_screenshot_factory,
                                   stitching_overlap: stitching_overlap
 
-          unless driver.frame_chain.empty?
+
+          unless original_frame.empty?
             logger.info 'Switching back to original frame...'
-            driver.switch_to.frame original_frame
+            driver.switch_to.frames frame_chain: original_frame
             logger.info 'Done switching!'
           end
+
           logger.info 'Creating EyesWebDriver screenshot instance..'
           ewd_screenshot = Applitools::Selenium::EyesFullPageScreenshot.new(full_page_image)
           logger.info 'Done creating EyesWebDriver screenshot instance!'

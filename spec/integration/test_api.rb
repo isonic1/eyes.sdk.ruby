@@ -11,7 +11,9 @@ PLATFORMS = if ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('linux').zer
             elsif ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('macos').zero?
               ['macOS 10.13'].freeze
             else
-              [Gem::Platform.local.os].freeze
+              local_platform = Gem::Platform.local.os
+              local_platform = local_platform.capitalize if local_platform.casecmp('linux').zero?
+              [local_platform].freeze
             end
 
 RSpec.shared_context 'eyes integration test' do
@@ -53,11 +55,12 @@ RSpec.shared_context 'eyes integration test' do
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
     @eyes.log_handler = Logger.new(STDOUT).tap do |l|
-      l.level = Logger::ERROR
+      l.level = Logger::INFO
     end
     @eyes.stitch_mode = :css
     @selenium_server_url = ENV['SELENIUM_SERVER_URL']
     @eyes.batch = $batch_info if $batch_info
+    @eyes.debug_screenshot = true
     # TODO: check if it real works with sauce
   end
 
@@ -229,22 +232,22 @@ RSpec.shared_examples 'test special cases' do
       let(:platform) { platform_name }
     end
 
-    it 'TestCheckRegionInAVeryBigFrame' do
-      eyes.check('map', Applitools::Selenium::Target.frame('frame1').region(:tag_name, 'img'))
-    end
-
-    it 'TestCheckRegionInAVeryBigFrameAfterManualSwitchToFrame' do
-      # driver.switchTo().frame("frame1");
-      #
-      # WebElement element = driver.findElement(By.cssSelector("img"));
-      # ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-      #
-      # eyes.check("", Target.region(By.cssSelector("img")));
-
-      driver.switch_to.frame(name_or_id: 'frame1')
-      element = driver.find_element(:css, 'img')
-      driver.execute_script('arguments[0].scrollIntoView(true);', element)
-      eyes.check('', Applitools::Selenium::Target.region(:css, 'img'))
-    end
+    # it 'TestCheckRegionInAVeryBigFrame' do
+    #   eyes.check('map', Applitools::Selenium::Target.frame('frame1').region(:tag_name, 'img'))
+    # end
+    #
+    # it 'TestCheckRegionInAVeryBigFrameAfterManualSwitchToFrame' do
+    #   # driver.switchTo().frame("frame1");
+    #   #
+    #   # WebElement element = driver.findElement(By.cssSelector("img"));
+    #   # ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+    #   #
+    #   # eyes.check("", Target.region(By.cssSelector("img")));
+    #
+    #   driver.switch_to.frame(name_or_id: 'frame1')
+    #   element = driver.find_element(:css, 'img')
+    #   driver.execute_script('arguments[0].scrollIntoView(true);', element)
+    #   eyes.check('', Applitools::Selenium::Target.region(:css, 'img'))
+    # end
   end
 end
