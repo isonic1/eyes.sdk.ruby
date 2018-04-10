@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
+require_relative 'css_transform/css_transform'
+
 module Applitools::Selenium
   class CssTranslatePositionProvider
     extend Forwardable
+    include Applitools::CssTransform
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
@@ -88,18 +91,18 @@ module Applitools::Selenium
 
     attr_accessor :executor, :disable_horizontal, :disable_vertical, :max_width, :max_height
 
-    def get_position_from_transform(transform)
-      regexp = /^translate\(\s*(\-?)([\d, \.]+)px,\s*(\-?)([\d, \.]+)px\s*\)/
-      data = regexp.match(transform)
-
-      raise Applitools::EyesError.new "Can't parse CSS transition: #{transform}!" unless data
-      x = data[2].to_f.round
-      y = data[4].to_f.round
-
-      x *= (-1) unless data[1].empty?
-      y *= (-1) unless data[3].empty?
-
-      Applitools::Location.new(x, y)
-    end
+    # def get_position_from_transform(transform)
+    #   regexp = /^translate\(\s*(\-?)([\d, \.]+)px,\s*(\-?)([\d, \.]+)px\s*\)/
+    #   data = regexp.match(transform)
+    #
+    #   raise Applitools::EyesError.new "Can't parse CSS transition: #{transform}!" unless data
+    #   x = data[2].to_f.round
+    #   y = data[4].to_f.round
+    #
+    #   x *= (-1) unless data[1].empty?
+    #   y *= (-1) unless data[3].empty?
+    #
+    #   Applitools::Location.new(x, y)
+    # end
   end
 end

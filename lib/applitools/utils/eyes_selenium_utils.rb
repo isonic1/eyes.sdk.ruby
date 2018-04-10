@@ -132,12 +132,20 @@ module Applitools::Utils
       }());
     JS
 
+    # JS_GET_TRANSFORM_VALUE = <<-JS.freeze
+    #   document.documentElement.style['%{key}']
+    # JS
+    #
+    # JS_SET_TRANSFORM_VALUE = <<-JS.freeze
+    #   document.documentElement.style['%{key}'] = '%{value}'
+    # JS
+
     JS_GET_TRANSFORM_VALUE = <<-JS.freeze
-      document.documentElement.style['%{key}']
+      %{element}.style['%{key}']
     JS
 
     JS_SET_TRANSFORM_VALUE = <<-JS.freeze
-      document.documentElement.style['%{key}'] = '%{value}'
+      %{element}.style['%{key}'] = '%{value}'
     JS
 
     JS_TRANSFORM_KEYS = ['transform', '-webkit-transform'].freeze
@@ -240,7 +248,7 @@ module Applitools::Utils
 
     def current_transforms(executor)
       script =
-        "return { #{JS_TRANSFORM_KEYS.map { |tk| "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { key: tk }}" }.join(', ')} };"
+        "return { #{JS_TRANSFORM_KEYS.map { |tk| "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { element: 'document.documentElement', key: tk }}" }.join(', ')} };"
       executor.execute_script(script)
     end
 
@@ -250,13 +258,31 @@ module Applitools::Utils
       set_transforms(executor, value)
     end
 
+
     def set_transforms(executor, value)
-      script = value.keys.map { |k| JS_SET_TRANSFORM_VALUE % { key: k, value: value[k] } }.join('; ')
+      script = value.keys.map { |k| JS_SET_TRANSFORM_VALUE % { element: 'document.documentElement', key: k, value: value[k] } }.join('; ')
       executor.execute_script(script)
+    end
+
+    def set_element_transforms(executor, element, transform)
+      value = {}
+      JS_TRANSFORM_KEYS.map { |tk| value[tk] = transform }
+      script = value.keys.map { |k| JS_SET_TRANSFORM_VALUE % { element: 'arguments[0]', key: k, value: value[k] } }.join('; ')
+      executor.execute_script(script, element)
+    end
+
+    def current_element_transforms(executor, element)
+      script =
+          "return { #{JS_TRANSFORM_KEYS.map { |tk| "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { element: 'arguments[0]', key: tk }}" }.join(', ')} };"
+      executor.execute_script(script, element)
     end
 
     def translate_to(executor, location)
       set_current_transforms(executor, "translate(#{-location.x}px, #{-location.y}px)")
+    end
+
+    def element_translate_to(executor, element, location)
+      set_element_transforms(executor, element, "translate(#{location.x}px, #{location.y}px)")
     end
 
     # @param [Applitools::Selenium::Driver] executor

@@ -9,8 +9,19 @@ module Applitools
         self.scroll_position_provider = Applitools::Selenium::ScrollPositionProvider.new driver
       end
 
-      def region
-        region = Applitools::Region.from_location_size(eye_region.location, eye_region.size)
+      def region(include_borders = true)
+        region = if include_borders
+                   location = eye_region.location.offset_negative(
+                     Applitools::Location.new(eye_region.padding_left, eye_region.padding_top)
+                   )
+                   size = eye_region.size.tap do |s|
+                     s.width += eye_region.padding_left + eye_region.padding_right
+                     s.height += eye_region.padding_top + eye_region.padding_bottom
+                   end
+                   Applitools::Region.from_location_size(location, size)
+                 else
+                   Applitools::Region.from_location_size(eye_region.location, eye_region.size)
+                 end
         if inside_a_frame?
           frame_window = calculate_frame_window
           return frame_window if eye_region.is_a?(Applitools::Region) && eye_region.empty?

@@ -42,7 +42,7 @@ module Applitools::Selenium
       stitching_overlap = options[:stitching_overlap] || MAX_SCROLL_BAR_SIZE
       top_left_position = options[:top_left_position] || Applitools::Location::TOP_LEFT
 
-      logger.info "Region to check: #{region_provider.region}"
+      logger.info "Region to check: #{region_provider.region(false)}"
       logger.info "Coordinates type: #{region_provider.coordinate_type}"
 
       original_position = origin_provider.state
@@ -81,12 +81,12 @@ module Applitools::Selenium
         entire_size = Applitools::RectangleSize.new image.width, image.height
       end
 
-      if region_provider.region.size.square > 0
-        left_top_image = screenshot.sub_screenshot(region_provider.region, region_provider.coordinate_type).image
+      if region_provider.region(false).size.square > 0
+        left_top_image = screenshot.sub_screenshot(region_provider.region(false), region_provider.coordinate_type).image
       else
         left_top_image = screenshot.image
       end
-      debug_screenshot_provider.save_subscreenshot(left_top_image, region_provider.region)
+      debug_screenshot_provider.save_subscreenshot(left_top_image, region_provider.region(false))
 
       image = left_top_image.image
 
@@ -141,7 +141,7 @@ module Applitools::Selenium
 
         logger.info "Taking screenshot for #{part_region}"
 
-        position_provider.position = part_region.location.offset(top_left_position)
+        position_provider.position = part_region.location.offset(top_left_position).offset_negative(intersection.location)
         sleep wait_before_screenshot
         current_position = position_provider.current_position
         logger.info "Set position to #{current_position}"
@@ -157,24 +157,26 @@ module Applitools::Selenium
 
         a_screenshot = eyes_screenshot_factory.call(part_image)
 
-        if region_provider.region.size.square > 0
+        if region_provider.region(false).size.square > 0
           a_screenshot = a_screenshot.sub_screenshot(
-            region_provider.region,
+            region_provider.region(false),
             Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
             false
           )
         end
 
+        position_to_replace = current_position.offset(intersection.location)
+
         replacement_region = Applitools::Region.new(
-          current_position.x,
-          current_position.y,
-          a_screenshot.width,
-          a_screenshot.height
+          position_to_replace.x,
+          position_to_replace.y,
+          a_screenshot.width - intersection.size.width,
+          a_screenshot.height - intersection.size.height
         )
 
         replacement_size = stitched_image_region.dup.intersect(replacement_region).size
         replacement_region_in_screenshot = Applitools::Region.from_location_size(
-          Applitools::Location::TOP_LEFT,
+          Applitools::Location.from_any_attribute(intersection.location),
           replacement_size
         )
 
@@ -186,11 +188,10 @@ module Applitools::Selenium
 
         logger.info 'Stitching part into the image container...'
 
-        stitched_image.replace! image_to_stitch, current_position.x, current_position.y
+        stitched_image.replace! image_to_stitch, position_to_replace.x, position_to_replace.y
         logger.info 'Done!'
 
-        last_successful_location = Applitools::Location.for current_position.x, current_position.y
-
+        last_successful_location = Applitools::Location.for position_to_replace.x, position_to_replace.y
         next unless image_to_stitch.area > 0
         last_successful_part_size = Applitools::RectangleSize.new(
           image_to_stitch.width,

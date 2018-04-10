@@ -301,7 +301,9 @@ module Applitools::Selenium
             if eyes_element.is_a? Applitools::Selenium::Element
               original_overflow = eyes_element.overflow
               eyes_element.overflow = 'hidden'
-              self.position_provider = Applitools::Selenium::ElementPositionProvider.new driver, eyes_element
+              # require 'pry'
+              # binding.pry
+              self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new driver, eyes_element
             end
           end
 
@@ -340,8 +342,7 @@ module Applitools::Selenium
       logger.info 'Done!'
 
       ensure_frame_visible
-      # TODO do we really need it?
-      self.force_full_page_screenshot = false
+
       yield if block_given?
 
       logger.info 'Switching back into top level frame...'
@@ -371,7 +372,15 @@ module Applitools::Selenium
         p.y.round + border_top_width,
         d.width - border_left_width - border_right_width,
         d.height - border_top_width - border_bottom_width
-      )
+      ).tap do |r|
+        border_padding = Applitools::PaddingBounds.new(
+          border_left_width,
+          border_top_width,
+          border_right_width,
+          border_bottom_width
+        )
+        r.padding(border_padding)
+      end
     end
 
     private :check_in_frame
@@ -545,7 +554,7 @@ module Applitools::Selenium
         stitching_overlap: stitching_overlap
       )
 
-      unless driver.original_frame.empty?
+      unless original_frame.empty?
         logger.info 'Switching back to original frame...'
         driver.switch_to.frames frame_chain: original_frame
         logger.info 'Done switching!'
