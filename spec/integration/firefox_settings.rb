@@ -7,7 +7,7 @@ RSpec.shared_context 'firefox settings' do
 
   let(:opts) do
     Selenium::WebDriver::Firefox::Options.new(profile: firefox_profile).tap do |o|
-      o.headless!
+      o.headless! unless ENV['SELENIUM_SERVER_URL'].casecmp('ondemand.saucelabs.com').zero?
     end
   end
 
