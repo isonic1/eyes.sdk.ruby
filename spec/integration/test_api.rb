@@ -17,6 +17,7 @@ PLATFORMS = if ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('linux').zer
             end
 
 RSpec.shared_context 'eyes integration test' do
+  let(:tested_page_url) { 'http://applitools.github.io/demo/TestPages/FramesTestPage/' }
   let(:eyes) { @eyes }
   let(:selenium_server_url) { @selenium_server_url }
   let(:desired_caps) do

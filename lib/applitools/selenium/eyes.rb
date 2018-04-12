@@ -317,7 +317,7 @@ module Applitools::Selenium
           self.position_provider = original_position_provider
           self.region_to_check = nil
           self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
-          region_visibility_strategy.return_to_original_position position_provider
+          region_visibility_strategy.return_to_original_position original_position_provider
         end
         # rubocop:enable BlockLength
       end
@@ -339,11 +339,14 @@ module Applitools::Selenium
 
       logger.info 'Switching to target frame according to frames path...'
       driver.switch_to.frames(frames_path: frames)
+      frame_chain_to_reset = driver.frame_chain
       logger.info 'Done!'
 
       ensure_frame_visible
 
       yield if block_given?
+
+      reset_frames_scroll_position(frame_chain_to_reset)
 
       logger.info 'Switching back into top level frame...'
       driver.switch_to.default_content
@@ -542,6 +545,9 @@ module Applitools::Selenium
       driver.switch_to.default_content
       region_provider = Applitools::Selenium::RegionProvider.new(driver, Applitools::Region::EMPTY)
 
+      require 'pry'
+      # binding.pry
+
       full_page_image = algo.get_stitched_region(
         image_provider: image_provider,
         region_to_check: region_provider,
@@ -554,6 +560,7 @@ module Applitools::Selenium
         stitching_overlap: stitching_overlap
       )
 
+      # binding.pry
       unless original_frame.empty?
         logger.info 'Switching back to original frame...'
         driver.switch_to.frames frame_chain: original_frame
@@ -790,6 +797,17 @@ module Applitools::Selenium
       until fc.empty?
         driver.switch_to.parent_frame
         position_provider.position = fc.pop.location
+      end
+      driver.switch_to.frames(frame_chain: original_fc)
+      original_fc
+    end
+
+    def reset_frames_scroll_position(original_fc)
+      return original_fc if original_fc.empty?
+      fc = Applitools::Selenium::FrameChain.new other: original_fc
+      until fc.empty?
+        driver.switch_to.parent_frame
+        position_provider.position = fc.pop.parent_scroll_position
       end
       driver.switch_to.frames(frame_chain: original_fc)
       original_fc
