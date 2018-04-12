@@ -2,6 +2,7 @@
 
 require_relative 'hash_extension'
 module Applitools
+  # rubocop:disable Metrics/BlockLength
   RectangleSize = Struct.new(:width, :height) do
     include Applitools::HashExtension
     class << self
@@ -72,4 +73,5 @@ module Applitools
       to_h
     end
   end
+  # rubocop:enable Metrics/BlockLength
 end

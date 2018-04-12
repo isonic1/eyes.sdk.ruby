@@ -303,7 +303,10 @@ module Applitools::Selenium
               eyes_element.overflow = 'hidden'
               # require 'pry'
               # binding.pry
-              self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new driver, eyes_element
+              self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new(
+                driver,
+                eyes_element
+              )
             end
           end
 

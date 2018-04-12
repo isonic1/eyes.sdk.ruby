@@ -247,8 +247,10 @@ module Applitools::Utils
     end
 
     def current_transforms(executor)
-      script =
-        "return { #{JS_TRANSFORM_KEYS.map { |tk| "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { element: 'document.documentElement', key: tk }}" }.join(', ')} };"
+      transform_script = JS_TRANSFORM_KEYS.map do |tk|
+        "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { element: 'document.documentElement', key: tk }}"
+      end.join(', ')
+      script = "return { #{transform_script} };"
       executor.execute_script(script)
     end
 
@@ -258,22 +260,27 @@ module Applitools::Utils
       set_transforms(executor, value)
     end
 
-
     def set_transforms(executor, value)
-      script = value.keys.map { |k| JS_SET_TRANSFORM_VALUE % { element: 'document.documentElement', key: k, value: value[k] } }.join('; ')
+      script = value.keys.map do |k|
+        JS_SET_TRANSFORM_VALUE % { element: 'document.documentElement', key: k, value: value[k] }
+      end.join('; ')
       executor.execute_script(script)
     end
 
     def set_element_transforms(executor, element, transform)
       value = {}
       JS_TRANSFORM_KEYS.map { |tk| value[tk] = transform }
-      script = value.keys.map { |k| JS_SET_TRANSFORM_VALUE % { element: 'arguments[0]', key: k, value: value[k] } }.join('; ')
+      script = value.keys.map do |k|
+        JS_SET_TRANSFORM_VALUE % { element: 'arguments[0]', key: k, value: value[k] }
+      end.join('; ')
       executor.execute_script(script, element)
     end
 
     def current_element_transforms(executor, element)
-      script =
-          "return { #{JS_TRANSFORM_KEYS.map { |tk| "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { element: 'arguments[0]', key: tk }}" }.join(', ')} };"
+      transform_script = JS_TRANSFORM_KEYS.map do |tk|
+        "'#{tk}': #{JS_GET_TRANSFORM_VALUE % { element: 'arguments[0]', key: tk }}"
+      end.join(', ')
+      script = "return { #{transform_script} };"
       executor.execute_script(script, element)
     end
 

@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 require_relative 'eyes_screenshot'
+
 module Applitools::Selenium
   # @!visibility private
   class EntireElementScreenshot < Applitools::Selenium::EyesScreenshot

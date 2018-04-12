@@ -8,7 +8,7 @@ RSpec.shared_context 'chrome settings' do
       o.add_argument('headless') unless ENV['SELENIUM_SERVER_URL'].casecmp('ondemand.saucelabs.com').zero?
       o.add_argument('disable-infobars')
     end
-    {'chromeOptions' => chrome_opts.as_json}
+    { 'chromeOptions' => chrome_opts.as_json }
   end
 
   let(:caps) do

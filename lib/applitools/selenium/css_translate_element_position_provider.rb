@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'element_position_provider'
 require_relative 'css_transform/css_transform'
 
@@ -11,9 +12,7 @@ module Applitools::Selenium
     #
     # @return [Applitools::Location] The location.
     def current_position
-      position = super
-      return position unless offset = transforms_offset
-      position.offset_negative offset
+      position = super.offset_negative transforms_offset
       logger.info "Current position is #{position}"
       position
     end
@@ -41,10 +40,12 @@ module Applitools::Selenium
       logger.info 'Getting element transforms...'
       transforms = Applitools::Utils::EyesSeleniumUtils.current_element_transforms(driver, element)
       logger.info "Current transforms: #{transforms}"
-      transform_positions = transforms.values.select { |s| !s.empty? }.map { |s| get_position_from_transform(s) }
-      transform_positions.each { |p| raise Applitools::EyesError.new 'Got different css positions!' unless p == transform_positions[0] }
+      transform_positions = transforms.values.select { |s| !s.empty? }
+                                      .map { |s| get_position_from_transform(s) }
+      transform_positions.each do |p|
+        raise Applitools::EyesError.new 'Got different css positions!' unless p == transform_positions[0]
+      end
       transform_positions[0] || Applitools::Location::TOP_LEFT.dup
     end
-
   end
 end

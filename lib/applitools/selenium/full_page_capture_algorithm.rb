@@ -133,6 +133,7 @@ module Applitools::Selenium
 
       logger.info 'Getting the rest of the image parts...'
 
+      # rubocop:disable Metrics/BlockLength
       image_parts.each_with_index do |part_regions, i|
         next unless i > 0
 
@@ -141,7 +142,11 @@ module Applitools::Selenium
 
         logger.info "Taking screenshot for #{part_region}"
 
-        position_provider.position = part_region.location.offset(top_left_position).offset_negative(intersection.location)
+        position_provider.position = part_region
+                                     .location
+                                     .offset(top_left_position)
+                                     .offset_negative(intersection.location)
+
         sleep wait_before_screenshot
         current_position = position_provider.current_position
         logger.info "Set position to #{current_position}"
@@ -198,6 +203,7 @@ module Applitools::Selenium
           image_to_stitch.height
         )
       end
+      # rubocop:enable Metrics/BlockLength
 
       logger.info 'Stitching done!'
 
