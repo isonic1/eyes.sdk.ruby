@@ -255,12 +255,13 @@ module Applitools::Selenium
       logger.info "check(#{name}) is called"
       self.tag_for_debug = name
       Applitools::ArgumentGuard.is_a? target, 'target', Applitools::Selenium::Target
+      target_to_check = target.finalize
       original_overflow = nil
       original_position_provider = position_provider
       original_force_full_page_screenshot = force_full_page_screenshot
-      # self.force_full_page_screenshot = false
+
       eyes_element = nil
-      timeout = target.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
+      timeout = target_to_check.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::ViewportScreenshot.new(
@@ -269,13 +270,13 @@ module Applitools::Selenium
         )
       end
 
-      check_in_frame target_frames: target.frames do
+      check_in_frame target_frames: target_to_check.frames do
         begin
           match_data = Applitools::MatchWindowData.new
           match_data.tag = name
           update_default_settings(match_data)
-          match_data.read_target(target, driver)
-          eyes_element = target.region_to_check.call(driver)
+          match_data.read_target(target_to_check, driver)
+          eyes_element = target_to_check.region_to_check.call(driver)
 
           unless force_full_page_screenshot
             region_visibility_strategy.move_to_region original_position_provider,
@@ -292,7 +293,7 @@ module Applitools::Selenium
           self.screenshot_type = self.class.obtain_screenshot_type(
             is_element,
             inside_a_frame,
-            target.options[:stitch_content],
+            target_to_check.options[:stitch_content],
             force_full_page_screenshot
           )
 

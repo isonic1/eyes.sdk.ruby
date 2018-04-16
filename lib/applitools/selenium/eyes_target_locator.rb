@@ -162,20 +162,14 @@ module Applitools::Selenium
 
     def frame_by_name_or_id(name_or_id)
       logger.info "EyesTargetLocator.frame(#{name_or_id})"
-      # Finding the target element so we can report it.
-      # We use find elements(plural) to avoid exception when the element
-      # is not found.
-      logger.info 'Getting frames by name...'
-      frames = driver.find_elements :name, name_or_id
-      if frames.empty?
-        logger.info 'No frames found! Trying by id...'
-        frames = driver.find_elements :id, name_or_id
-        raise Applitools::EyesNoSuchFrame.new "No frame with name or id #{name_or_id} exists!" if frames.empty?
-      end
+
+      logger.info 'Getting frame by name or id...'
+      target_frame = driver.find_element(name_or_id: name_or_id)
+
       logger.info 'Done! Making preparations...'
-      on_will_switch.will_switch_to_frame(:frame, frames.first)
+      on_will_switch.will_switch_to_frame(:frame, target_frame)
       logger.info 'Done! Switching to frame...'
-      __getobj__.frame frames.first
+      __getobj__.frame target_frame
 
       logger.info 'Done!'
       driver
