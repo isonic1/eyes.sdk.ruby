@@ -23,9 +23,6 @@ module Applitools::Selenium
       return if out_of_eyes == Applitools::Location::TOP_LEFT
       logger.info "Moving element by #{out_of_eyes} to fit in the eyes region"
 
-      # require 'pry'
-      # binding.pry
-
       Applitools::Utils::EyesSeleniumUtils.element_translate_to(
         driver,
         element,

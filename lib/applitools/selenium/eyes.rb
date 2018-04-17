@@ -302,8 +302,6 @@ module Applitools::Selenium
             if eyes_element.is_a? Applitools::Selenium::Element
               original_overflow = eyes_element.overflow
               eyes_element.overflow = 'hidden'
-              # require 'pry'
-              # binding.pry
               self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new(
                 driver,
                 eyes_element
@@ -548,9 +546,6 @@ module Applitools::Selenium
       original_frame = driver.frame_chain
       driver.switch_to.default_content
       region_provider = Applitools::Selenium::RegionProvider.new(driver, Applitools::Region::EMPTY)
-
-      require 'pry'
-      # binding.pry
 
       full_page_image = algo.get_stitched_region(
         image_provider: image_provider,
