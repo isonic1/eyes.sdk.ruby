@@ -10,7 +10,8 @@ module Applitools
         213 => 1.33,
         240 => 1.5,
         320 => 2,
-        480 => 3
+        480 => 3,
+        640 => 4
       }.freeze
 
       def initialize(*args)
