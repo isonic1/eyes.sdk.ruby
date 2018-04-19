@@ -58,12 +58,12 @@ RSpec.shared_context 'eyes integration test' do
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
     @eyes.log_handler = Logger.new(STDOUT).tap do |l|
-      l.level = Logger::INFO
+      l.level = Logger::FATAL
     end
     @eyes.stitch_mode = :css
     @selenium_server_url = ENV['SELENIUM_SERVER_URL']
     @eyes.batch = $batch_info if $batch_info
-    @eyes.debug_screenshot = true
+    @eyes.debug_screenshot = false
     # TODO: check if it real works with sauce
   end
 
