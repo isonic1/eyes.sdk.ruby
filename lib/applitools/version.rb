@@ -1,3 +1,3 @@
 module Applitools
-  VERSION = '3.14.2'.freeze
+  VERSION = '3.14.3'.freeze
 end
