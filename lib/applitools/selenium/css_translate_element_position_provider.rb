@@ -37,7 +37,7 @@ module Applitools::Selenium
       logger.info 'Getting element transforms...'
       transforms = Applitools::Utils::EyesSeleniumUtils.current_element_transforms(driver, element)
       logger.info "Current transforms: #{transforms}"
-      transform_positions = transforms.values.compact.select { |s| !s.empty? }
+      transform_positions = transforms.values.select { |s| !s.empty? }
                                       .map { |s| get_position_from_transform(s) }
       transform_positions.each do |p|
         raise Applitools::EyesError.new 'Got different css positions!' unless p == transform_positions[0]

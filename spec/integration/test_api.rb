@@ -58,7 +58,7 @@ RSpec.shared_context 'eyes integration test' do
   before(:context) do
     @eyes = Applitools::Selenium::Eyes.new
     @eyes.log_handler = Logger.new(STDOUT).tap do |l|
-      l.level = Logger::FATAL
+      l.level = Logger::INFO
     end
     @eyes.stitch_mode = :css
     @selenium_server_url = ENV['SELENIUM_SERVER_URL']
