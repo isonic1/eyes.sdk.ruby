@@ -38,7 +38,7 @@ module Applitools::Selenium
     #
     # @param [Applitools::Location] value The location.
     def restore_state(value)
-      transforms = value.values.select { |el| !el.empty? }
+      transforms = value.values.compact.select { |el| !el.empty? }
       Applitools::Utils::EyesSeleniumUtils.set_transforms(executor, value)
       if transforms.empty?
         self.last_state_position = Applitools::Location::TOP_LEFT
@@ -67,7 +67,7 @@ module Applitools::Selenium
     # Gets the entire size of the frame.
     #
     # @return [Applitools::RectangleSize] The entire size of the frame.
-    def entire_size(image_width, image_height)
+    def entire_size(_image_width, _image_height)
       viewport_size = Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(executor)
       result = Applitools::Utils::EyesSeleniumUtils.current_frame_content_entire_size(executor)
       logger.info "Entire size: #{result}"
@@ -77,14 +77,16 @@ module Applitools::Selenium
       result.width = [viewport_size.width, result.width].min if disable_horizontal
       result.height = [viewport_size.height, result.height].min if disable_vertical
       logger.info "Actual size to scroll: #{result}"
-      return result unless executor.frame_chain.empty?
+      result
 
-      spp = Applitools::Selenium::ScrollPositionProvider.new(executor)
-      original_scroll_position = spp.current_position
-      spp.scroll_to_bottom_right
-      bottom_right_position = spp.current_position
-      spp.restore_state(original_scroll_position)
-      Applitools::RectangleSize.new(bottom_right_position.x + image_width, bottom_right_position.y + image_height)
+      # return result unless executor.frame_chain.empty?
+
+      # spp = Applitools::Selenium::ScrollPositionProvider.new(executor)
+      # original_scroll_position = spp.current_position
+      # spp.scroll_to_bottom_right
+      # bottom_right_position = spp.current_position
+      # spp.restore_state(original_scroll_position)
+      # Applitools::RectangleSize.new(bottom_right_position.x + image_width, bottom_right_position.y + image_height)
     end
 
     private

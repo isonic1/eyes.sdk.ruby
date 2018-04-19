@@ -88,27 +88,27 @@ RSpec.shared_context 'test classic API' do
       let(:platform) { platform_name }
     end
 
-    it 'TestCheckWindow' do
-      eyes.check_window('Window')
-    end
-
-    it 'TestCheckRegion' do
-      eyes.check_region(:id, 'overflowing-div', tag: 'Region', stitch_content: true)
-    end
-
-    it 'TestCheckFrame', pending: 'Right bottom corner is corrupted' do
-      eyes.check_frame(name_or_id: 'frame1')
-      fail 'Right bottom corner is corrupted'
-    end
-
-    it 'TestCheckRegionInFrame' do
-      eyes.check_region_in_frame(
-        name_or_id: 'frame1',
-        by: [:id, 'inner-frame-div'],
-        tag: 'Inner frame div',
-        stitch_content: true
-      )
-    end
+    # it 'TestCheckWindow' do
+    #   eyes.check_window('Window')
+    # end
+    #
+    # it 'TestCheckRegion' do
+    #   eyes.check_region(:id, 'overflowing-div', tag: 'Region', stitch_content: true)
+    # end
+    #
+    # it 'TestCheckFrame', pending: 'Right bottom corner is corrupted' do
+    #   eyes.check_frame(name_or_id: 'frame1')
+    #   fail 'Right bottom corner is corrupted'
+    # end
+    #
+    # it 'TestCheckRegionInFrame' do
+    #   eyes.check_region_in_frame(
+    #     name_or_id: 'frame1',
+    #     by: [:id, 'inner-frame-div'],
+    #     tag: 'Inner frame div',
+    #     stitch_content: true
+    #   )
+    # end
 
     it 'TestCheckRegion2' do
       eyes.check_region(:id, 'overflowing-div-image', tag: 'minions', stitch_content: true)

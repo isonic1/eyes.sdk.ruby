@@ -3,6 +3,8 @@
 module Applitools
   module Selenium
     class RegionProvider
+      FF_OLD_VERSION = '45.0'
+
       attr_accessor :driver, :eye_region, :scroll_position_provider
 
       def initialize(driver, eye_region)
@@ -53,7 +55,9 @@ module Applitools
       end
 
       def frame_window_calculator
-        return FirefoxFrameWindowCalculator if driver.browser.running_browser_name == :firefox
+        return FirefoxFrameWindowCalculator if
+            driver.browser.running_browser_name == :firefox &&
+                (Gem::Version.new(driver.capabilities.version) <=> Gem::Version.new(FF_OLD_VERSION)) > 0
         FrameWindowCalculator
       end
 
