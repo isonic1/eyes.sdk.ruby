@@ -38,7 +38,7 @@ module Applitools::Selenium
     #
     # @param [Applitools::Location] value The location.
     def restore_state(value)
-      transforms = value.values.compact.select { |el| !el.empty? }
+      transforms = value.values.select { |el| !el.empty? }
       Applitools::Utils::EyesSeleniumUtils.set_transforms(executor, value)
       if transforms.empty?
         self.last_state_position = Applitools::Location::TOP_LEFT
