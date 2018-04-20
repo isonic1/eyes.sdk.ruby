@@ -10,7 +10,7 @@ RSpec.shared_context 'chrome settings' do
     res
   end
 
-  let (:opts) do
+  let(:opts) do
     {
       'chromeOptions' => {
         args: args
