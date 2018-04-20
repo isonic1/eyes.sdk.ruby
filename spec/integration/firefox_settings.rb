@@ -14,7 +14,7 @@ RSpec.shared_context 'firefox settings' do
   let(:opts) do
     {
       'moz:firefoxOptions' => {
-        :profile => firefox_profile.as_json,
+        :profile => firefox_profile.as_json['zip'],
         :args => args
       }
     }
