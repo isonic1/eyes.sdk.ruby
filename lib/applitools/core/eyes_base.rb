@@ -34,7 +34,7 @@ module Applitools
     #   Default value is false.
     #   @return [boolean] verbose_results flag
 
-    attr_accessor :app_name, :baseline_name, :batch, :agent_id, :full_agent_id,
+    attr_accessor :app_name, :batch, :agent_id, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :host_os, :host_app, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
@@ -599,7 +599,7 @@ module Applitools
 
       self.session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
                                                 scenario_id_or_name: test_name, batch_info: batch,
-                                                env_name: baseline_name, environment: app_env,
+                                                env_name: baseline_env_name, environment: app_env,
                                                 default_match_settings: default_match_settings,
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name,
                                                 properties: properties
