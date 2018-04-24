@@ -98,7 +98,7 @@ module Applitools::Selenium
     #   @return [Applitools::RectangleSize] explicit_entire_size
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
-      :wait_before_screenshots, :debug_screenshot, :stitch_mode, :disable_horizontal_scrolling,
+      :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
       :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
       :full_page_capture_algorithm_left_top_offset, :screenshot_type
     attr_reader :driver
@@ -121,10 +121,10 @@ module Applitools::Selenium
       self.stitch_mode = Applitools::STITCH_MODE[:scroll]
       self.wait_before_screenshots = DEFAULT_WAIT_BEFORE_SCREENSHOTS
       self.region_visibility_strategy = MoveToRegionVisibilityStrategy.new
-      self.debug_screenshot = false
+      self.debug_screenshots = false
       self.debug_screenshot_provider = Applitools::DebugScreenshotProvider.new
                                                                           .tag_access { tag_for_debug }
-                                                                          .debug_flag_access { debug_screenshot }
+                                                                          .debug_flag_access { debug_screenshots }
       self.disable_horizontal_scrolling = false
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil

@@ -18,7 +18,7 @@ RSpec.describe 'Check region in frame offset example', :type => :feature, :js =>
       eyes.log_handler = Logger.new(STDOUT)
       eyes.stitch_mode = :css
       eyes.hide_scrollbars = false
-      eyes.debug_screenshot = false
+      eyes.debug_screenshots = false
       # eyes.match_level = Applitools::MATCH_LEVEL[:content]
       # eyes.proxy = Applitools::Connectivity::Proxy.new 'http://localhost:9999'
     end

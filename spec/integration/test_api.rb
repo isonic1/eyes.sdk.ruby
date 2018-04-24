@@ -63,7 +63,7 @@ RSpec.shared_context 'eyes integration test' do
     @eyes.stitch_mode = :css
     @selenium_server_url = ENV['SELENIUM_SERVER_URL']
     @eyes.batch = $batch_info if $batch_info
-    @eyes.debug_screenshot = false
+    @eyes.debug_screenshots = false
     # TODO: check if it real works with sauce
   end
 
