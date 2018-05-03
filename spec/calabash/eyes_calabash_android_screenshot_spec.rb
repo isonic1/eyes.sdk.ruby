@@ -35,9 +35,8 @@ RSpec.describe Applitools::Calabash::EyesCalabashAndroidScreenshot do
     end
 
     it 'calculates density' do
-      new_instance = described_class.new(Applitools::Screenshot.from_image(
-        ::ChunkyPNG::Image.new(5, 5)),
-        density: 1600
+      new_instance = described_class.new(
+        Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)), density: 1600
       )
       expect(new_instance.scale_factor).to eq 10
     end

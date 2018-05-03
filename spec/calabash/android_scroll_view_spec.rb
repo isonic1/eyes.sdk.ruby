@@ -7,16 +7,15 @@ RSpec.describe 'Applitools::Calabash::FullPageCaptureAlgorithm::CalabashAndroidS
     end
   end
   let(:subject) { dummy_class.new }
-  let(:image) { ChunkyPNG::Image.from_file('spec/fixtures/pic.png')}
+  let(:image) { ChunkyPNG::Image.from_file('spec/fixtures/pic.png') }
   let(:screenshot) { Applitools::Screenshot.from_image(image) }
   let(:unknown_density) { 333 }
   before do
     allow(subject).to receive(:logger).and_return(Applitools::EyesLogger)
   end
 
-
   it 'there are no exception when unknown density is passed' do
-    expect{ subject.calabash_android_screenshot(screenshot, unknown_density) }.to_not raise_error
+    expect { subject.calabash_android_screenshot(screenshot, unknown_density) }.to_not raise_error
   end
 
   it 'reports unknown density' do

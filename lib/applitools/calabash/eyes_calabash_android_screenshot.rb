@@ -18,8 +18,6 @@ module Applitools
 
       DENSITY_DEFAULT = 160
 
-
-
       class UnknownDeviceDensity < ::Applitools::EyesError; end
 
       def initialize(*args)
