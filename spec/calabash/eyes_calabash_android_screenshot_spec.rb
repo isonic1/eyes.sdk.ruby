@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe Applitools::Calabash::EyesCalabashAndroidScreenshot do
   it 'Android densities table' do
-    expect(described_class::ANDROID_DENSITY.keys).to contain_exactly(120, 160, 213, 240, 320, 480, 640)
+    expect(described_class::ANDROID_DENSITY.keys).to contain_exactly(120, 160, 213, 240, 320, 480, 560, 640)
     expect(described_class::ANDROID_DENSITY).to include(
       120 => 0.75,
       160 => 1,
@@ -10,6 +10,7 @@ RSpec.describe Applitools::Calabash::EyesCalabashAndroidScreenshot do
       240 => 1.5,
       320 => 2,
       480 => 3,
+      560 => 3.5,
       640 => 4
     )
   end
@@ -28,15 +29,16 @@ RSpec.describe Applitools::Calabash::EyesCalabashAndroidScreenshot do
       expect(new_instance.scale_factor).to eq 1.5
     end
 
-    it 'rejects invalid density' do
-      expect do
-        described_class.new(Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)), density: 242)
-      end.to raise_error Applitools::EyesError
-    end
-
     it 'converts density to scale factor' do
       new_instance = described_class.new(Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)), density: 240)
       expect(new_instance.scale_factor).to eq 1.5
+    end
+
+    it 'calculates density' do
+      new_instance = described_class.new(
+        Applitools::Screenshot.from_image(::ChunkyPNG::Image.new(5, 5)), density: 1600
+      )
+      expect(new_instance.scale_factor).to eq 10
     end
   end
 

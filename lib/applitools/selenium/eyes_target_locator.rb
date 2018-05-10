@@ -38,8 +38,10 @@ module Applitools::Selenium
         end
       when Applitools::Selenium::Element
         frame_by_frame_element(value)
+      when String
+        frame_by_name_or_id(value)
       else
-        raise Applitools::EyesError 'Unknown frame selector to switch!'
+        raise Applitools::EyesError, 'Unknown frame selector to switch!'
       end
       # require 'pry'
       # binding.pry

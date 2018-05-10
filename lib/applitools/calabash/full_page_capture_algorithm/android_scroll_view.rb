@@ -2,7 +2,15 @@ require_relative 'base'
 module Applitools
   module Calabash
     module FullPageCaptureAlgorithm
+      module CalabashAndroidScreenshot
+        def calabash_android_screenshot(screenshot, density)
+          Applitools::Calabash::EyesCalabashAndroidScreenshot.new(
+            screenshot, density: density
+          )
+        end
+      end
       class AndroidScrollView < Base
+        include CalabashAndroidScreenshot
         def initialize(*args)
           super
           @entire_content = nil
@@ -29,9 +37,9 @@ module Applitools
 
           restore_original_position
 
-          Applitools::Calabash::EyesCalabashAndroidScreenshot.new(
+          calabash_android_screenshot(
             Applitools::Screenshot.from_image(stitched_image),
-            density: screenshot_provider.density
+            screenshot_provider.density
           )
         end
 
