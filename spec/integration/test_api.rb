@@ -48,7 +48,7 @@ RSpec.shared_context 'eyes integration test' do
     )
   end
 
-  let(:test_name) { example_name + '_' + platform.gsub(/\s+/, '_') + (force_fullpage_screenshot ? '_FPS' : '') }
+  let(:test_name) { example_name + (force_fullpage_screenshot ? '_FPS' : '') }
 
   # rubocop:disable Style/SymbolProc
   let(:example_name) { |e| e.description }
