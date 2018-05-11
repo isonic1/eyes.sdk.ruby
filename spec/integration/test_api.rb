@@ -239,7 +239,6 @@ RSpec.shared_examples 'test special cases' do
     include_context 'eyes integration test' do
       let(:platform) { platform_name }
     end
-
     # it 'TestCheckRegionInAVeryBigFrame' do
     #   eyes.check('map', Applitools::Selenium::Target.frame('frame1').region(:tag_name, 'img'))
     # end
