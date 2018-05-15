@@ -27,7 +27,7 @@ module Applitools
       def initialize
         self.frames = []
         self.options = {
-          ignore_caret: false,
+          ignore_caret: true,
           ignore_mismatch: false
         }
         reset_for_fullscreen
