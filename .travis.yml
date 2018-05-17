@@ -18,10 +18,10 @@ env:
 #  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
 #  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
 #  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
 matrix:
   allow_failures:
     - rvm: rbx-2

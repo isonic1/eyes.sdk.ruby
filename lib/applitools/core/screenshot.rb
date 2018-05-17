@@ -43,6 +43,10 @@ module Applitools
       super
     end
 
+    def square
+      width * height
+    end
+
     class Datastream < self
       extend Forwardable
       def_delegators :header, :width, :height

@@ -603,7 +603,10 @@ module Applitools::Selenium
       sleep wait_before_screenshots
       image = image_provider.take_screenshot
       scale_provider.scale_image(image) if scale_provider
-      cut_provider.cut(image) if cut_provider
+      local_cut_provider = (
+        cut_provider || Applitools::Selenium::FixedCutProvider.viewport(image, viewport_size, region_to_check)
+      )
+      local_cut_provider.cut(image) if local_cut_provider
       eyes_screenshot_factory.call(image)
     end
 
