@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Applitools
   module Selenium
     class FixedCutProvider
@@ -37,7 +39,9 @@ module Applitools
         crop_height = image.height - header - footer
         image.crop!(left, header, crop_width, crop_height)
       end
+
       private
+
       attr_accessor :left, :header, :right, :footer
     end
   end
