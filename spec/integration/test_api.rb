@@ -38,7 +38,6 @@ RSpec.shared_context 'eyes integration test' do
       )
     end
   end
-
   let(:driver) do
     eyes.open(
       driver: web_driver,
