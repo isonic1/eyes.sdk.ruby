@@ -21,8 +21,8 @@ module Applitools::EyesLogger
     end
   end
 
-  MANDATORY_METHODS = [:debug, :info, :close].freeze
-  OPTIONAL_METHODS = [:warn, :error, :fatal].freeze
+  MANDATORY_METHODS = [:debug, :info, :warn, :error, :fatal, :close].freeze
+  OPTIONAL_METHODS = [].freeze
 
   def_delegators :@log_handler, *MANDATORY_METHODS
 

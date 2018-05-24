@@ -4,6 +4,9 @@ require_relative 'eyes_calabash_screenshot'
 module Applitools
   module Calabash
     class EyesCalabashAndroidScreenshot < ::Applitools::Calabash::EyesCalabashScreenshot
+      extend Forwardable
+      def_delegators 'Applitools::EyesLogger', :logger
+
       ANDROID_DENSITY = {
         120 => 0.75,
         160 => 1,
@@ -11,8 +14,13 @@ module Applitools
         240 => 1.5,
         320 => 2,
         480 => 3,
+        560 => 3.5,
         640 => 4
       }.freeze
+
+      DENSITY_DEFAULT = 160
+
+      class UnknownDeviceDensity < ::Applitools::EyesError; end
 
       def initialize(*args)
         options = if args.last.is_a? Hash
@@ -51,8 +59,9 @@ module Applitools
       end
 
       def density=(value)
-        raise Applitools::EyesIllegalArgument, "Unknown density = #{value}" unless ANDROID_DENSITY[value.to_i]
-        @scale_factor = ANDROID_DENSITY[value.to_i]
+        logger.warn("Trying to set unknown device density - #{value}") unless
+            ANDROID_DENSITY.keys.include?(value.to_i)
+        @scale_factor = value.to_f / DENSITY_DEFAULT
       end
     end
   end
