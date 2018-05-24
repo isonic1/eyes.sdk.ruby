@@ -14,14 +14,15 @@ env:
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
   - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+
 matrix:
   allow_failures:
     - rvm: rbx-2
@@ -37,7 +38,7 @@ before_install:
   - "BUILD_ONLY=true rake clean build"
   - "cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd .."
 before_script:
-  - "export APPLITOOLS_BATCH_ID=$(java UUIDFromString $(git log --pretty=format:'%H' -n 1)$TRAVIS_RUBY_VERSION)"
+  - "export APPLITOOLS_BATCH_ID=$(java UUIDFromString $TRAVIS_COMMIT$TRAVIS_RUBY_VERSION)"
   - "echo $APPLITOOLS_BATCH_ID"
 script:
   - bundle exec rake

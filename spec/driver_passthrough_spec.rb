@@ -2,10 +2,14 @@
 
 require 'spec_helper'
 
-describe 'passthrough methods' do
+describe 'passthrough methods', mock_connection: true do
   let(:static_file) { "file://#{File.dirname(__FILE__)}/fixtures/static_test_file.html" }
   let(:eyes) { Applitools::Selenium::Eyes.new }
   let(:web_driver) { Selenium::WebDriver.for :phantomjs }
+
+  before do
+    pending('phantomJS is no longer supported by Selenium') unless RUBY_KEY == RUBY_1_9_3
+  end
 
   before do
     pending('phantomJS is no longer supported by Selenium') unless RUBY_KEY == RUBY_1_9_3

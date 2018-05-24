@@ -34,7 +34,7 @@ module Applitools
     #   Default value is false.
     #   @return [boolean] verbose_results flag
 
-    attr_accessor :app_name, :baseline_name, :batch, :agent_id, :full_agent_id,
+    attr_accessor :app_name, :batch, :agent_id, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :host_os, :host_app, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
@@ -400,7 +400,7 @@ module Applitools
     # @param [Boolean] throw_exception If set to +true+ eyes will trow [Applitools::TestFailedError] exception,
     # otherwise the test will pass. Default is true
 
-    def close(throw_exception = true)
+    def close(throw_exception = true, be_silent = false)
       if disabled?
         logger.info "#{__method__} Ignored"
         return false
@@ -415,8 +415,8 @@ module Applitools
       clear_user_inputs
 
       unless running_session
-        logger.info 'Server session was not started'
-        logger.info '--- Empty test ended'
+        be_silent || logger.info('Server session was not started')
+        be_silent || logger.info('--- Empty test ended')
         return Applitools::TestResults.new
       end
 
@@ -599,7 +599,7 @@ module Applitools
 
       self.session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
                                                 scenario_id_or_name: test_name, batch_info: batch,
-                                                env_name: baseline_name, environment: app_env,
+                                                env_name: baseline_env_name, environment: app_env,
                                                 default_match_settings: default_match_settings,
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name,
                                                 properties: properties
