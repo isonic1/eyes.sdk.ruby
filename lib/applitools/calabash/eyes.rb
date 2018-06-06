@@ -1,17 +1,19 @@
+# frozen_string_literal: false
+
 module Applitools
   module Calabash
     class Eyes < Applitools::EyesBase
       attr_accessor :device_pixel_ratio, :full_page_capture_algorithm, :base_agent_id, :title,
-        :debug_screenshot, :debug_screenshot_provider, :tag_for_debug
+        :debug_screenshots, :debug_screenshot_provider, :tag_for_debug
       attr_reader :context
 
       def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
         super
         self.base_agent_id = "eyes.calabash.ruby/#{Applitools::VERSION}".freeze
-        self.debug_screenshot = false
+        self.debug_screenshots = false
         self.debug_screenshot_provider = Applitools::DebugScreenshotProvider.new
                                                                             .tag_access { tag_for_debug }
-                                                                            .debug_flag_access { debug_screenshot }
+                                                                            .debug_flag_access { debug_screenshots }
       end
 
       def open(options = {})

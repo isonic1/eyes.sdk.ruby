@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 RSpec::Matchers.define :be_a_one_of do |*expected|
@@ -104,11 +106,11 @@ RSpec.describe Applitools::Selenium::Target do
 
     it 'sets default value when called without args' do
       subject.ignore_caret
-      expect(subject.options[:ignore_caret]).to be false
+      expect(subject.options[:ignore_caret]).to be true
     end
 
     it 'false by default' do
-      expect(subject.options[:ignore_caret]).to be false
+      expect(subject.options[:ignore_caret]).to be true
     end
   end
 
