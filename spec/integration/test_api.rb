@@ -201,9 +201,9 @@ RSpec.shared_examples 'test fluent API' do
       )
       eyes.check('Fluent - Window with floating region by region', target)
       res = Applitools::EyesTestResult.new(eyes.close(true), eyes)
-      # expect(res.actual_floating).to floating_array_match(
-      #   [::Applitools::FloatingRegion.new(10, 10, 20, 20, 4, 4, 21, 31)]
-      # )
+      expect(res.actual_floating).to floating_array_match(
+        [::Applitools::FloatingRegion.new(10, 10, 20, 20, 4, 4, 21, 31)]
+      )
       res
     end
 
@@ -225,9 +225,9 @@ RSpec.shared_examples 'test fluent API' do
       element = driver.find_element(:id, 'overflowing-div-image')
       eyes.check('Fluent - Region by element', Applitools::Selenium::Target.region(element).ignore(element))
       res = Applitools::EyesTestResult.new(eyes.close(true), eyes)
-      # expect(res.actual_ignore).to ignore_array_match(
-      #   [::Applitools::Region.new(0, 0, 304, 184)]
-      # )
+      expect(res.actual_ignore).to ignore_array_match(
+        [::Applitools::Region.new(-1, -1, 306, 186)]
+      )
       res
     end
   end
