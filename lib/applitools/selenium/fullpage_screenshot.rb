@@ -23,7 +23,9 @@ module Applitools::Selenium
         )
       )
 
-      result = self.class.new(sub_screenshot_image, region_provider: region_provider)
+      result = self.class.new(sub_screenshot_image, region_provider: region_provider).tap do |s|
+        s.top_left_location = top_left_location.dup.offset(region.location)
+      end
       logger.info 'Done!'
       result
     end

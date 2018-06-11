@@ -275,7 +275,6 @@ module Applitools::Selenium
           match_data = Applitools::MatchWindowData.new
           match_data.tag = name
           update_default_settings(match_data)
-          match_data.read_target(target_to_check, driver)
           eyes_element = target_to_check.region_to_check.call(driver)
 
           unless force_full_page_screenshot
@@ -286,6 +285,8 @@ module Applitools::Selenium
           region_provider = Applitools::Selenium::RegionProvider.new(driver, region_for_element(eyes_element))
 
           self.region_to_check = region_provider
+
+          match_data.read_target(target_to_check, driver)
 
           is_element = eyes_element.is_a? Applitools::Selenium::Element
           inside_a_frame = !driver.frame_chain.empty?
