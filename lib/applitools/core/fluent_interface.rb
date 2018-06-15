@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'match_level_setter'
 module Applitools::FluentInterface
   include Applitools::MatchLevelSetter
@@ -9,7 +11,7 @@ module Applitools::FluentInterface
     end
   end
 
-  def ignore_caret(value = false)
+  def ignore_caret(value = true)
     options[:ignore_caret] = value ? true : false
     self
   end

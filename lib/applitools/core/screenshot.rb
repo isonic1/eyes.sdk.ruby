@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Applitools
   class Screenshot < Delegator
     class << self
@@ -39,6 +41,10 @@ module Applitools
 
     def respond_to_missing?(method_name, include_private = false)
       super
+    end
+
+    def square
+      width * height
     end
 
     class Datastream < self

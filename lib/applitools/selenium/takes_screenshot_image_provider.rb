@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Applitools::Selenium
   # @!visibility private
   class TakesScreenshotImageProvider
@@ -10,11 +12,11 @@ module Applitools::Selenium
     #
     # @param [Applitools::Selenium::Driver] driver
     # @param [Hash] options The options for taking a screenshot.
-    # @option options [Boolean] :debug_screenshot
+    # @option options [Boolean] :debug_screenshots
     # @option options [Enumerator] :name_enumerator The name enumerator.
     def initialize(driver, options = {})
       self.driver = driver
-      options = { debug_screenshot: false }.merge! options
+      options = { debug_screenshots: false }.merge! options
       self.debug_screenshot_provider = options[:debug_screenshot_provider]
     end
 
@@ -32,7 +34,7 @@ module Applitools::Selenium
 
     private
 
-    attr_accessor :debug_screenshot
+    attr_accessor :debug_screenshots
 
     def save_debug_screenshot(screenshot, suffix)
       debug_screenshot_provider.save(screenshot, suffix || '')
