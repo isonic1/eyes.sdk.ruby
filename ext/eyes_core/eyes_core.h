@@ -15,7 +15,7 @@ typedef unsigned char BYTE; // Bytes use 8 bits unsigned integers
 
 
 
-void Init_resampling();
+void Init_eyes_core();
 
 
 BYTE interpolate_char(double, BYTE, BYTE, BYTE, BYTE);
