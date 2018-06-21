@@ -11,8 +11,8 @@ VALUE c_resampling_first_step(VALUE self, VALUE dst_dimension_x, VALUE dst_dimen
     unsigned long int source_width, source_height, c_dst_dimension_x, c_dst_dimension_y, w_m, h_m;
     VALUE result_array;
 
-    source_width = NUM2UINT(rb_funcall(self, rb_intern("width"), 0, NULL));
-    source_height = NUM2UINT(rb_funcall(self, rb_intern("height"), 0, NULL));
+    source_width = NUM2UINT(rb_funcall(self, rb_intern("width"), 0, 0));
+    source_height = NUM2UINT(rb_funcall(self, rb_intern("height"), 0, 0));
 
     c_dst_dimension_x = NUM2UINT(dst_dimension_x);
     c_dst_dimension_y = NUM2UINT(dst_dimension_y);
@@ -57,9 +57,9 @@ PIXEL* get_c_array(VALUE self) {
   PIXEL* ary;
   VALUE pixels;
 
-  pixels = rb_funcall(self, rb_intern("pixels"), 0, NULL);
-  w = NUM2UINT(rb_funcall(self, rb_intern("width"), 0, NULL));
-  h = NUM2UINT(rb_funcall(self, rb_intern("height"), 0, NULL));
+  pixels = rb_funcall(self, rb_intern("pixels"), 0, 0);
+  w = NUM2UINT(rb_funcall(self, rb_intern("width"), 0, 0));
+  h = NUM2UINT(rb_funcall(self, rb_intern("height"), 0, 0));
   ary = (PIXEL*)malloc( w*h*sizeof(PIXEL));
 
   for(i=0; i<w*h; i++) {
