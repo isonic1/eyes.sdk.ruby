@@ -10,7 +10,7 @@ Bundler::GemHelper.install_tasks name: 'eyes_images'
 Bundler::GemHelper.install_tasks name: 'eyes_selenium'
 Bundler::GemHelper.install_tasks name: 'eyes_calabash'
 
-unless ENV['BUILD_ONLY']
+unless ENV['BUILD_ONLY'] && !ENV['BUILD_ONLY'].empty?
   require 'rspec/core/rake_task'
   require 'rubocop/rake_task'
 
