@@ -95,8 +95,8 @@ BYTE interpolate_char(double t, BYTE c0, BYTE c1, BYTE c2, BYTE c3) {
   return (BYTE)(res);
 };
 
-PIXEL raw_merge_pixels(PIXEL* merge_pixels, unsigned int size) {
-  unsigned int i, real_colors, acum_r, acum_g, acum_b, acum_a;
+PIXEL raw_merge_pixels(PIXEL* merge_pixels, unsigned long int size) {
+  unsigned long int i, real_colors, acum_r, acum_g, acum_b, acum_a;
   BYTE new_r, new_g, new_b, new_a;
   PIXEL pix;
 

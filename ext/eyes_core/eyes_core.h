@@ -22,7 +22,7 @@ VALUE c_resampling_first_step(VALUE, VALUE, VALUE);
 VALUE get_ruby_array(VALUE, PIXEL*, unsigned long int);
 PIXEL get_line_pixel(PIXEL*, unsigned long int, long int, unsigned long int);
 PIXEL get_column_pixel(PIXEL*, unsigned long int, long int, unsigned long int, unsigned long int);
-PIXEL raw_merge_pixels(PIXEL*, unsigned int);
+PIXEL raw_merge_pixels(PIXEL*, unsigned long int);
 PIXEL* c_scale_points(PIXEL*, unsigned long int, unsigned long int, unsigned long int, unsigned long int);
 
 #endif
