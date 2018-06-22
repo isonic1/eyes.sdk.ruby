@@ -13,11 +13,6 @@ typedef unsigned char BYTE; // Bytes use 8 bits unsigned integers
 #define BUILD_PIXEL(r, g, b, a)  (((PIXEL) (r) << 24) + ((PIXEL) (g) << 16) + ((PIXEL) (b) << 8) + (PIXEL) (a))
 #define INT8_MULTIPLY(a, b)      (((((a) * (b) + 0x80) >> 8) + ((a) * (b) + 0x80)) >> 8)
 
-
-
-void Init_eyes_core();
-
-
 BYTE interpolate_char(double, BYTE, BYTE, BYTE, BYTE);
 
 PIXEL* get_bicubic_points(PIXEL*, unsigned long int, unsigned long int, unsigned long int, unsigned long int);
