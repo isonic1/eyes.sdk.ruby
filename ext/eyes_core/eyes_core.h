@@ -13,11 +13,6 @@ typedef unsigned char BYTE; // Bytes use 8 bits unsigned integers
 #define BUILD_PIXEL(r, g, b, a)  (((PIXEL) (r) << 24) + ((PIXEL) (g) << 16) + ((PIXEL) (b) << 8) + (PIXEL) (a))
 #define INT8_MULTIPLY(a, b)      (((((a) * (b) + 0x80) >> 8) + ((a) * (b) + 0x80)) >> 8)
 
-
-
-void Init_resampling();
-
-
 BYTE interpolate_char(double, BYTE, BYTE, BYTE, BYTE);
 
 PIXEL* get_bicubic_points(PIXEL*, unsigned long int, unsigned long int, unsigned long int, unsigned long int);
@@ -27,7 +22,7 @@ VALUE c_resampling_first_step(VALUE, VALUE, VALUE);
 VALUE get_ruby_array(VALUE, PIXEL*, unsigned long int);
 PIXEL get_line_pixel(PIXEL*, unsigned long int, long int, unsigned long int);
 PIXEL get_column_pixel(PIXEL*, unsigned long int, long int, unsigned long int, unsigned long int);
-PIXEL raw_merge_pixels(PIXEL*, unsigned int);
+PIXEL raw_merge_pixels(PIXEL*, unsigned long int);
 PIXEL* c_scale_points(PIXEL*, unsigned long int, unsigned long int, unsigned long int, unsigned long int);
 
 #endif
