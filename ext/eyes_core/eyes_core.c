@@ -11,8 +11,8 @@ VALUE c_resampling_first_step(VALUE self, VALUE dst_dimension_x, VALUE dst_dimen
     unsigned long int source_width, source_height, c_dst_dimension_x, c_dst_dimension_y, w_m, h_m;
     VALUE result_array;
 
-    source_width = NUM2UINT(rb_funcall(self, rb_intern("width"), 0, NULL));
-    source_height = NUM2UINT(rb_funcall(self, rb_intern("height"), 0, NULL));
+    source_width = NUM2UINT(rb_funcall(self, rb_intern("width"), 0));
+    source_height = NUM2UINT(rb_funcall(self, rb_intern("height"), 0));
 
     c_dst_dimension_x = NUM2UINT(dst_dimension_x);
     c_dst_dimension_y = NUM2UINT(dst_dimension_y);
@@ -57,9 +57,9 @@ PIXEL* get_c_array(VALUE self) {
   PIXEL* ary;
   VALUE pixels;
 
-  pixels = rb_funcall(self, rb_intern("pixels"), 0, NULL);
-  w = NUM2UINT(rb_funcall(self, rb_intern("width"), 0, NULL));
-  h = NUM2UINT(rb_funcall(self, rb_intern("height"), 0, NULL));
+  pixels = rb_funcall(self, rb_intern("pixels"), 0);
+  w = NUM2UINT(rb_funcall(self, rb_intern("width"), 0));
+  h = NUM2UINT(rb_funcall(self, rb_intern("height"), 0));
   ary = (PIXEL*)malloc( w*h*sizeof(PIXEL));
 
   for(i=0; i<w*h; i++) {
@@ -95,8 +95,8 @@ BYTE interpolate_char(double t, BYTE c0, BYTE c1, BYTE c2, BYTE c3) {
   return (BYTE)(res);
 };
 
-PIXEL raw_merge_pixels(PIXEL* merge_pixels, unsigned int size) {
-  unsigned int i, real_colors, acum_r, acum_g, acum_b, acum_a;
+PIXEL raw_merge_pixels(PIXEL* merge_pixels, unsigned long int size) {
+  unsigned long int i, real_colors, acum_r, acum_g, acum_b, acum_a;
   BYTE new_r, new_g, new_b, new_a;
   PIXEL pix;
 
