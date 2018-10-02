@@ -50,7 +50,11 @@ module Applitools
             'ScreenshotUrl' => nil,
             'Title' => nil,
             'IsPrimary' => false,
-            'Elapsed' => 0
+            'Elapsed' => 0,
+            'Location' => {
+                'X' => 0,
+                'Y' => 0
+            }
           },
           'Tag' => nil
         }
@@ -113,9 +117,16 @@ module Applitools
     def app_output=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Applitools::AppOutputWithScreenshot
       @app_output = value
-      hash_value = value.to_hash
-      %w(Screenshot64 ScreenshotUrl Title IsPrimary Elapsed).each do |key|
-        current_data['AppOutput'][key] = hash_value[key] unless hash_value[key].nil?
+      hash_value = Applitools::Utils.capitalize_hash_keys(value.to_hash)
+      %i(Screenshot64 ScreenshotUrl Title IsPrimary Elapsed Location).each do |key|
+        unless hash_value[key].nil?
+          current_data['AppOutput'][key.to_s] = case hash_value[key]
+                                                when Hash
+                                                  Hash[hash_value[key].map { |k,v| [k.to_s, v] }]
+                                                else
+                                                  hash_value[key]
+                                                end
+        end
       end
     end
 

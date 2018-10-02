@@ -636,7 +636,9 @@ module Applitools
       a_title = title
       logger.info 'Done!'
       Applitools::AppOutputWithScreenshot.new(
-        Applitools::AppOutput.new(a_title, compress_result),
+        Applitools::AppOutput.new(a_title, compress_result).tap do |o|
+          o.location = region.location unless region.empty?
+        end,
         screenshot
       )
     end
