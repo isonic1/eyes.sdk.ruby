@@ -52,8 +52,8 @@ module Applitools
             'IsPrimary' => false,
             'Elapsed' => 0,
             'Location' => {
-                'X' => 0,
-                'Y' => 0
+              'X' => 0,
+              'Y' => 0
             }
           },
           'Tag' => nil
@@ -119,14 +119,13 @@ module Applitools
       @app_output = value
       hash_value = Applitools::Utils.capitalize_hash_keys(value.to_hash)
       %i(Screenshot64 ScreenshotUrl Title IsPrimary Elapsed Location).each do |key|
-        unless hash_value[key].nil?
-          current_data['AppOutput'][key.to_s] = case hash_value[key]
-                                                when Hash
-                                                  Hash[hash_value[key].map { |k,v| [k.to_s, v] }]
-                                                else
-                                                  hash_value[key]
-                                                end
-        end
+        next if hash_value[key].nil?
+        current_data['AppOutput'][key.to_s] = case hash_value[key]
+                                              when Hash
+                                                Hash[hash_value[key].map { |k, v| [k.to_s, v] }]
+                                              else
+                                                hash_value[key]
+                                              end
       end
     end
 

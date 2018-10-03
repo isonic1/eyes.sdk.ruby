@@ -43,36 +43,36 @@ RSpec.describe Applitools::MatchWindowData do
   context 'app_output=' do
     let(:app_output_hash) do
       {
-          'Screenshot64' => 'Screenshot64_11',
-          'ScreenshotUrl' => 'ScreenshotUrl_11',
-          'Title' => 'Title_11',
-          'IsPrimary' => 'IsPrimary_11',
-          'Elapsed' => 'Elapsed_11',
-          'Location' => { 'X' => 35, 'Y' => 46}
+        'Screenshot64' => 'Screenshot64_11',
+        'ScreenshotUrl' => 'ScreenshotUrl_11',
+        'Title' => 'Title_11',
+        'IsPrimary' => 'IsPrimary_11',
+        'Elapsed' => 'Elapsed_11',
+        'Location' => { 'X' => 35, 'Y' => 46 }
       }
     end
 
     let(:app_output_hash_sym) do
       {
-          'Screenshot64' => 'Screenshot64_11',
-          'ScreenshotUrl' => 'ScreenshotUrl_11',
-          'Title' => 'Title_11',
-          'IsPrimary' => 'IsPrimary_11',
-          'Elapsed' => 'Elapsed_11',
-          'Location' => { :X => 35, :y => 46}
+        'Screenshot64' => 'Screenshot64_11',
+        'ScreenshotUrl' => 'ScreenshotUrl_11',
+        'Title' => 'Title_11',
+        'IsPrimary' => 'IsPrimary_11',
+        'Elapsed' => 'Elapsed_11',
+'Location' => { X: 35, y: 46 }
       }
     end
 
     it 'accepts AppOutputWithScreenshot' do
-      expect {subject.send(:app_output=, 123)}.to raise_error Applitools::EyesIllegalArgument
-      expect {subject.send(:app_output=, app_output_with_screenshot) }.to_not raise_error
+      expect { subject.send(:app_output=, 123) }.to raise_error Applitools::EyesIllegalArgument
+      expect { subject.send(:app_output=, app_output_with_screenshot) }.to_not raise_error
     end
     it 'iterates over keys' do
       expect(app_output_with_screenshot).to receive(:to_hash).and_return(app_output_hash)
       %w(Screenshot64 ScreenshotUrl Title IsPrimary Elapsed Location). each do |key|
         expect(subject.send(:current_data)['AppOutput']).to receive(:[]=).with(key, app_output_hash[key])
       end
-      subject.app_output = (app_output_with_screenshot)
+      subject.app_output = app_output_with_screenshot
     end
     it 'handles \'location\'' do
       expect(app_output_with_screenshot).to receive(:to_hash).and_return(app_output_hash_sym)

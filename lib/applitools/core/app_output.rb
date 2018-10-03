@@ -17,9 +17,9 @@ module Applitools
 
     def to_hash
       {
-        :'Title' => title,
-        :'Screenshot64' => nil,
-        :'Location' => location.to_hash
+        Title: title,
+        Screenshot64: nil,
+        Location: location.to_hash
       }
     end
   end
