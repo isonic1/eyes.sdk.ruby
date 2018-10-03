@@ -48,6 +48,7 @@ EYES_GEM_SPECS = {
     gem 'nokogiri', '~> 1.6'
     gem 'public_suffix', '<= 2.0.5'
     gem 'rack-test', '< 0.7'
+    gem 'watir', '<=6.13.0'
   end,
   RUBY_2_1_6 => proc do |spec|
     gem 'xpath', '< 3.0.0'
