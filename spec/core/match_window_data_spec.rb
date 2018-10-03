@@ -14,6 +14,10 @@ RSpec.describe Applitools::MatchWindowData do
   end
 
   let!(:value) { double }
+  let(:app_output) { Applitools::AppOutput.new(nil, nil) }
+  let(:a_screenshot) { Applitools::Screenshot.from_region(Applitools::Region.new(0, 0, 1, 1)) }
+  let(:eyes_screenshot) { Applitools::EyesScreenshot.new(a_screenshot) }
+  let(:app_output_with_screenshot) { Applitools::AppOutputWithScreenshot.new(app_output, eyes_screenshot) }
 
   it_should_behave_like 'responds to method', [
     :app_output,
@@ -35,6 +39,48 @@ RSpec.describe Applitools::MatchWindowData do
     :to_s,
     :to_hash
   ]
+
+  context 'app_output=' do
+    let(:app_output_hash) do
+      {
+        'Screenshot64' => 'Screenshot64_11',
+        'ScreenshotUrl' => 'ScreenshotUrl_11',
+        'Title' => 'Title_11',
+        'IsPrimary' => 'IsPrimary_11',
+        'Elapsed' => 'Elapsed_11',
+        'Location' => { 'X' => 35, 'Y' => 46 }
+      }
+    end
+
+    let(:app_output_hash_sym) do
+      {
+        'Screenshot64' => 'Screenshot64_11',
+        'ScreenshotUrl' => 'ScreenshotUrl_11',
+        'Title' => 'Title_11',
+        'IsPrimary' => 'IsPrimary_11',
+        'Elapsed' => 'Elapsed_11',
+'Location' => { X: 35, y: 46 }
+      }
+    end
+
+    it 'accepts AppOutputWithScreenshot' do
+      expect { subject.send(:app_output=, 123) }.to raise_error Applitools::EyesIllegalArgument
+      expect { subject.send(:app_output=, app_output_with_screenshot) }.to_not raise_error
+    end
+    it 'iterates over keys' do
+      expect(app_output_with_screenshot).to receive(:to_hash).and_return(app_output_hash)
+      %w(Screenshot64 ScreenshotUrl Title IsPrimary Elapsed Location). each do |key|
+        expect(subject.send(:current_data)['AppOutput']).to receive(:[]=).with(key, app_output_hash[key])
+      end
+      subject.app_output = app_output_with_screenshot
+    end
+    it 'handles \'location\'' do
+      expect(app_output_with_screenshot).to receive(:to_hash).and_return(app_output_hash_sym)
+      subject.app_output = app_output_with_screenshot
+      expect(subject.send(:current_data)['AppOutput']['Location']['X']).to eq 35
+      expect(subject.send(:current_data)['AppOutput']['Location']['Y']).to eq 46
+    end
+  end
 
   context 'exact' do
     it 'reads options=> match_window_settings=>exact key' do
@@ -271,13 +317,17 @@ RSpec.describe Applitools::MatchWindowData do
           'IsPrimary',
           'Screenshot64',
           'ScreenshotUrl',
-          'Title'
+          'Title',
+          'Location'
         )
       end
 
       it 'has default values' do
         expect(subject['Elapsed']).to be_zero
         expect(subject['IsPrimary']).to eq false
+        expect(subject['Location'].keys).to contain_exactly('X', 'Y')
+        expect(subject['Location']['X']).to eq(0)
+        expect(subject['Location']['Y']).to eq(0)
       end
     end
 
