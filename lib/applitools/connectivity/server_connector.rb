@@ -124,6 +124,16 @@ module Applitools::Connectivity
       Applitools::TestResults.new(response)
     end
 
+    def post_dom_json(dom_data)
+      request_body = Oj.dump(dom_data)
+      res = post(
+          endpoint_url + 'data', body: request_body
+      )
+      #p request_body
+      raise Applitools::EyesError.new("Request failed: #{res.status} #{res.body} #{request_body}") unless res.success?
+      res.headers['location']
+    end
+
     private
 
     DEFAULT_HEADERS = {

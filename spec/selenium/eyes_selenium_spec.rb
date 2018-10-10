@@ -28,6 +28,17 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
     subject.api_key = 'API_KEY_FOR_TESTS'
   end
 
+  context ':respond_to_methods' do
+    it_should_behave_like 'responds to method', [
+        :send_dom,
+        :send_dom=
+    ]
+
+    it 'sets default values' do
+      expect(subject.send_dom).to be true
+    end
+  end
+
   context ':open' do
     it 'passes a block to :open_base block' do
       expect(subject).to receive(:open_base) do |*_args, &block|

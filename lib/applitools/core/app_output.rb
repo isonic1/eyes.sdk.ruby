@@ -3,6 +3,7 @@
 module Applitools
   class AppOutput
     attr_reader :title, :screenshot64, :location
+    attr_accessor :dom_url
 
     def initialize(title, screenshot64)
       @title = title
@@ -16,11 +17,13 @@ module Applitools
     end
 
     def to_hash
-      {
+      result = {
         Title: title,
         Screenshot64: nil,
-        Location: location.to_hash
+        Location: location.to_hash,
       }
+      result[:DomUrl] = dom_url if dom_url
+      result
     end
   end
 end
