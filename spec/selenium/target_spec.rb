@@ -17,7 +17,7 @@ RSpec.describe Applitools::Selenium::Target do
       expect(subject.options[:send_dom]).to be true
     end
     it ':send_dom default value' do
-      expect(subject.options[:send_dom]).to be true
+      expect(subject.options[:send_dom]).to be nil
     end
   end
 end

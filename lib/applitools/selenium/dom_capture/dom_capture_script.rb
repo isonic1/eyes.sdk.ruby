@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+#
 module Applitools::Selenium
   module DomCapture
-    CSS_CAPTURE_SCRIPT = <<-SCRIPT.freeze
+    CSS_CAPTURE_SCRIPT = <<-SCRIPT
       function extractCssResources() {
         return Array.from(document.querySelectorAll('link[rel="stylesheet"],style')).map(el => {
           if (el.tagName.toUpperCase() === 'LINK') {
@@ -10,10 +12,9 @@ module Applitools::Selenium
           }
         });
       }
-      
       return extractCssResources();
     SCRIPT
-    DOM_CAPTURE_SCRIPT = <<-SCRIPT.freeze
+    DOM_CAPTURE_SCRIPT = <<-SCRIPT
     function captureFrame({styleProps, attributeProps, rectProps, ignoredTagNames}) {
       const NODE_TYPES = {
           ELEMENT: 1,

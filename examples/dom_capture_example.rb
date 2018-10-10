@@ -15,10 +15,10 @@ eyes.match_level = Applitools::MATCH_LEVEL[:layout]
 begin
   web_driver = Selenium::WebDriver.for :chrome
   eyes.test(
-      app_name: 'DOM Capture',
-      test_name: 'Applitools DomCapture test',
-      viewport_size: { width: 800, height: 600 },
-      driver: web_driver
+    app_name: 'DOM Capture',
+    test_name: 'Applitools DomCapture test',
+    viewport_size: { width: 800, height: 600 },
+    driver: web_driver
   ) do |driver|
     driver.get 'https://nikita-andreev.github.io/applitools/dom_capture.html?aaa'
     eyes.check_window('initial')

@@ -20,7 +20,7 @@ module Applitools
       result = {
         Title: title,
         Screenshot64: nil,
-        Location: location.to_hash,
+        Location: location.to_hash
       }
       result[:DomUrl] = dom_url if dom_url
       result
