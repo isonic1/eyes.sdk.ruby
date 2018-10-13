@@ -2,6 +2,8 @@
 
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
+require 'zlib'
+
 require_relative 'match_level_setter'
 
 module Applitools
@@ -482,6 +484,10 @@ module Applitools
 
     private :full_agent_id, :full_agent_id=
 
+    def dom_data
+      {}
+    end
+
     def match_level_keys
       %w(match_level exact scale remainder).map(&:to_sym)
     end
@@ -619,6 +625,21 @@ module Applitools
     end
 
     def get_app_output_with_screenshot(region_provider, last_screenshot)
+      dom_url = ''
+      captured_dom_data = dom_data
+      unless captured_dom_data.empty?
+        begin
+          logger.info 'Processing DOM..'
+          dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
+            Zlib::Deflate.deflate(json.encode('UTF-8'), Zlib::BEST_COMPRESSION)
+          end
+          logger.info 'Done'
+          logger.info dom_url
+        rescue Applitools::EyesError => e
+          logger.warn e.message
+          dom_url = nil
+        end
+      end
       logger.info 'Getting screenshot...'
       screenshot = capture_screenshot
       logger.info 'Done getting screenshot!'
@@ -638,6 +659,7 @@ module Applitools
       Applitools::AppOutputWithScreenshot.new(
         Applitools::AppOutput.new(a_title, compress_result).tap do |o|
           o.location = region.location unless region.empty?
+          o.dom_url = dom_url unless dom_url && dom_url.empty?
         end,
         screenshot
       )

@@ -25,4 +25,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'selenium-webdriver'
   spec.add_dependency 'capybara'
   spec.add_dependency 'watir'
+  spec.add_dependency 'css_parser'
 end
