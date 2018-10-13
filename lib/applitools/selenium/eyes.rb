@@ -131,7 +131,7 @@ module Applitools::Selenium
       self.force_driver_resolution_as_viewport_size = false
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
       self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
-      self.send_dom = true
+      self.send_dom = false
       self.prevent_dom_processing = false
     end
 

@@ -127,15 +127,15 @@ module Applitools::Connectivity
     def post_dom_json(dom_data)
       Applitools::EyesLogger.debug 'About to send captured DOM...'
       request_body = Oj.dump(dom_data)
-      Applitools::EyesLogger.debug  request_body
+      Applitools::EyesLogger.debug request_body
       processed_request_body = yield(request_body) if block_given?
       res = post(
-          endpoint_url + 'data',
-          body: processed_request_body.nil? ? request_body : processed_request_body,
-          content_type: 'application/octet-stream'
+        endpoint_url + 'data',
+        body: processed_request_body.nil? ? request_body : processed_request_body,
+        content_type: 'application/octet-stream'
       )
 
-      Applitools::EyesLogger.debug  'Done!'
+      Applitools::EyesLogger.debug 'Done!'
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.body}") unless res.success?
       Applitools::EyesLogger.debug  'Server response headers:'
       Applitools::EyesLogger.debug  res.headers.inspect

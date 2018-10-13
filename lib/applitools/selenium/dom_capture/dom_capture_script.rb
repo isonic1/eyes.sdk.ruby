@@ -20,15 +20,12 @@ module Applitools::Selenium
           ELEMENT: 1,
           TEXT: 3,
         };
-      
         function filter(x) {
           return !!x;
         }
-      
         function notEmptyObj(obj) {
           return Object.keys(obj).length ? obj : undefined;
         }
-      
         function iframeToJSON(el) {
           const obj = elementToJSON(el);
           try {
@@ -40,21 +37,16 @@ module Applitools::Selenium
             return obj;
           }
         }
-      
         function elementToJSON(el) {
           const tagName = el.tagName.toUpperCase();
           if (ignoredTagNames.indexOf(tagName) > -1) return null;
           const computedStyle = window.getComputedStyle(el);
           const boundingClientRect = el.getBoundingClientRect();
-      
           const style = {};
           for (const p of styleProps) style[p] = computedStyle.getPropertyValue(p);
-      
           const rect = {};
           for (const p of rectProps) rect[p] = boundingClientRect[p];
-      
           const attributes = {};
-      
           if (!attributeProps) {
             if (el.hasAttributes()) {
               var attrs = el.attributes;
@@ -69,7 +61,6 @@ module Applitools::Selenium
                 if (el.hasAttribute(p)) attributes[p] = el.getAttribute(p);
               }
             }
-      
             if (attributeProps[tagName]) {
               for (const p of attributeProps[tagName]) {
                 if (el.hasAttribute(p)) attributes[p] = el.getAttribute(p);
@@ -84,14 +75,12 @@ module Applitools::Selenium
             childNodes: Array.prototype.map.call(el.childNodes, captureNode).filter(filter),
           };
         }
-      
         function captureTextNode(node) {
           return {
             tagName: '#text',
             text: node.textContent,
           };
         }
-      
         function captureNode(node) {
           switch (node.nodeType) {
             case NODE_TYPES.TEXT:
@@ -106,10 +95,8 @@ module Applitools::Selenium
               return null;
           }
         }
-      
         return captureNode(document.documentElement);
       }
-      
       return captureFrame(arguments[0]);
     SCRIPT
   end

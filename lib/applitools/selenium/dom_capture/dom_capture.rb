@@ -19,14 +19,14 @@ module Applitools::Selenium
 
     def get_frame_dom(driver, args_obj, logger)
       dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-      traverse_dom_tree(driver, args_obj, dom_tree, logger)
+      traverse_dom_tree(driver, dom_tree, logger)
     end
 
-    def traverse_dom_tree(driver, args_obj, dom_tree, logger)
+    def traverse_dom_tree(driver, dom_tree, logger)
       tag_name = dom_tree['tagName']
       return unless tag_name
 
-      loop(driver, {'childNodes' => [dom_tree]}, logger)
+      loop(driver, { 'childNodes' => [dom_tree] }, logger)
       dom_tree
     end
 
