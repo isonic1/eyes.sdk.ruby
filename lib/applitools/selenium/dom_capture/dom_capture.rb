@@ -7,14 +7,8 @@ module Applitools::Selenium
 
     def get_window_dom(driver, logger)
       args_obj = {
-        'styleProps' => %w(background-color background-image background-size color border-width border-color
-                           border-style padding margin),
-        'attributeProps' => {
-          'all' => %w(id class),
-          'IMG' => %w(src),
-          'IFRAME' => %w(src),
-          'A' => %w(href)
-        },
+        'styleProps' => [],
+        'attributeProps' => nil,
         'rectProps' => %w(width height top left bottom right),
         'ignoredTagNames' => %w(HEAD SCRIPT)
       }
@@ -25,39 +19,27 @@ module Applitools::Selenium
 
     def get_frame_dom(driver, args_obj, logger)
       dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-      traverse_dom_tree(driver, args_obj, dom_tree, -1, logger)
+      traverse_dom_tree(driver, args_obj, dom_tree, logger)
     end
 
-    def traverse_dom_tree(driver, args_obj, dom_tree, frame_index, logger)
+    def traverse_dom_tree(driver, args_obj, dom_tree, logger)
       tag_name = dom_tree['tagName']
       return unless tag_name
 
-      if frame_index > -1
-        driver.switch_to.frame(frame_index)
-        dom = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-        dom_tree['childNodes'] = dom
-        src_url = dom_tree['attributes'] && dom_tree['attributes']['src']
-        logger.respond_to?(:warn) && logger.warn('WARNING! The iframe with no src!') unless src_url
-        traverse_dom_tree(driver, args_obj, dom, -1, src_url, logger)
-        driver.switch_to.parent_frame
-      end
-
-      dom_tree['css'] = get_frame_bundled_css(driver, logger) if tag_name.casecmp('HTML') == 0
-
-      loop(driver, args_obj, dom_tree, logger)
+      loop(driver, {'childNodes' => [dom_tree]}, logger)
       dom_tree
     end
 
-    def loop(driver, args_obj, dom_tree, logger)
+    def loop(driver, dom_tree, logger)
       child_nodes = dom_tree['childNodes']
       return unless child_nodes
-      index = 0
-      child_nodes.each do |node|
-        if node['tagName'].casecmp('IFRAME') == 0
-          traverse_dom_tree(driver, args_obj, node, index, logger)
-          index += 1
+      iterate_child_nodes = proc do |node_childs|
+        node_childs.each do |node|
+          node['css'] = get_frame_bundled_css(driver, logger) if node['tagName'].casecmp('HTML') == 0
+          iterate_child_nodes.call(node['childNodes']) unless node['childNodes'].nil?
         end
       end
+      iterate_child_nodes.call(child_nodes)
     end
 
     def get_frame_bundled_css(driver, logger)

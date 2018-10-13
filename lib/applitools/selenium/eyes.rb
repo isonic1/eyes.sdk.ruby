@@ -502,7 +502,12 @@ module Applitools::Selenium
 
     def dom_data
       return {} if prevent_dom_processing
-      Applitools::Selenium::DomCapture.get_window_dom(driver, logger)
+      begin
+        Applitools::Selenium::DomCapture.get_window_dom(driver, logger)
+      rescue Applitools::EyesError => e
+        logger.error "DOM capture failed! #{e.message}"
+        return {}
+      end
     end
 
     private

@@ -2,6 +2,8 @@
 
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
+require 'zlib'
+
 require_relative 'match_level_setter'
 
 module Applitools
@@ -626,10 +628,17 @@ module Applitools
       dom_url = ''
       captured_dom_data = dom_data
       unless captured_dom_data.empty?
-        logger.info 'Processing DOM..'
-        dom_url = server_connector.post_dom_json(captured_dom_data)
-        logger.info 'Done'
-        logger.info dom_url
+        begin
+          logger.info 'Processing DOM..'
+          dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
+            Zlib::Deflate.deflate(json.encode('UTF-8'), Zlib::BEST_COMPRESSION)
+          end
+          logger.info 'Done'
+          logger.info dom_url
+        rescue Applitools::EyesError => e
+          logger.warn e.message
+          dom_url = nil
+        end
       end
       logger.info 'Getting screenshot...'
       screenshot = capture_screenshot

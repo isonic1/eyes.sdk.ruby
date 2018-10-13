@@ -35,7 +35,7 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
     ]
 
     it 'sets default values' do
-      expect(subject.send_dom).to be true
+      expect(subject.send_dom).to be false
     end
   end
 
