@@ -10,7 +10,7 @@ eyes.force_full_page_screenshot = true
 eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 eyes.match_level = Applitools::MATCH_LEVEL[:layout]
-# eyes.send_dom = false
+eyes.send_dom = true
 
 begin
   web_driver = Selenium::WebDriver.for :chrome

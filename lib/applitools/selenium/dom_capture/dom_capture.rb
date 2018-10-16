@@ -12,22 +12,24 @@ module Applitools::Selenium
         'rectProps' => %w(width height top left bottom right),
         'ignoredTagNames' => %w(HEAD SCRIPT)
       }
-      get_frame_dom(driver, args_obj, logger)
+      dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
+      get_frame_dom(driver, {'childNodes' => [dom_tree], 'tagName' => 'OUTER_HTML'}, logger)
+      dom_tree
     end
 
     private
 
-    def get_frame_dom(driver, args_obj, logger)
-      dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-      traverse_dom_tree(driver, dom_tree, logger)
-    end
-
-    def traverse_dom_tree(driver, dom_tree, logger)
+    def get_frame_dom(driver, dom_tree, logger)
       tag_name = dom_tree['tagName']
       return unless tag_name
-
-      loop(driver, { 'childNodes' => [dom_tree] }, logger)
-      dom_tree
+      frame_index = 0
+      loop(driver, dom_tree, logger) do |dom_sub_tree|
+        #this block is called if IFRAME found
+        driver.switch_to.frame(index: frame_index)
+          get_frame_dom(driver, dom_sub_tree, logger)
+        driver.switch_to.parent_frame
+        frame_index += 1
+      end
     end
 
     def loop(driver, dom_tree, logger)
@@ -35,8 +37,12 @@ module Applitools::Selenium
       return unless child_nodes
       iterate_child_nodes = proc do |node_childs|
         node_childs.each do |node|
-          node['css'] = get_frame_bundled_css(driver, logger) if node['tagName'].casecmp('HTML') == 0
-          iterate_child_nodes.call(node['childNodes']) unless node['childNodes'].nil?
+          if node['tagName'].casecmp('IFRAME') == 0
+            yield(node) if block_given?
+          else
+            node['css'] = get_frame_bundled_css(driver, logger) if node['tagName'].casecmp('HTML') == 0
+            iterate_child_nodes.call(node['childNodes']) unless node['childNodes'].nil?
+          end
         end
       end
       iterate_child_nodes.call(child_nodes)
