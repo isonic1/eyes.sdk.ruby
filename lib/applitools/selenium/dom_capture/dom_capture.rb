@@ -61,6 +61,8 @@ module Applitools::Selenium
             parser.load_uri!(url_to_load)
           rescue CssParser::CircularReferenceError
             logger.respond_to?(:error) && logger.error("Got a circular reference error! #{url_to_load}")
+          rescue CssParser::RemoteFileError
+            nil
           end
         end
       end
