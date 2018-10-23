@@ -26,3 +26,23 @@ begin
 ensure
   web_driver.quit
 end
+
+begin
+  web_driver = Selenium::WebDriver.for(
+    :remote, url: 'https://ondemand.saucelabs.com/wd/hub',
+    desired_capabilities: Selenium::WebDriver::Remote::Capabilities.chrome.merge!(
+      username: ENV['SAUCE_USERNAME'], accesskey: ENV['SAUCE_ACCESS_KEY']
+    )
+  )
+  eyes.test(
+    app_name: 'DOM Capture Sauce',
+    test_name: 'Applitools DomCapture test',
+    viewport_size: { width: 800, height: 600 },
+    driver: web_driver
+  ) do |driver|
+    driver.get 'https://nikita-andreev.github.io/applitools/dom_capture.html?aaa'
+    eyes.check_window('initial')
+  end
+ensure
+  web_driver.quit if web_driver
+end
