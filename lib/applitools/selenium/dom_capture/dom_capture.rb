@@ -7,9 +7,10 @@ module Applitools::Selenium
 
     def get_window_dom(driver, logger)
       args_obj = {
-        'styleProps' => [],
+        'styleProps' => %w(background-color background-image background-size color border-width
+                          border-color border-style padding margin),
         'attributeProps' => nil,
-        'rectProps' => %w(width height top left bottom right),
+        'rectProps' => %w(width height top left),
         'ignoredTagNames' => %w(HEAD SCRIPT)
       }
       dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)

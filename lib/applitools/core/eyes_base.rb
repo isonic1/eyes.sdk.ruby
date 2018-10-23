@@ -631,7 +631,14 @@ module Applitools
         begin
           logger.info 'Processing DOM..'
           dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
-            Zlib::Deflate.deflate(json.encode('UTF-8'), Zlib::BEST_COMPRESSION)
+            io = StringIO.new()
+            gz = Zlib::GzipWriter.new(io)
+            gz.write(json.encode('UTF-8'))
+            gz.close
+            result = io.string
+            io.close
+            result
+            # Zlib::Deflate.deflate(json.encode('UTF-8'), Zlib::BEST_COMPRESSION)
           end
           logger.info 'Done'
           logger.info dom_url
