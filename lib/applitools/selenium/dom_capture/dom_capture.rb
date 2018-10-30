@@ -72,12 +72,12 @@ module Applitools::Selenium
             if Timeout.respond_to?(:timeout)
               Timeout.timeout(CSS_DOWNLOAD_TIMEOUT) do
                 css_string, = parser.send(:read_remote_file, url)
-                css_items[i] = [css_string, {base_uri: url}]
+                css_items[i] = [css_string, { base_uri: url }]
               end
             else
               timeout(CSS_DOWNLOAD_TIMEOUT) do
                 css_string, = parser.send(:read_remote_file, url)
-                css_items[i] = [css_string, {base_uri: url}]
+                css_items[i] = [css_string, { base_uri: url }]
               end
             end
           end
