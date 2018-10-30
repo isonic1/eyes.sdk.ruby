@@ -3,6 +3,7 @@
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
 require 'zlib'
+require 'benchmark'
 
 require_relative 'match_level_setter'
 
@@ -626,24 +627,29 @@ module Applitools
 
     def get_app_output_with_screenshot(region_provider, last_screenshot)
       dom_url = ''
-      captured_dom_data = dom_data
-      unless captured_dom_data.empty?
-        begin
-          logger.info 'Processing DOM..'
-          dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
-            io = StringIO.new
-            gz = Zlib::GzipWriter.new(io)
-            gz.write(json.encode('UTF-8'))
-            gz.close
-            result = io.string
-            io.close
-            result
+      Benchmark.bm do |x|
+        captured_dom_data = nil
+        x.report { captured_dom_data = dom_data }
+        unless captured_dom_data.empty?
+          begin
+            x.report do
+              logger.info 'Processing DOM..'
+              dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
+                io = StringIO.new
+                gz = Zlib::GzipWriter.new(io)
+                gz.write(json.encode('UTF-8'))
+                gz.close
+                result = io.string
+                io.close
+                result
+              end
+            end
+            logger.info 'Done'
+            logger.info dom_url
+          rescue Applitools::EyesError => e
+            logger.warn e.message
+            dom_url = nil
           end
-          logger.info 'Done'
-          logger.info dom_url
-        rescue Applitools::EyesError => e
-          logger.warn e.message
-          dom_url = nil
         end
       end
       logger.info 'Getting screenshot...'
