@@ -8,6 +8,7 @@ include Benchmark
 module Applitools::Selenium
   module DomCapture
     CSS_DOWNLOAD_TIMEOUT = 2 # 2 seconds
+    DOM_CAPTURE_TIMEOUT = 10 # 10 seconds
 
     extend self
 
@@ -21,8 +22,18 @@ module Applitools::Selenium
         'rectProps' => %w(width height top left),
         'ignoredTagNames' => %w(HEAD SCRIPT)
       }
-      dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-      get_frame_dom(driver, { 'childNodes' => [dom_tree], 'tagName' => 'OUTER_HTML' }, logger)
+      dom_tree = ''
+      if Timeout.respond_to?(:timeout)
+        Timeout.timeout(DOM_CAPTURE_TIMEOUT) do
+          dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
+          get_frame_dom(driver, { 'childNodes' => [dom_tree], 'tagName' => 'OUTER_HTML' }, logger)
+        end
+      else
+        timeout(DOM_CAPTURE_TIMEOUT) do
+          dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
+          get_frame_dom(driver, { 'childNodes' => [dom_tree], 'tagName' => 'OUTER_HTML' }, logger)
+        end
+      end
       dom_tree
     end
 
