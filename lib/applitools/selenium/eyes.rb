@@ -100,7 +100,7 @@ module Applitools::Selenium
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
       :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
-      :full_page_capture_algorithm_left_top_offset, :screenshot_type
+      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -131,6 +131,8 @@ module Applitools::Selenium
       self.force_driver_resolution_as_viewport_size = false
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
       self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
+      self.send_dom = false
+      self.prevent_dom_processing = false
     end
 
     # Starts a test
@@ -270,6 +272,8 @@ module Applitools::Selenium
         )
       end
 
+      self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) || send_dom)
+
       check_in_frame target_frames: target_to_check.frames do
         begin
           match_data = Applitools::MatchWindowData.new
@@ -324,6 +328,7 @@ module Applitools::Selenium
         end
         # rubocop:enable BlockLength
       end
+      self.prevent_dom_processing = false
     end
 
     # Validates the contents of an iframe and matches it with the expected output.
@@ -495,11 +500,22 @@ module Applitools::Selenium
       end
     end
 
+    def dom_data
+      return {} if prevent_dom_processing
+      begin
+        Applitools::Selenium::DomCapture.get_window_dom(driver, logger)
+      rescue Applitools::EyesError => e
+        logger.error "DOM capture failed! #{e.message}"
+        return {}
+      end
+    end
+
     private
 
     attr_accessor :check_frame_or_element, :region_to_check, :dont_get_title,
       :device_pixel_ratio, :position_provider, :scale_provider, :tag_for_debug,
-      :region_visibility_strategy, :eyes_screenshot_factory, :force_driver_resolution_as_viewport_size
+      :region_visibility_strategy, :eyes_screenshot_factory, :force_driver_resolution_as_viewport_size,
+      :prevent_dom_processing
 
     def image_provider
       Applitools::Selenium::TakesScreenshotImageProvider.new(

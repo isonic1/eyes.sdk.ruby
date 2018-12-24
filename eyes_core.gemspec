@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec', '>= 3'
-  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'rubocop', '<= 0.46.0'
 
   # Exclude debugging support on Travis CI, due to its incompatibility with jruby and older rubies.
   unless ENV['TRAVIS']
