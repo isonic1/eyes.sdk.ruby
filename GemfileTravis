@@ -9,6 +9,7 @@ source "file://#{ENV['PWD']}/pkg" do
   gem 'eyes_images'
   gem 'eyes_calabash'
   gem 'eyes_core'
+  gem 'eyes_calabash'
 end
 
 CURRENT_RUBY_VERSION = Gem::Version.new RUBY_VERSION
