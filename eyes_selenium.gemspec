@@ -17,10 +17,11 @@ Gem::Specification.new do |spec|
 
   spec.files         = `git ls-files lib/applitools/selenium`.split($RS) +
     `git ls-files lib/applitools/poltergeist`.split($RS) +
-    ['lib/eyes_selenium.rb', 'lib/applitools/version.rb']
+    ['lib/eyes_selenium.rb', 'lib/applitools/capybara.rb', 'lib/applitools/version.rb']
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = %w(lib)
   spec.add_dependency 'eyes_core', "= #{Applitools::VERSION}"
   spec.add_dependency 'selenium-webdriver'
+  spec.add_dependency 'css_parser'
 end

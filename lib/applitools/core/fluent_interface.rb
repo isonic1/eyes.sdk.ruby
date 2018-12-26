@@ -44,4 +44,9 @@ module Applitools::FluentInterface
     options[:match_level], options[:exact] = match_level_with_exact(value, exact_options)
     self
   end
+
+  def send_dom(value)
+    options[:send_dom] = value ? true : false
+    self
+  end
 end

@@ -28,7 +28,8 @@ module Applitools
         self.frames = []
         self.options = {
           ignore_caret: true,
-          ignore_mismatch: false
+          ignore_mismatch: false,
+          send_dom: nil
         }
         reset_for_fullscreen
       end

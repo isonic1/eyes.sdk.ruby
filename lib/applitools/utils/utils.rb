@@ -18,6 +18,10 @@ module Applitools::Utils
     uncapitalize(tokens.shift) + tokens.map(&:capitalize).join
   end
 
+  def capitalize(str)
+    str[0, 1].upcase + str[1..-1]
+  end
+
   def to_method_name(str)
     str = str.to_s if !str.is_a?(String) && str.respond_to?(:to_s)
     underscore(str).gsub(%r{\/}, '__')
@@ -39,6 +43,14 @@ module Applitools::Utils
 
   def camelcase_hash_keys(hash)
     convert_hash_keys(hash, :camelcase)
+  end
+
+  def capitalize_hash_keys(hash)
+    convert_hash_keys(hash, :capitalize)
+  end
+
+  def stringify_hash_keys(hash)
+    convert_hash_keys(hash, :stringify)
   end
 
   def boolean_value(value)
