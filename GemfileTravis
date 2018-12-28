@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source :rubygems
+source "https://rubygems.org"
 
 gem 'rspec'
 
@@ -9,7 +9,7 @@ source "file://#{ENV['PWD']}/pkg" do
   gem 'eyes_images'
   gem 'eyes_calabash'
   gem 'eyes_core'
-  gem 'eyes_calabash'
+  gem 'eyes_capybara'
 end
 
 CURRENT_RUBY_VERSION = Gem::Version.new RUBY_VERSION
