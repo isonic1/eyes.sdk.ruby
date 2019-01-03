@@ -34,8 +34,6 @@ branches:
     - development
 
 before_install:
-  - "gem update --system"
-  - "gem update bundler"
   - "gem install builder"
   - "BUILD_ONLY=true rake clean build"
   - "cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd .."
