@@ -187,12 +187,6 @@ module Applitools::Selenium
       send(method_name) if respond_to?(method_name, :include_private)
     end
 
-    def perform_driver_settings_for_appium_driver
-      self.region_visibility_strategy = NopRegionVisibilityStrategy.new
-      self.force_driver_resolution_as_viewport_size = true
-    end
-
-    private :perform_driver_settings_for_appium_driver
     private :perform_driver_specific_settings
 
     # Sets the stitch mode.
