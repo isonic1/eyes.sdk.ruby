@@ -1,3 +1,5 @@
+# frozen_string_literal: false
+
 module Applitools::Appium
   module Eyes
     def perform_driver_settings_for_appium_driver

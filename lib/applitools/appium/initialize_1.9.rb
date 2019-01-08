@@ -1,5 +1,7 @@
+# frozen_string_literal: false
+
 module Applitools::Appium
-  module Init1_9
+  module Init19
     extend self
 
     def init
@@ -8,6 +10,7 @@ module Applitools::Appium
         alias_method :super_android?, :android?
         alias_method :super_ios?, :ios?
         alias_method :super_platform_version, :platform_version
+        alias_method :super_current_scroll_position, :current_scroll_position
         include Applitools::Appium::Utils
       end
 

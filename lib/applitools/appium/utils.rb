@@ -1,3 +1,5 @@
+# frozen_string_literal: false
+
 module Applitools::Appium
   module Utils
     # true if test is running on mobile device
@@ -19,6 +21,24 @@ module Applitools::Appium
     # @param [Applitools::Selenium::Driver] driver
     def platform_version(driver)
       driver.respond_to?(:caps) && driver.caps[:platformVersion]
+    end
+
+    # def current_position
+    #   result = nil
+    #   begin
+    #     logger.info 'current_position()'
+    #     result = Applitools::Utils::EyesSeleniumUtils.current_scroll_position(executor)
+    #     logger.info "Current position: #{result}"
+    #   rescue Applitools::EyesDriverOperationException
+    #     result = Applitools::Location::TOP_LEFT
+    #   end
+    #   result
+    # end
+
+    def current_scroll_position(driver)
+      super
+    rescue
+      Applitools::Location::TOP_LEFT
     end
   end
 end

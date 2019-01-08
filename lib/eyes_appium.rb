@@ -1,3 +1,5 @@
+# frozen_string_literal: false
+
 require 'eyes_selenium'
 require 'appium_lib'
 
@@ -14,9 +16,9 @@ RUBY_KEY = [RUBY_1_9_3, RUBY_2_0_0, RUBY_2_1_6, RUBY_2_2_2, RUBY_2_4_0].select {
 Applitools.require_dir('appium')
 
 if RUBY_KEY >= RUBY_2_0_0
-  Applitools::Appium::Init2_0.init
+  Applitools::Appium::Init20.init
 else
-  Applitools::Appium::Init1_9.init
+  Applitools::Appium::Init19.init
 end
 
 if defined? Appium::Driver
