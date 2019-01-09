@@ -28,8 +28,6 @@ module Applitools::Selenium
       def eyes_driver(driver, eyes = nil)
         if driver.respond_to? :driver_for_eyes
           driver.driver_for_eyes eyes
-        elsif defined?(::Capybara::Poltergeist) && (driver.is_a? ::Capybara::Poltergeist::Driver)
-          Applitools::Poltergeist::Driver.new(eyes, driver: driver)
         else
           unless driver.is_a?(Applitools::Selenium::Driver)
             Applitools::EyesLogger.warn("Unrecognized driver type: (#{driver.class.name})!")
