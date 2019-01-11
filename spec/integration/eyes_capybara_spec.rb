@@ -68,7 +68,7 @@ RSpec.describe 'Capybara sauce :chrome', type: [:feature, :eyes], capybara: true
 
   caps = Selenium::WebDriver::Remote::Capabilities.chrome.merge! opts
 
-  if ENV['SELENIUM_SERVER_URL'].casecmp('http://ondemand.saucelabs.com/wd/hub').zero?
+  if ENV['SELENIUM_SERVER_URL'] && ENV['SELENIUM_SERVER_URL'].casecmp('http://ondemand.saucelabs.com/wd/hub').zero?
     caps[:username] = ENV['SAUCE_USERNAME']
     caps[:accesskey] = ENV['SAUCE_ACCESS_KEY']
   end
