@@ -19,8 +19,8 @@ RSpec.shared_context 'Eyes settings' do
 end
 
 RSpec.configure do |config|
-  config.include_context('Eyes settings', type: :eyes)
-  config.around type: :eyes do |example|
+  config.include_context('Eyes settings', :type => :eyes)
+  config.around :type => :eyes do |example|
     begin
       eyes.open(app_name: example.example_group.description, test_name: example.full_description, driver: page,
                 viewport_size: { width: 800, height: 600 })
@@ -31,7 +31,6 @@ RSpec.configure do |config|
     end
   end
 end
-
 
 RSpec.shared_examples 'End to end tests for eyes_capybara' do
   let(:url_to_check) { 'http://applitools.github.io/demo/TestPages/FramesTestPage/' }
@@ -54,7 +53,7 @@ RSpec.shared_examples 'End to end tests for eyes_capybara' do
   end
 end
 
-RSpec.describe 'Capybara sauce :chrome', type: [:feature, :eyes], :capybara => true do
+RSpec.describe 'Capybara sauce :chrome', type: [:feature, :eyes], capybara: true, integration: true do
   args = [].tap do |a|
     a << 'headless'
     a << 'disable-infobars'
@@ -63,7 +62,7 @@ RSpec.describe 'Capybara sauce :chrome', type: [:feature, :eyes], :capybara => t
   opts =
     {
       'chromeOptions' => {
-          args: args
+        args: args
       }
     }
 
@@ -75,7 +74,8 @@ RSpec.describe 'Capybara sauce :chrome', type: [:feature, :eyes], :capybara => t
   end
 
   before(:context) do
-    Applitools.register_capybara_driver browser: :remote, url: ENV['SELENIUM_SERVER_URL'], desired_capabilities: caps
+    Applitools.register_capybara_driver :browser => :remote, :url => ENV['SELENIUM_SERVER_URL'],
+                                        :desired_capabilities => caps
   end
   include_examples 'End to end tests for eyes_capybara'
 end

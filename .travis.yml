@@ -27,15 +27,11 @@ env:
 matrix:
   include:
     - rvm: 1.9.3
-      gemfile:
-        - GemfileTravisCapybara
-      env:
-        - END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+      gemfile: GemfileTravisCapybara
+      env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
     - rvm: 2.0.0
-      gemfile:
-        - GemfileTravisCapybara
-      env:
-        - END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+      gemfile: GemfileTravisCapybara
+      env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
 
 #
 #    - rvm: 2.0.0
