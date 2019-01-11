@@ -67,3 +67,6 @@ EYES_GEM_SPECS = {
       gem 'rake'
     end
 }.freeze
+
+EYES_GEM_SPECS[RUBY_KEY].call
+
