@@ -28,8 +28,6 @@ module Applitools::Selenium
       def eyes_driver(driver, eyes = nil)
         if driver.respond_to? :driver_for_eyes
           driver.driver_for_eyes eyes
-        elsif defined?(::Capybara::Poltergeist) && (driver.is_a? ::Capybara::Poltergeist::Driver)
-          Applitools::Poltergeist::Driver.new(eyes, driver: driver)
         else
           unless driver.is_a?(Applitools::Selenium::Driver)
             Applitools::EyesLogger.warn("Unrecognized driver type: (#{driver.class.name})!")
@@ -187,12 +185,6 @@ module Applitools::Selenium
       send(method_name) if respond_to?(method_name, :include_private)
     end
 
-    def perform_driver_settings_for_appium_driver
-      self.region_visibility_strategy = NopRegionVisibilityStrategy.new
-      self.force_driver_resolution_as_viewport_size = true
-    end
-
-    private :perform_driver_settings_for_appium_driver
     private :perform_driver_specific_settings
 
     # Sets the stitch mode.

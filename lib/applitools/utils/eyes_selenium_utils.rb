@@ -167,23 +167,22 @@ module Applitools::Utils
 
     # true if test is running on mobile device
     def mobile_device?
-      return nil unless defined?(Appium::Driver)
-      return $driver if $driver && $driver.is_a?(Appium::Driver)
+      nil
     end
 
     # true if test is running on Android device
-    def android?(driver)
-      driver.respond_to?(:appium_device) && driver.appium_device == :android
+    def android?(_driver)
+      false
     end
 
     # true if test is running on iOS device
-    def ios?(driver)
-      driver.respond_to?(:appium_device) && driver.appium_device == :ios
+    def ios?(_driver)
+      false
     end
 
     # @param [Applitools::Selenium::Driver] driver
-    def platform_version(driver)
-      driver.respond_to?(:caps) && driver.caps[:platformVersion]
+    def platform_version(_driver)
+      nil
     end
 
     # @param [Applitools::Selenium::Driver] executor
