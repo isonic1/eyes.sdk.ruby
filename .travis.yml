@@ -5,27 +5,45 @@ rvm:
   - 2.1.6
   - 2.3.1
   - 2.4.1
-  - rbx-2
+  - 2.5.3
+  - 2.6.0
 gemfile:
   - GemfileTravis
 env:
   - END_TO_END_TESTS=false
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
-  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
-#  - END_TO_END_TESTS=true SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
 
 matrix:
-  allow_failures:
-    - rvm: rbx-2
+  include:
+    - rvm: 1.9.3
+      gemfile:
+        - GemfileTravisCapybara
+      env:
+        - END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+    - rvm: 2.0.0
+      gemfile:
+        - GemfileTravisCapybara
+      env:
+        - END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+
+#
+#    - rvm: 2.0.0
+#    - rvm: 2.1.6
+#    - rvm: 2.3.1
+#    - rvm: 2.4.1
+#    - rvm: 2.5.3
+#    - rvm: 2.6.0
 sudo: false
 
 branches:

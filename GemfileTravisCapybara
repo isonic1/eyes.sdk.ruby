@@ -1,0 +1,11 @@
+# frozen_string_literal: true
+
+source :rubygems
+
+gem 'rspec'
+
+source "file://#{ENV['PWD']}/pkg" do
+  gem 'eyes_selenium'
+  gem 'eyes_core'
+  gem 'eyes_capybara'
+end
