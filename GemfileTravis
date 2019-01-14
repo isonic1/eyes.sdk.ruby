@@ -9,6 +9,7 @@ source "file://#{ENV['PWD']}/pkg" do
   gem 'eyes_images'
   gem 'eyes_calabash'
   gem 'eyes_core'
+  gem 'eyes_capybara'
 end
 
 CURRENT_RUBY_VERSION = Gem::Version.new RUBY_VERSION
@@ -48,7 +49,6 @@ EYES_GEM_SPECS = {
     gem 'nokogiri', '~> 1.6'
     gem 'public_suffix', '<= 2.0.5'
     gem 'rack-test', '< 0.7'
-    gem 'watir', '<=6.13.0'
     gem 'xpath', '<3.0.0'
   end,
   RUBY_2_1_6 => proc do |spec|
@@ -60,7 +60,6 @@ EYES_GEM_SPECS = {
     gem 'nokogiri', '~> 1.6'
     gem 'public_suffix', '<= 2.0.5'
     gem 'rack-test', '< 0.7'
-    gem 'watir', '<=6.13.0'
   end,
   RUBY_2_2_2 => proc do |spec|
     gem 'rubocop', '<= 0.46.0'

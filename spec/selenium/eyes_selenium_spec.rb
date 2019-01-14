@@ -94,7 +94,7 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
         subject.open(driver: appium_driver, app_name: 'app_name', test_name: 'test_name')
       end
 
-      it 'appium_driver settings' do
+      xit 'appium_driver settings' do
         subject.send(:perform_driver_settings_for_appium_driver)
         expect(subject.send(:region_visibility_strategy)).to be_a Applitools::Selenium::NopRegionVisibilityStrategy
         expect(subject.send(:force_driver_resolution_as_viewport_size)).to be true
