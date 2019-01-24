@@ -3,6 +3,7 @@
 require 'eyes_selenium'
 require 'eyes_images'
 require 'eyes_calabash'
+require 'eyes_capybara'
 
 Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 

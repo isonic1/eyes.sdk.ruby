@@ -5,7 +5,7 @@ require_relative '../lib/eyes_selenium'
 
 RSpec.describe 'Simple examples for eyes_selenium' do
   let(:eyes) do
-    Applitools::Selenium::Eyes.new.tap do |eyes|
+    Applitools::Selenium::Eyes.new('https://testeyes.applitools.com').tap do |eyes|
       eyes.api_key = ENV['APPLITOOLS_API_KEY']
       eyes.log_handler = logger
       eyes.match_level = Applitools::MATCH_LEVEL[:layout]

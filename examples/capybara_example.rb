@@ -2,8 +2,9 @@
 
 require 'rspec'
 require 'capybara/rspec'
-require_relative '../lib/eyes_selenium'
-require 'applitools/capybara'
+require 'eyes_capybara'
+# require_relative '../lib/eyes_selenium'
+# require 'applitools/capybara'
 
 ##
 # This will register capybara driver :eyes by performing

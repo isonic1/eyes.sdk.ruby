@@ -6,7 +6,6 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'applitools/version'
 
 module_files = `git ls-files lib/applitools/images`.split($RS) + `git ls-files lib/applitools/selenium`.split($RS) +
-  `git ls-files lib/applitools/poltergeist`.split($RS) +
   ['lib/eyes_images', 'lib/applitools/capybara', 'lib/eyes_selenium']
 
 Gem::Specification.new do |spec|
@@ -20,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'Apache License, Version 2.0'
 
   spec.files         = `git ls-files lib/applitools`.split($RS) + `git ls-files ext/eyes_core`.split($RS) +
-    ['lib/require_utils.rb', 'lib/eyes_core.rb'] - module_files
+    ['lib/require_utils.rb', 'lib/eyes_core.rb', 'lib/eyes_rspec.rb'] - module_files
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
 
