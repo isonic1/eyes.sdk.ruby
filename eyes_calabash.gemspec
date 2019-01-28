@@ -8,12 +8,13 @@ require 'applitools/version'
 Gem::Specification.new do |spec|
   spec.name          = 'eyes_calabash'
   spec.version       = Applitools::VERSION
+  spec.version = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ['Applitools Team']
   spec.email         = ['team@applitools.com']
-  spec.description   = 'Applitools Ruby Calabash SDK'
+  spec.description   = 'Provides SDK for writing Applitools Calabash tests.'
   spec.summary       = 'Applitools Ruby Calabash SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache License, Version 2.0'
+  spec.license       = 'Apache-2.0'
 
   spec.metadata['yard.run'] = 'yri' # use "yard" to build full HTML docs.
 

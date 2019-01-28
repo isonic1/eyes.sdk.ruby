@@ -8,12 +8,13 @@ require 'applitools/version'
 Gem::Specification.new do |spec|
   spec.name          = 'eyes_appium'
   spec.version       = Applitools::VERSION
+  spec.version = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ['Applitools Team']
   spec.email         = ['team@applitools.com']
   spec.description   = 'Appium support for Applitools Ruby SDK'
-  spec.summary       = 'Appium support for Applitools Ruby SDK'
+  spec.summary       = 'Applitools Ruby Appium SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache License, Version 2.0'
+  spec.license       = 'Apache-2.0'
 
   spec.files         = `git ls-files lib/applitools/capybara`.split($RS) +
     ['lib/eyes_capybara.rb', 'lib/applitools/version.rb']
