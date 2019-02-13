@@ -17,6 +17,7 @@ sudo: false
 branches:
   only:
   - master
+  - /^v.*$/
 before_install:
 - gem install builder
 - BUILD_ONLY=true rake clean build
