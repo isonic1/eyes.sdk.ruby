@@ -11,12 +11,13 @@ module_files = `git ls-files lib/applitools/images`.split($RS) + `git ls-files l
 Gem::Specification.new do |spec|
   spec.name          = 'eyes_core'
   spec.version       = Applitools::VERSION
+  spec.version = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ['Applitools Team']
   spec.email         = ['team@applitools.com']
-  spec.description   = 'Applitools Ruby SDK'
-  spec.summary       = 'Applitools Ruby SDK'
+  spec.description   = "Don't use it directly, take a look at eyes_selenium, eyes_images or eyes_calabash gems instead."
+  spec.summary       = 'Core of the Applitools Ruby SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache License, Version 2.0'
+  spec.license       = 'Apache-2.0'
 
   spec.files         = `git ls-files lib/applitools`.split($RS) + `git ls-files ext/eyes_core`.split($RS) +
     ['lib/require_utils.rb', 'lib/eyes_core.rb', 'lib/eyes_rspec.rb'] - module_files

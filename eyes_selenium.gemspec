@@ -8,12 +8,13 @@ require 'applitools/version'
 Gem::Specification.new do |spec|
   spec.name          = 'eyes_selenium'
   spec.version       = Applitools::VERSION
+  spec.version = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ['Applitools Team']
   spec.email         = ['team@applitools.com']
-  spec.description   = 'Applitools Ruby Images SDK'
-  spec.summary       = 'Applitools Ruby Images SDK'
+  spec.description   = 'Provides SDK for writing Applitools Selenium-based tests'
+  spec.summary       = 'Applitools Ruby Selenium SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache License, Version 2.0'
+  spec.license       = 'Apache-2.0'
 
   spec.files         = `git ls-files lib/applitools/selenium`.split($RS) +
     ['lib/eyes_selenium.rb', 'lib/applitools/version.rb']
