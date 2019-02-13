@@ -112,6 +112,3 @@ jobs:
       on:
         tags: true
       gem: eyes_appium
-
-
-
