@@ -8,7 +8,6 @@ require 'applitools/version'
 Gem::Specification.new do |spec|
   spec.name          = 'eyes_capybara'
   spec.version       = Applitools::VERSION
-  spec.version = "#{spec.version}-alpha-#{ENV['TRAVIS_BUILD_NUMBER']}" if ENV['TRAVIS']
   spec.authors       = ['Applitools Team']
   spec.email         = ['team@applitools.com']
   spec.description   = 'Provides Capybara support for Applitools Selenium SDK'

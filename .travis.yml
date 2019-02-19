@@ -1,5 +1,4 @@
 language: ruby
-cache: bundler
 rvm:
 - 1.9.3
 - 2.0.0
@@ -12,7 +11,25 @@ gemfile:
 - GemfileTravis
 env:
 - END_TO_END_TESTS=false
-matrix: 
+- END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
+- END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
+- END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=linux
+- END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=linux
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=windows
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=classic TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
+#  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
+
+#matrix:
+#  include:
+#    - rvm: 2.4.1
+#      gemfile: GemfileTravisCapybara
+#      env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+
 sudo: false
 branches:
   only:
@@ -27,9 +44,27 @@ before_script:
 - echo $APPLITOOLS_BATCH_ID
 script:
 - bundle exec rake
+stages:
+  - test
+  - capybara tests
+  - name: gems release
+    if: tag = true
+
 jobs:
   include:
-  - stage: gem release eyes_core
+  - stage: capybara tests
+    rvm: 2.4.1
+    gemfile: GemfileTravisCapybara
+    env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+  - rvm: 2.5.3
+    gemfile: GemfileTravisCapybara
+    env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+  - rvm: 2.6.0
+    gemfile: GemfileTravisCapybara
+    env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+
+  - stage: gems release
+    name: eyes_core
     rvm: 2.4.1
     env: ''
     before_install: skip
@@ -43,8 +78,8 @@ jobs:
       on:
         tags: true
       gem: eyes_core
-  - stage: gem release eyes_images
-    rvm: 2.4.1
+  - rvm: 2.4.1
+    name: eyes_images
     env: ''
     before_install: skip
     before_script: skip
@@ -57,7 +92,7 @@ jobs:
       on:
         tags: true
       gem: eyes_images
-  - stage: gem release eyes_selenium
+  - name: eyes_selenium
     rvm: 2.4.1
     env: ''
     before_install: skip
@@ -71,7 +106,7 @@ jobs:
       on:
         tags: true
       gem: eyes_selenium
-  - stage: gem release eyes_calabash
+  - name: eyes_calabash
     rvm: 2.4.1
     env: ''
     before_install: skip
@@ -85,7 +120,7 @@ jobs:
       on:
         tags: true
       gem: eyes_calabash
-  - stage: gem release eyes_capybara
+  - name: eyes_capybara
     rvm: 2.4.1
     env: ''
     before_install: skip
@@ -99,7 +134,7 @@ jobs:
       on:
         tags: true
       gem: eyes_capybara
-  - stage: gem release eyes_appium
+  - name: eyes_appium
     rvm: 2.4.1
     env: ''
     before_install: skip
