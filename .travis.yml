@@ -46,7 +46,7 @@ before_script:
 script:
 - bundle exec rake
 stages:
-  - name: tests
+  - tests
   - name: gem release eyes_core
     if: tag = true
   - name: gem release eyes_images
