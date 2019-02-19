@@ -48,17 +48,17 @@ script:
 stages:
   - tests
   - name: gem release eyes_core
-    - if: tag = true
+    if: tag = true
   - name: gem release eyes_images
-      - if: tag = true
+    if: tag = true
   - name: gem release eyes_selenium
-      - if: tag = true
+    if: tag = true
   - name: gem release eyes_calabash
-      - if: tag = true
+    if: tag = true
   - name: gem release eyes_capybara
-      - if: tag = true
+    if: tag = true
   - name: gem release eyes_appium
-      - if: tag = true
+    if: tag = true
 
 jobs:
   include:
