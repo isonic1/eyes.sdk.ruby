@@ -49,7 +49,7 @@ stages:
   - test
   - capybara tests
   - name: gems release
-    if: branch = master
+    if: tag = true
 
 jobs:
   include:
