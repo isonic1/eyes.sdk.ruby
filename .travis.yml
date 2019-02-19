@@ -25,11 +25,11 @@ env:
 #  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=chrome TEST_PLATFORM=macos
 #  - END_TO_END_TESTS=selenium SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_API=fluent TEST_IN_BROWSER=firefox TEST_PLATFORM=macos
 
-matrix:
-  include:
-    - rvm: 2.4.1
-      gemfile: GemfileTravisCapybara
-      env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+#matrix:
+#  include:
+#    - rvm: 2.4.1
+#      gemfile: GemfileTravisCapybara
+#      env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
 
 sudo: false
 branches:
@@ -62,6 +62,14 @@ stages:
 
 jobs:
   include:
+  - stage: capybara tests
+    name: 'Capybara Tests'
+    rvm: 2.4.1
+    gemfile: GemfileTravisCapybara
+    env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+  - rvm: 2.5.0
+    gemfile: GemfileTravisCapybara
+    env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
   - stage: gem release eyes_core
     rvm: 2.4.1
     env: ''
