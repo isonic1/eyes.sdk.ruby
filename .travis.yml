@@ -46,6 +46,8 @@ before_script:
 script:
 - bundle exec rake
 stages:
+  - tests
+  - capybara tests
   - name: gems release
     if: branch = master
 
