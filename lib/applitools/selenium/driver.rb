@@ -62,17 +62,17 @@ module Applitools::Selenium
     # Returns the platform name.
     #
     # @return [String] The platform name or +nil+ if it is undefined.
-    def platform_name
-      capabilities['platformName']
-    end
+    # def platform_name
+    #   capabilities['platformName']
+    # end
 
     # Returns the platform version.
     #
     # @return [String] The platform version or +nil+ if it is undefined.
-    def platform_version
-      version = capabilities['platformVersion']
-      version.nil? ? nil : version.to_s
-    end
+    # def platform_version
+    #   version = capabilities['platformVersion']
+    #   version.nil? ? nil : version.to_s
+    # end
 
     # Returns +true+ if the driver orientation is landscape.
     def landscape_orientation?
@@ -175,15 +175,15 @@ module Applitools::Selenium
       driver.find_elements(how, what).map { |el| Applitools::Selenium::Element.new(self, el) }
     end
 
-    # Returns +true+ if test is running on Android platform
-    def android?
-      platform_name.to_s.upcase == ANDROID
-    end
-
-    # Returns +true+ if test is running on iOS platform
-    def ios?
-      platform_name.to_s.upcase == IOS
-    end
+    # # Returns +true+ if test is running on Android platform
+    # def android?
+    #   platform_name.to_s.upcase == ANDROID
+    # end
+    #
+    # # Returns +true+ if test is running on iOS platform
+    # def ios?
+    #   platform_name.to_s.upcase == IOS
+    # end
 
     # Returns a copy of current frame chain. Frame chain stores information about all parent frames,
     #   including scroll offset an frame coordinates.
