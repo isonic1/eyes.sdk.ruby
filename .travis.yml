@@ -48,7 +48,7 @@ stages:
   - test
   - capybara tests
   - name: gems release
-    if: tag = true
+    if: tag IS present
 
 jobs:
   include:
