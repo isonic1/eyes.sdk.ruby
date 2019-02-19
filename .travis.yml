@@ -27,9 +27,9 @@ env:
 
 matrix:
   include:
-  - rvm: 2.4.1
-    gemfile: GemfileTravisCapybara
-    env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+    - rvm: 2.4.1
+      gemfile: GemfileTravisCapybara
+      env: END_TO_END_TESTS=capybara SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
 
 sudo: false
 branches:
@@ -46,7 +46,7 @@ before_script:
 script:
 - bundle exec rake
 stages:
-  - tests
+  - Unit & Integration tests
   - name: gem release eyes_core
     if: tag = true
   - name: gem release eyes_images
