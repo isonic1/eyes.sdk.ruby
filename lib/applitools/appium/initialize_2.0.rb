@@ -8,10 +8,6 @@ module Applitools::Appium
         prepend Applitools::Appium::Utils
         extend self
       end
-
-      Applitools::Selenium::Eyes.class_eval do
-        prepend Applitools::Appium::Eyes
-      end
     end
   end
 end
