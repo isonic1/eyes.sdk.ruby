@@ -166,7 +166,7 @@ module Applitools::Utils
     MAX_DIFF = 3
 
     # true if test is running on mobile device
-    def mobile_device?
+    def mobile_device?(_driver)
       nil
     end
 
