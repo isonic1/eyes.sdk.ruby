@@ -18,7 +18,7 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
     self.tag_for_debug = name
     Applitools::ArgumentGuard.one_of? target, 'target', [Applitools::Selenium::Target, Applitools::Appium::Target]
 
-    return check_native(name, target) if is_native_app?
+    return check_native(name, target) if native_app?
     super
   end
 
@@ -39,11 +39,11 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
     match_data.read_target(target_to_check, driver)
 
     check_window_base(
-        region_provider, timeout, match_data
+      region_provider, timeout, match_data
     )
   end
 
-  def is_native_app?
+  def native_app?
     return true if driver.current_context == 'NATIVE_APP'
     false
   end
@@ -52,9 +52,9 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
     logger.info 'Getting screenshot (capture_screenshot() has been invoked)'
     case eyes_element_to_check
     when Applitools::Region
-      get_viewport_screenshot
+      viewport_screenshot
     when Selenium::WebDriver::Element, Applitools::Selenium::Element
-      get_element_screenshot
+      element_screenshot
     end
   end
 
@@ -63,16 +63,16 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
       if scale_provider
         scaled_image = scale_provider.scale_image(screenshot.image)
         self.screenshot = Applitools::Appium::Screenshot.new(
-            Applitools::Screenshot.from_image(
-                case scaled_image
-                when ChunkyPNG::Image
-                  scaled_image
-                when Applitools::Screenshot::Datastream
-                  scaled_image.image
-                else
-                  raise Applitools::EyesError.new('Unknown image format after scale!')
-                end
-            )
+          Applitools::Screenshot.from_image(
+            case scaled_image
+            when ChunkyPNG::Image
+              scaled_image
+            when Applitools::Screenshot::Datastream
+              scaled_image.image
+            else
+              raise Applitools::EyesError.new('Unknown image format after scale!')
+            end
+          )
         )
       end
     end
@@ -82,21 +82,29 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
     {}
   end
 
+  # def check_window()
+  #
+  # end
+  #
+  # def check_region()
+  #
+  # end
+
   private
 
-  def get_viewport_screenshot
+  def viewport_screenshot
     logger.info 'Viewport screenshot requested...'
     self.screenshot = Applitools::Appium::Screenshot.new(
-        Applitools::Screenshot.from_datastream(driver.screenshot_as(:png))
+      Applitools::Screenshot.from_datastream(driver.screenshot_as(:png))
     )
   end
 
-  def get_element_screenshot
+  def element_screenshot
     logger.info 'Element screenshot requested...'
     self.screenshot = Applitools::Appium::Screenshot.new(
-        Applitools::Screenshot.from_datastream(
-          driver.element_screenshot_as(eyes_element_to_check, :png)
-        )
+      Applitools::Screenshot.from_datastream(
+        driver.element_screenshot_as(eyes_element_to_check, :png)
+      )
     )
   end
 end
