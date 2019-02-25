@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Applitools
   module Appium
     class RegionProvider
@@ -9,7 +11,8 @@ module Applitools
       end
 
       def region
-        return Applitools::Region::EMPTY if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include? eye_region.class
+        return Applitools::Region::EMPTY if
+            [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include? eye_region.class
         region = driver.session_capabilities['viewportRect']
         Applitools::Region.new(
           region['left'],

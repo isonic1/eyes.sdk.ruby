@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Applitools::Appium
   class Driver < Applitools::Selenium::Driver
     attr_accessor :appium_driver

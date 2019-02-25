@@ -28,21 +28,8 @@ module Applitools::Appium
         session_info = executor.session_capabilities
         return session_info['pixelRatio'].to_f if session_info['pixelRatio']
       end
-      return Applitools::Selenium::Eyes::UNKNOWN_DEVICE_PIXEL_RATIO
+      Applitools::Selenium::Eyes::UNKNOWN_DEVICE_PIXEL_RATIO
     end
-
-
-    # def current_position
-    #   result = nil
-    #   begin
-    #     logger.info 'current_position()'
-    #     result = Applitools::Utils::EyesSeleniumUtils.current_scroll_position(executor)
-    #     logger.info "Current position: #{result}"
-    #   rescue Applitools::EyesDriverOperationException
-    #     result = Applitools::Location::TOP_LEFT
-    #   end
-    #   result
-    # end
 
     def current_scroll_position(driver)
       super
