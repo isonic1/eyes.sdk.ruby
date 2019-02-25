@@ -519,9 +519,7 @@ module Applitools::Selenium
     def capture_screenshot
       logger.info 'Getting screenshot (capture_screenshot() has been invoked)'
 
-      p "AAaaaaaaaaaaaaa"
       update_scaling_params
-      p "BbbbbBBbBBBBBBBBB"
 
       if hide_scrollbars
         begin
