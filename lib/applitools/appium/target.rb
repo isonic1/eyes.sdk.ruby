@@ -12,8 +12,8 @@ module Applitools
           new
         end
 
-        def element(*args)
-          new.element(*args)
+        def region(*args)
+          new.region(*args)
         end
       end
 
@@ -22,7 +22,7 @@ module Applitools
         self.options = {}
       end
 
-      def element(*args)
+      def region(*args)
         self.region_to_check = case args.first
                                when ::Selenium::WebDriver::Element
                                  proc { args.first }

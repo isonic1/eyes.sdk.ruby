@@ -82,13 +82,18 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
     {}
   end
 
-  # def check_window()
-  #
-  # end
-  #
-  # def check_region()
-  #
-  # end
+  def check_window(tag = nil, match_timeout = USE_DEFAULT_MATCH_TIMEOUT)
+    target = Applitools::Appium::Target.window.tap do |t|
+      t.timeout(match_timeout)
+    end
+    check(tag, target)
+  end
+
+  def check_region(*args)
+    options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge! Applitools::Utils.extract_options!(args)
+    target = Applitools::Appium::Target.new.region(*args).timeout(options[:match_timeout])
+    check(options[:tag], target)
+  end
 
   private
 
