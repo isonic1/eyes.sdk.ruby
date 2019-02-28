@@ -7,7 +7,7 @@ require 'applitools/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'eyes_appium'
-  spec.version       = Applitools::VERSION + '-alfa'
+  spec.version       = Applitools::VERSION
   spec.authors       = ['Applitools Team']
   spec.email         = ['team@applitools.com']
   spec.description   = 'Appium support for Applitools Ruby SDK'
