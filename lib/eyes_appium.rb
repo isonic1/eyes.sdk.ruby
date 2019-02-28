@@ -24,7 +24,7 @@ end
 if defined? Appium::Driver
   Appium::Driver.class_eval do
     def driver_for_eyes(eyes)
-      Applitools::Selenium::Driver.new(eyes, driver: driver || start_driver, is_mobile_device: true)
+      Applitools::Appium::Driver.new(eyes, driver: driver || start_driver, is_mobile_device: true, appium_driver: self)
     end
   end
 end

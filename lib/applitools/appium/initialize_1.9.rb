@@ -13,10 +13,6 @@ module Applitools::Appium
         alias_method :super_current_scroll_position, :current_scroll_position
         include Applitools::Appium::Utils
       end
-
-      Applitools::Selenium::Eyes.class_eval do
-        include Applitools::Appium::Eyes
-      end
     end
   end
 end

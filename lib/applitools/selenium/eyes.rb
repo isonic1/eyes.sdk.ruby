@@ -762,7 +762,7 @@ module Applitools::Selenium
       app_env = super
       if app_env.os.nil?
         logger.info 'No OS set, checking for mobile OS...'
-        underlying_driver = Applitools::Utils::EyesSeleniumUtils.mobile_device?
+        underlying_driver = Applitools::Utils::EyesSeleniumUtils.mobile_device?(driver)
         unless underlying_driver.nil?
           logger.info 'Mobile device detected! Checking device type...'
           if Applitools::Utils::EyesSeleniumUtils.android?(underlying_driver)
