@@ -64,6 +64,7 @@ require_relative 'applitools/extensions'
 require_relative 'applitools/version'
 require_relative 'applitools/chunky_png_patch'
 
+Applitools.require_dir 'core/concerns'
 Applitools.require_dir 'core'
 Applitools.require_dir 'connectivity'
 Applitools.require_dir 'utils'

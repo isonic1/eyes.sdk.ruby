@@ -45,5 +45,6 @@ Gem::Specification.new do |spec|
     spec.add_development_dependency 'byebug'
     spec.add_development_dependency 'pry-doc'
     spec.add_development_dependency 'pry-stack_explorer'
+    spec.add_development_dependency 'rb-readline'
   end
 end

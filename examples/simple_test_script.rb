@@ -22,6 +22,30 @@ begin
     eyes.check_window('initial')
     eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
   end
+
+  driver = eyes.open(driver: web_driver) do |config|
+    config.app_name = 'Ruby SDK'
+    config.test_name = 'Applitools website test 1'
+    config.viewport_size = Applitools::RectangleSize.from_any_argument(width: 850, height: 600)
+  end
+
+  driver.get 'http://www.applitools.com'
+  eyes.check_window('initial')
+  eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
+  eyes.close
+
+  cnf = Applitools::Selenium::SeleniumConfiguration.new.tap do |config|
+    config.app_name = 'Ruby SDK'
+    config.test_name = 'Applitools website test 2'
+    config.viewport_size = Applitools::RectangleSize.from_any_argument(width: 900, height: 600)
+  end
+
+  driver = eyes.open(driver: web_driver, config: cnf)
+  driver.get 'http://www.applitools.com'
+  eyes.check_window('initial')
+  eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
+  eyes.close
+
 ensure
   web_driver.quit
 end
