@@ -163,6 +163,16 @@ module Applitools
         self
       end
 
+      def send_dom(value = true)
+        options[:send_dom] = value ? true : false
+        self
+      end
+
+      def use_dom(value = true)
+        options[:use_dom] = value ? true : false
+        self
+      end
+
       def finalize
         return self unless frame_or_element
         region = frame_or_element

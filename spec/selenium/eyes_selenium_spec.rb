@@ -30,12 +30,12 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
 
   context ':respond_to_methods' do
     it_should_behave_like 'responds to method', [
-      :use_dom,
-      :use_dom=
+      :send_dom,
+      :send_dom=
     ]
 
     it 'sets default values' do
-      expect(subject.use_dom).to be false
+      expect(subject.send_dom).to be false
     end
   end
 

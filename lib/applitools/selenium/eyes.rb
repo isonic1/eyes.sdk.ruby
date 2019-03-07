@@ -98,7 +98,7 @@ module Applitools::Selenium
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
       :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
-      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :use_dom
+      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -129,7 +129,7 @@ module Applitools::Selenium
       self.force_driver_resolution_as_viewport_size = false
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
       self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
-      self.use_dom = false
+      self.send_dom = false
       self.prevent_dom_processing = false
     end
 
@@ -264,7 +264,8 @@ module Applitools::Selenium
         )
       end
 
-      self.prevent_dom_processing = !((!target.options[:use_dom].nil? && target.options[:use_dom]) || use_dom)
+      self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
+          send_dom || stitch_mode == Applitools::STITCH_MODE[:css])
 
       check_in_frame target_frames: target_to_check.frames do
         begin
