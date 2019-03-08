@@ -588,7 +588,7 @@ module Applitools::Selenium
       result
     end
 
-    def  entire_element_screenshot(algo)
+    def entire_element_screenshot(algo)
       logger.info 'Entire element screenshot requested'
       entire_frame_or_element = algo.get_stitched_region(
         image_provider: image_provider,

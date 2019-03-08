@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.shared_context 'chrome settings' do
   let(:args) do
     res = []
-    # res << 'headless' unless ENV['SELENIUM_SERVER_URL'].casecmp('ondemand.saucelabs.com').zero?
+    res << 'headless' unless ENV['SELENIUM_SERVER_URL'].casecmp('ondemand.saucelabs.com').zero?
     res << 'disable-infobars'
     res
   end

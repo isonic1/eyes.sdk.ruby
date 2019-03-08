@@ -23,8 +23,9 @@ RSpec.configure do |config|
   config.include_context('Eyes settings', :type => :eyes)
   config.around :type => :eyes do |example|
     begin
-      @driver = eyes.open(app_name: example.example_group.description, test_name: example.full_description, driver: web_driver,
-                viewport_size: { width: 800, height: 600 })
+      @driver = eyes.open(app_name: example.example_group.description,
+                          test_name: example.full_description, driver: web_driver,
+                          viewport_size: { width: 800, height: 600 })
       example.run
       eyes.close(false)
     ensure
@@ -90,5 +91,3 @@ RSpec.describe 'Overflow workaround:', type: [:feature, :eyes], overflow: true, 
     expect(html.attribute('data-applitools-scroll')).to eq 'true'
   end
 end
-
-

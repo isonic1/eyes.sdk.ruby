@@ -5,6 +5,11 @@ require 'eyes_selenium'
 
 RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
   let(:element) { Selenium::WebDriver::Element.new('', nil) }
+  let(:applitools_element) do
+    double(Applitools::Selenium::Element).tap do |e|
+      allow(e).to receive(:scroll_data_attribute=)
+    end
+  end
   let(:target_locator) do
     double.tap do |t|
       allow(t).to receive(:frame)
@@ -19,6 +24,7 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
         .and_return(left: 0, top: 0)
       allow(d).to receive(:user_agent).and_return(nil)
       allow(d).to receive(:frame_chain).and_return([])
+      allow(d).to receive(:find_element).and_return(applitools_element)
     end
   end
   let(:driver) { Applitools::Selenium::Driver.new(subject, driver: original_driver) }
