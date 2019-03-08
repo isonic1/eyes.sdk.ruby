@@ -5,7 +5,7 @@ require 'eyes_rspec'
 require 'spec_helper'
 require_relative 'chrome_settings'
 
-RSpec.shared_context 'Eyes settings' do
+RSpec.shared_context 'Eyes settings overflow' do
   let(:logger) do
     Logger.new(STDOUT).tap do |l|
       l.level = Logger::FATAL
@@ -20,7 +20,7 @@ RSpec.shared_context 'Eyes settings' do
 end
 
 RSpec.configure do |config|
-  config.include_context('Eyes settings', :type => :eyes)
+  config.include_context('Eyes settings overflow', :type => :eyes)
   config.around :type => :eyes do |example|
     begin
       @driver = eyes.open(app_name: example.example_group.description,
