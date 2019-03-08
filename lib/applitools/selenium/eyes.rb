@@ -277,6 +277,7 @@ module Applitools::Selenium
           unless force_full_page_screenshot
             region_visibility_strategy.move_to_region original_position_provider,
               Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+            driver.find_element(:css, 'html').scroll_data_attribute = true
           end
 
           region_provider = Applitools::Selenium::RegionProvider.new(driver, region_for_element(eyes_element))
@@ -300,6 +301,8 @@ module Applitools::Selenium
             if eyes_element.is_a? Applitools::Selenium::Element
               original_overflow = eyes_element.overflow
               eyes_element.overflow = 'hidden'
+              eyes_element.scroll_data_attribute = true
+              eyes_element.overflow_data_attribute = original_overflow
               self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new(
                 driver,
                 eyes_element
@@ -525,6 +528,7 @@ module Applitools::Selenium
       if hide_scrollbars
         begin
           original_overflow = Applitools::Utils::EyesSeleniumUtils.hide_scrollbars driver
+          driver.find_element(:css, 'html').overflow_data_attribute = original_overflow
         rescue Applitools::EyesDriverOperationException => e
           logger.warn "Failed to hide scrollbars! Error: #{e.message}"
         end
@@ -584,7 +588,7 @@ module Applitools::Selenium
       result
     end
 
-    def entire_element_screenshot(algo)
+    def  entire_element_screenshot(algo)
       logger.info 'Entire element screenshot requested'
       entire_frame_or_element = algo.get_stitched_region(
         image_provider: image_provider,

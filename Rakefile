@@ -62,5 +62,12 @@ unless ENV['BUILD_ONLY'] && !ENV['BUILD_ONLY'].empty?
       t.pattern = 'spec/integration/eyes_capybara_spec.rb'
     end
     task :default => :spec_integration
+  when 'overflow'
+    require 'rspec/core/rake_task'
+    RSpec::Core::RakeTask.new(:spec_integration) do |t|
+      t.rspec_opts = '--tag overflow'
+      t.pattern = 'spec/integration/eyes_overflow_spec.rb'
+    end
+    task :default => :spec_integration
   end
 end
