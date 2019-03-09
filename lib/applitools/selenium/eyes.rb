@@ -98,7 +98,7 @@ module Applitools::Selenium
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
       :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
-      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :use_dom
+      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -129,7 +129,7 @@ module Applitools::Selenium
       self.force_driver_resolution_as_viewport_size = false
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
       self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
-      self.use_dom = false
+      self.send_dom = false
       self.prevent_dom_processing = false
     end
 
@@ -264,7 +264,11 @@ module Applitools::Selenium
         )
       end
 
-      self.prevent_dom_processing = !((!target.options[:use_dom].nil? && target.options[:use_dom]) || use_dom)
+      # self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
+      #     send_dom || stitch_mode == Applitools::STITCH_MODE[:css])
+
+      self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
+          send_dom)
 
       check_in_frame target_frames: target_to_check.frames do
         begin
@@ -276,6 +280,7 @@ module Applitools::Selenium
           unless force_full_page_screenshot
             region_visibility_strategy.move_to_region original_position_provider,
               Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+            driver.find_element(:css, 'html').scroll_data_attribute = true
           end
 
           region_provider = Applitools::Selenium::RegionProvider.new(driver, region_for_element(eyes_element))
@@ -299,6 +304,8 @@ module Applitools::Selenium
             if eyes_element.is_a? Applitools::Selenium::Element
               original_overflow = eyes_element.overflow
               eyes_element.overflow = 'hidden'
+              eyes_element.scroll_data_attribute = true
+              eyes_element.overflow_data_attribute = original_overflow
               self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new(
                 driver,
                 eyes_element
@@ -524,6 +531,7 @@ module Applitools::Selenium
       if hide_scrollbars
         begin
           original_overflow = Applitools::Utils::EyesSeleniumUtils.hide_scrollbars driver
+          driver.find_element(:css, 'html').overflow_data_attribute = original_overflow
         rescue Applitools::EyesDriverOperationException => e
           logger.warn "Failed to hide scrollbars! Error: #{e.message}"
         end

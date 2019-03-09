@@ -52,6 +52,16 @@ stages:
 
 jobs:
   include:
+  - stage: applitools-data-attributes
+    rvm: 2.4.1
+    gemfile: GemfileTravis
+    env: END_TO_END_TESTS=overflow SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+  - rvm: 2.5.3
+    gemfile: GemfileTravis
+    env: END_TO_END_TESTS=overflow SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
+  - rvm: 2.6.0
+    gemfile: GemfileTravis
+    env: END_TO_END_TESTS=overflow SELENIUM_SERVER_URL=http://ondemand.saucelabs.com/wd/hub TEST_PLATFORM=linux
   - stage: capybara tests
     rvm: 2.4.1
     gemfile: GemfileTravisCapybara

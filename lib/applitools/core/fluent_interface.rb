@@ -45,11 +45,6 @@ module Applitools::FluentInterface
     self
   end
 
-  def use_dom(value = true)
-    options[:use_dom] = value ? true : false
-    self
-  end
-
   def enable_patterns(value = true)
     options[:enable_patterns] = value ? true : false
     self
