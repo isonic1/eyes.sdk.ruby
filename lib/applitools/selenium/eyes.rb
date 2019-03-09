@@ -264,8 +264,11 @@ module Applitools::Selenium
         )
       end
 
+      # self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
+      #     send_dom || stitch_mode == Applitools::STITCH_MODE[:css])
+
       self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
-          send_dom || stitch_mode == Applitools::STITCH_MODE[:css])
+          send_dom)
 
       check_in_frame target_frames: target_to_check.frames do
         begin
