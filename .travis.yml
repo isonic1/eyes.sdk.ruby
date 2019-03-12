@@ -47,6 +47,7 @@ script:
 stages:
   - test
   - capybara tests
+  - applitools-data-attributes
   - name: gems release
     if: tag IS present
 
