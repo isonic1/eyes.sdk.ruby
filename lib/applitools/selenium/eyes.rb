@@ -98,7 +98,7 @@ module Applitools::Selenium
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
       :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
       :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
-      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom
+      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom, :use_dom, :enable_patterns
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -130,6 +130,8 @@ module Applitools::Selenium
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
       self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
       self.send_dom = false
+      self.use_dom = false
+      self.enable_patterns = false
       self.prevent_dom_processing = false
     end
 
@@ -288,6 +290,8 @@ module Applitools::Selenium
           self.region_to_check = region_provider
 
           match_data.read_target(target_to_check, driver)
+          match_data.use_dom = use_dom unless match_data.use_dom
+          match_data.enable_patterns = enable_patterns unless match_data.enable_patterns
 
           is_element = eyes_element.is_a? Applitools::Selenium::Element
           inside_a_frame = !driver.frame_chain.empty?
