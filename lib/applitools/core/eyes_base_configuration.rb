@@ -34,6 +34,12 @@ module Applitools
       config_hash.keys
     end
 
+    def to_s
+      config_keys.map do |k|
+        "#{k} = #{send(k)}"
+      end.join("\n")
+    end
+
     def valid?
       validation_errors.clear
       validation_errors[:app_name] = ':app_name is required' if app_name.empty?
@@ -55,5 +61,10 @@ module Applitools
     string_field :app_name
     string_field :test_name
     object_field :viewport_size, Applitools::RectangleSize
+
+    def short_description
+      "#{test_name} of #{app_name}"
+    end
+
   end
 end

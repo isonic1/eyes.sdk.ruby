@@ -80,6 +80,7 @@ module Applitools
     end
 
     def screenshot
+      return '' unless app_output.screenshot.respond_to?(:image)
       app_output.screenshot.image.to_blob
     end
 
@@ -230,7 +231,7 @@ module Applitools
       return unless @need_convert_ignored_regions_coordinates
       self.ignored_regions = @ignored_regions.map do |r|
         self.class.convert_coordinates(r, app_output.screenshot)
-      end
+      end unless app_output.screenshot.nil?
       @need_convert_ignored_regions_coordinates = false
     end
 
@@ -253,7 +254,7 @@ module Applitools
           r.max_right_offset,
           r.max_bottom_offset
         ).padding(r.current_padding)
-      end
+      end  unless app_output.screenshot.nil?
       @need_convert_floating_regions_coordinates = false
     end
 

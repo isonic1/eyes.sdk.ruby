@@ -46,7 +46,7 @@ module Applitools
         define_method("#{field_name}=") do |*args|
           value = args.shift
           raise Applitools::EyesIllegalArgument, "Expected #{field_name} to be a String but got #{value.class} instead" unless value.is_a? String
-          config_hash[field_name.to_sym] = value
+          config_hash[field_name.to_sym] = value.freeze
         end
 
         define_method("defined_#{field_name}?") do

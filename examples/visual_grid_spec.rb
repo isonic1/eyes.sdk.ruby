@@ -2,32 +2,35 @@ require 'rspec'
 require 'eyes_selenium'
 require 'pry'
 
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
+Applitools::EyesLogger.log_handler = Logger.new(STDOUT)
+
 RSpec.shared_examples 'Test for url' do |url|
   let(:url) { url }
   # let(:runner) { Applitools::Selenium::VisualGridRunner }
   let(:web_driver) { Selenium::WebDriver.for :chrome }
 
   let(:driver) do
-    @eyes.open(driver: web_driver) do |config|
+    eyes.open(driver: web_driver) do |config|
       config.app_name = 'Top 10 sites'
       config.test_name = "Top 10 sites - #{url}"
       config.add_browser { |b| b.width(800).height(600).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
             .add_browser { |b| b.width(700).height(500).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
             .add_browser { |b| b.width(1600).height(1200).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
+            .add_browser { |b| b.width(1280).height(1024).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
     end
   end
 
-  let(:terget1) { Applitools::Selenium::Target.window.send_dom(true) }
-  let(:terget2) { Applitools::Selenium::Target.window.fully(false).send_dom(true) }
+  let(:target1) { Applitools::Selenium::Target.window.send_dom(true) }
+  let(:target2) { Applitools::Selenium::Target.window.fully(true).send_dom(true) }
 
   let(:eyes) { @eyes }
 
-  before(:all) do
-    @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: Applitools::Selenium::VisualGridRunner.new )
-  end
-
   after do
-    @eyes.close
+    eyes.close
+    puts eyes.get_all_test_results.map(&:as_expected?)
+    driver.quit
   end
 
   after(:all) do
@@ -35,7 +38,6 @@ RSpec.shared_examples 'Test for url' do |url|
   end
 
   it url do
-    binding.pry
     driver.get(url)
     eyes.check('Step1' + url, target1)
     eyes.check('Step2' + url, target2)
@@ -43,8 +45,21 @@ RSpec.shared_examples 'Test for url' do |url|
 end
 
 RSpec.describe 'My first visual grid test' do
+  before(:all) do
+    @runner = Applitools::Selenium::VisualGridRunner.new(12)
+    @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: @runner )
+    # @eyes = Applitools::Selenium::Eyes.new
+  end
+
+  after(:all) do
+    puts @runner.get_all_test_results.map {|r| r.passed? }
+    @runner.stop
+  end
 
   %w(
+    https://applitools.com
+    https://lcb.org/
+    http://opzharp.ru
     https://google.com
     https://facebook.com
     https://youtube.com
@@ -54,7 +69,7 @@ RSpec.describe 'My first visual grid test' do
     https://wikipedia.org
     https://instagram.com
     https://www.target.com/c/blankets-throws/-/N-d6wsb?lnk=ThrowsBlankets%E2%80%9C,tc
-  ).each do |url|
+  ).first(2).each do |url|
     it_behaves_like 'Test for url', url
   end
 end

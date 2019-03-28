@@ -32,7 +32,9 @@ begin
   driver.get 'http://www.applitools.com'
   eyes.check_window('initial')
   eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
-  eyes.close
+  z = eyes.close
+  require 'pry'
+  binding.pry
 
   cnf = Applitools::Selenium::SeleniumConfiguration.new.tap do |config|
     config.app_name = 'Ruby SDK'

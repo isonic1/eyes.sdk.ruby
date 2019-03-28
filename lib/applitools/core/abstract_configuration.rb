@@ -7,8 +7,9 @@ module Applitools
     def initialize
       @config_hash = {}
       self.validation_errors = {}
-      self.class.default_config.keys.each do |k|
-        send "#{k}=", self.class.default_config[k]
+      default_config = self.class.default_config
+      default_config.keys.each do |k|
+        send "#{k}=", default_config[k]
       end
     end
   end

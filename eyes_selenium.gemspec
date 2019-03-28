@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'eyes_core', "= #{Applitools::VERSION}"
   spec.add_dependency 'selenium-webdriver'
   spec.add_dependency 'css_parser'
+  spec.add_dependency 'state_machine'
 end

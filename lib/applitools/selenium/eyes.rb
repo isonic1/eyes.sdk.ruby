@@ -8,8 +8,7 @@ module Applitools
         server_url = args.first unless server_url
         runner = options.delete(:visual_grid_runner)
         if runner.is_a? Applitools::Selenium::VisualGridRunner
-          #   ****************************VISUAL GRID**************************
-          super Applitools::Selenium::VisualGridEyes.new
+          super Applitools::Selenium::VisualGridEyes.new(runner)
         else
           super Applitools::Selenium::SeleniumEyes.new(server_url)
         end

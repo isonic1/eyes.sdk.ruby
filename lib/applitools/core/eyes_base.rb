@@ -497,6 +497,10 @@ module Applitools
       @compare_with_parent_branch = value ? true : false
     end
 
+    # def rendering_info
+    #   server_connector.rendering_info
+    # end
+    #
     private
 
     attr_accessor :running_session, :last_screenshot, :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider,
@@ -688,6 +692,7 @@ module Applitools
         Applitools::AppOutput.new(a_title, compress_result).tap do |o|
           o.location = region.location unless region.empty?
           o.dom_url = dom_url unless dom_url && dom_url.empty?
+          o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
         end,
         screenshot
       )

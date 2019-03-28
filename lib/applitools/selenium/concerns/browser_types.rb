@@ -3,8 +3,8 @@ module Applitools
     module Concerns
       module BrowserTypes
         extend self
-        CHROME = :CHROME
-        FIREFOX = :FIREFOX
+        CHROME = :chrome
+        FIREFOX = :firefox
 
         def enum_values
           [CHROME, FIREFOX]
