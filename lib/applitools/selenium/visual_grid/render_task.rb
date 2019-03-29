@@ -5,7 +5,7 @@ module Applitools
   module Selenium
     class RenderTask < VGTask
       include Applitools::Jsonable
-      MAX_FAILS_COUNT = 62
+      MAX_FAILS_COUNT = 5
       MAX_ITERATIONS = 100
 
       attr_accessor :script, :running_test, :all_blobs, :resource_urls, :resource_cache, :put_cache, :server_connector,
@@ -35,8 +35,8 @@ module Applitools
           response = nil
           begin
             response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
-          rescue StandardError => _e
-            response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
+          # rescue StandardError => _e
+          #   response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
           rescue Applitools::EyesError => e
             fetch_fails += 1
             sleep 2
@@ -160,7 +160,7 @@ module Applitools
           browser: {name: running_test.browser_info.browser_type, platform: running_test.browser_info.platform},
           script_hooks: nil,
           selectors_to_find_region_for: nil,
-          send_dom: running_test.configuration.send_dom,
+          send_dom: running_test.eyes.config.send_dom,
           task: nil
         )
       end

@@ -17,6 +17,11 @@ module Applitools
       end
     end
 
+    def initialize
+      super
+      self.batch_info = Applitools::BatchInfo.new
+    end
+
     def merge(other_config)
       return if self.object_id == other_config.object_id
       (config_keys + other_config. config_keys).uniq do |k|

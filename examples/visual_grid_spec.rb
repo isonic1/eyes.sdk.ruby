@@ -11,15 +11,20 @@ RSpec.shared_examples 'Test for url' do |url|
   # let(:runner) { Applitools::Selenium::VisualGridRunner }
   let(:web_driver) { Selenium::WebDriver.for :chrome }
 
-  let(:driver) do
-    eyes.open(driver: web_driver) do |config|
-      config.app_name = 'Top 10 sites'
-      config.test_name = "Top 10 sites - #{url}"
-      config.add_browser { |b| b.width(800).height(600).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
-            .add_browser { |b| b.width(700).height(500).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
-            .add_browser { |b| b.width(1600).height(1200).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
-            .add_browser { |b| b.width(1280).height(1024).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
+  let(:config) do
+    Applitools::Selenium::SeleniumConfiguration.new.tap do |config|
+    config.app_name = 'Top 10 sites'
+    config.test_name = "Top 10 sites - #{url}"
+    config.add_browser { |b| b.width(800).height(600).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
+        .add_browser { |b| b.width(700).height(500).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
+        .add_browser { |b| b.width(1600).height(1200).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
+        .add_browser { |b| b.width(1280).height(1024).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
     end
+  end
+
+  let(:driver) do
+    eyes.config = config
+    eyes.open(driver: web_driver)
   end
 
   let(:target1) { Applitools::Selenium::Target.window.send_dom(true) }
@@ -49,6 +54,8 @@ RSpec.describe 'My first visual grid test' do
     @runner = Applitools::Selenium::VisualGridRunner.new(12)
     @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: @runner )
     # @eyes = Applitools::Selenium::Eyes.new
+    #
+    @eyes.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
   end
 
   after(:all) do
@@ -57,9 +64,10 @@ RSpec.describe 'My first visual grid test' do
   end
 
   %w(
+    http://opzharp.ru
+    http://localhost:3000
     https://applitools.com
     https://lcb.org/
-    http://opzharp.ru
     https://google.com
     https://facebook.com
     https://youtube.com
@@ -69,7 +77,7 @@ RSpec.describe 'My first visual grid test' do
     https://wikipedia.org
     https://instagram.com
     https://www.target.com/c/blankets-throws/-/N-d6wsb?lnk=ThrowsBlankets%E2%80%9C,tc
-  ).first(2).each do |url|
+  ).each do |url|
     it_behaves_like 'Test for url', url
   end
 end

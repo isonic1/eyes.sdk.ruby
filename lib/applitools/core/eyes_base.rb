@@ -29,7 +29,6 @@ module Applitools
     CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
 
     attr_accessor :config
-    private :config, :config=
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
     def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
@@ -48,7 +47,7 @@ module Applitools
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :host_os, :host_app, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
-      :compare_with_parent_branch
+      :compare_with_parent_branch, :results
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -78,6 +77,7 @@ module Applitools
       self.app_output_provider = Object.new
       self.verbose_results = false
       self.failed = false
+      self.results = []
       @inferred_environment = nil
       @properties = []
       @server_scale = 0
@@ -218,7 +218,8 @@ module Applitools
       self.running_session = nil
     end
 
-    def open_base(options)
+    def open_base(options = {})
+      self.results = []
       if disabled?
         logger.info "#{__method__} Ignored"
         return false
@@ -229,11 +230,7 @@ module Applitools
         raise Applitools::EyesError.new 'A test is already running'
       end
 
-      if options[:config].is_a? Applitools::EyesBaseConfiguration
-        merge_config(options[:config])
-      else
-        update_config_from_options(options)
-      end
+      update_config_from_options(options)
 
       raise Applitools::EyesIllegalArgument, config.validation_errors.values.join('/n') unless config.valid?
 
@@ -253,19 +250,19 @@ module Applitools
     end
 
     def update_config_from_options(options)
-      Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
+      # Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
       default_options = { session_type: 'SEQUENTIAL' }
       options = default_options.merge options
 
       if app_name && app_name.empty?
-        Applitools::ArgumentGuard.not_nil options[:app_name], 'options[:app_name]'
-        self.app_name = options[:app_name]
+        # Applitools::ArgumentGuard.not_nil options[:app_name], 'options[:app_name]'
+        self.app_name = options[:app_name] if options[:app_name]
       end
 
-      Applitools::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
-      self.test_name = options[:test_name]
-      self.viewport_size = options[:viewport_size]
-      self.session_type = options[:session_type]
+      # Applitools::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
+      self.test_name = options[:test_name] if options[:test_name]
+      self.viewport_size = options[:viewport_size] if options[:viewport_size]
+      self.session_type = options[:session_type] if options[:session_type]
     end
 
     def merge_config(other_config)
@@ -487,6 +484,7 @@ module Applitools
       end
 
       logger.info '--- Test passed'
+      self.results.push results
       return results
     ensure
       self.running_session = nil

@@ -116,15 +116,13 @@ module Applitools
 
       attr_accessor :open_queue, :task_queue, :render_queue, :close_queue, :watch_open, :watch_task, :watch_render, :watch_close
 
-      attr_accessor :eyes, :configuration, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock
+      attr_accessor :eyes, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock
 
-      def initialize(eyes, configuration, browser_info, driver)
+      def initialize(eyes, browser_info, driver)
         Applitools::ArgumentGuard.is_a? eyes, 'eyes', Applitools::Selenium::EyesConnector
-        Applitools::ArgumentGuard.is_a? configuration, 'configuration', Applitools::Selenium::SeleniumConfiguration
         Applitools::ArgumentGuard.is_a? browser_info, 'browser_info', Applitools::Selenium::RenderBrowserInfo
 
         self.eyes = eyes
-        self.configuration = configuration.freeze
         self.browser_info = browser_info
         self.driver = driver
 
@@ -140,14 +138,13 @@ module Applitools
 
         self.task_lock = nil
 
-
         self.pending_exceptions = []
         super()
         init
       end
 
       def init
-        open_task = Applitools::Selenium::VGTask.new("open #{browser_info}") { eyes.open(driver, configuration, browser_info) }
+        open_task = Applitools::Selenium::VGTask.new("open #{browser_info}") { eyes.open(driver, browser_info) }
 
         open_task.on_task_succeeded { watch_open[open_task] = true; becomes_opened if all_tasks_completed?(watch_open) }.
             on_task_error { |e| pending_exceptions << e; becomes_completed }
@@ -157,7 +154,7 @@ module Applitools
 
       def check(tag, target, script_result, visual_grid_manager, mod = nil)
         render_task = RenderTask.new(
-          "Render #{configuration.short_description} - #{tag}",
+          "Render #{eyes.config.short_description} - #{tag}",
           script_result,
           self,
           visual_grid_manager.resource_cache,
@@ -181,8 +178,7 @@ module Applitools
         watch_task[check_task] = false
 
         render_task.on_task_succeeded do |r|
-          res = r.first
-          eyes.screenshot_url_for_task(render_task.uuid, res['imageLocation']) if res
+          eyes.render_status_for_task(render_task.uuid, r) if r
           watch_render[render_task] = true
           becomes_rendered if all_tasks_completed?(watch_render)
         end.on_task_error do

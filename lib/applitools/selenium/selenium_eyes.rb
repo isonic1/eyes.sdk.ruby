@@ -70,6 +70,8 @@ module Applitools::Selenium
       end
     end
 
+    def_delegators 'config', *Applitools::Selenium::SeleniumConfiguration.methods_to_delegate
+
     # @!attribute [rw] force_full_page_screenshot
     #   Forces a full page screenshot (by scrolling and stitching) if the
     #   browser only supports viewport screenshots.
@@ -137,6 +139,10 @@ module Applitools::Selenium
       self.config = Applitools::Selenium::SeleniumConfiguration.new
     end
 
+    def get_all_test_results
+      results
+    end
+
     # Starts a test
     #
     # @param options [Hash] options
@@ -156,12 +162,12 @@ module Applitools::Selenium
           options[:viewport_size]
 
       base_args = [options]
-      base_args = [{config: options[:config]}] if options[:config].is_a? Applitools::Selenium::SeleniumConfiguration
-      if block_given?
-        cnf = Applitools::Selenium::SeleniumConfiguration.new
-        yield(cnf)
-        base_args = [{config: cnf}]
-      end
+      # base_args = [{config: options[:config]}] if options[:config].is_a? Applitools::Selenium::SeleniumConfiguration
+      # if block_given?
+      #   cnf = Applitools::Selenium::SeleniumConfiguration.new
+      #   yield(cnf)
+      #   base_args = [{config: cnf}]
+      # end
 
       if disabled?
         logger.info('Ignored')

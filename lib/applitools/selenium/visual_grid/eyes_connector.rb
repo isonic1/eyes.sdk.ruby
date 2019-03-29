@@ -3,8 +3,8 @@ module Applitools
     class EyesConnector < ::Applitools::EyesBase
       USE_DEFAULT_MATCH_TIMEOUT = -1
 
-      attr_accessor :browser_info, :config, :test_result, :driver, :dummy_region_provider, :dont_get_title,
-                    :screenshot_urls, :current_uuid
+      attr_accessor :browser_info, :test_result, :driver, :dummy_region_provider, :dont_get_title,
+                    :current_uuid, :render_statuses
       public :server_connector
 
       class RegionProvider
@@ -15,19 +15,23 @@ module Applitools
 
       def initialize(*args)
         super
-        self.screenshot_urls = {}
+        self.render_statuses = {}
         self.dummy_region_provider = RegionProvider.new
         self.dont_get_title = false
       end
 
-      def open(driver, configuration, browser_info)
+      def ensure_config
+        self.config = Applitools::Selenium::SeleniumConfiguration.new
+      end
+
+
+      def open(driver, browser_info)
         self.driver = driver
         self.browser_info = browser_info
-        logger.info "opening EyesConnector for #{configuration.short_description} with viewport size: #{browser_info}"
-        self.config = configuration
+        logger.info "opening EyesConnector for #{config.short_description} with viewport size: #{browser_info}"
         config.viewport_size = browser_info.viewport_size
-        open_base(config: config)
-        ensure_running_session
+        open_base
+        # ensure_running_session
       end
 
       def check(name, target, check_task_uuid)
@@ -60,12 +64,22 @@ module Applitools
         nil
       end
 
-      def screenshot_url_for_task(uuid, url)
-        screenshot_urls[uuid] = url
+      def render_status_for_task(uuid, status)
+        render_statuses[uuid] = status.first
+      end
+
+      def render_status
+        status = render_statuses[current_uuid]
+        raise Applitools::EyesError, 'Got empty render status!' if status.nil? || !status.is_a?(Hash) || status.keys.empty?
+        status
       end
 
       def screenshot_url
-        screenshot_urls[current_uuid]
+        render_status['imageLocation']
+      end
+
+      def dom_url
+        render_status['domLocation']
       end
 
       def match_level_keys
@@ -76,6 +90,10 @@ module Applitools
         match_level_keys.each do |k|
           match_data.send("#{k}=", default_match_settings[k])
         end
+      end
+
+      def inferred_environment
+        "useragent: #{render_status['userAgent']}"
       end
 
       def default_match_settings
@@ -140,7 +158,7 @@ module Applitools
         Applitools::AppOutputWithScreenshot.new(
             Applitools::AppOutput.new(a_title, '').tap do |o|
               o.location = region.location unless region.empty?
-              # o.dom_url = dom_url unless dom_url && dom_url.empty?
+              # o.dom_url = dom_url
               o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
             end,
             nil,
