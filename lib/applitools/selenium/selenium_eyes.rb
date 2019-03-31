@@ -2,7 +2,7 @@
 
 module Applitools::Selenium
   # The main API gateway for the SDK
-  class SeleniumEyes < Applitools::EyesBase
+  class Eyes < Applitools::EyesBase
     # @!visibility private
     UNKNOWN_DEVICE_PIXEL_RATIO = 0
 
@@ -70,8 +70,6 @@ module Applitools::Selenium
       end
     end
 
-    def_delegators 'config', *Applitools::Selenium::SeleniumConfiguration.methods_to_delegate
-
     # @!attribute [rw] force_full_page_screenshot
     #   Forces a full page screenshot (by scrolling and stitching) if the
     #   browser only supports viewport screenshots.
@@ -98,9 +96,9 @@ module Applitools::Selenium
     #   @return [Applitools::RectangleSize] explicit_entire_size
 
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
-      :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
-      :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
-      :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom
+                  :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
+                  :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
+                  :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom, :use_dom, :enable_patterns
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -123,8 +121,8 @@ module Applitools::Selenium
       self.region_visibility_strategy = MoveToRegionVisibilityStrategy.new
       self.debug_screenshots = false
       self.debug_screenshot_provider = Applitools::DebugScreenshotProvider.new
-                                                                          .tag_access { tag_for_debug }
-                                                                          .debug_flag_access { debug_screenshots }
+                                           .tag_access { tag_for_debug }
+                                           .debug_flag_access { debug_screenshots }
       self.disable_horizontal_scrolling = false
       self.disable_vertical_scrolling = false
       self.explicit_entire_size = nil
@@ -132,15 +130,9 @@ module Applitools::Selenium
       self.stitching_overlap = DEFAULT_STITCHING_OVERLAP
       self.full_page_capture_algorithm_left_top_offset = Applitools::Location::TOP_LEFT
       self.send_dom = false
+      self.use_dom = false
+      self.enable_patterns = false
       self.prevent_dom_processing = false
-    end
-
-    def ensure_config
-      self.config = Applitools::Selenium::SeleniumConfiguration.new
-    end
-
-    def get_all_test_results
-      results
     end
 
     # Starts a test
@@ -160,14 +152,8 @@ module Applitools::Selenium
       original_driver = options.delete(:driver)
       options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size] if
           options[:viewport_size]
-
-      base_args = [options]
-      # base_args = [{config: options[:config]}] if options[:config].is_a? Applitools::Selenium::SeleniumConfiguration
-      # if block_given?
-      #   cnf = Applitools::Selenium::SeleniumConfiguration.new
-      #   yield(cnf)
-      #   base_args = [{config: cnf}]
-      # end
+      Applitools::ArgumentGuard.not_nil original_driver, 'options[:driver]'
+      Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
 
       if disabled?
         logger.info('Ignored')
@@ -179,16 +165,16 @@ module Applitools::Selenium
 
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
       self.position_provider = self.class.position_provider(
-        stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
+          stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
       )
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::ViewportScreenshot.new(
-          image, driver: @driver, force_offset: position_provider.force_offset
+            image, driver: @driver, force_offset: position_provider.force_offset
         )
       end
 
-      open_base(*base_args) do
+      open_base(options) do
         self.viewport_size = nil if force_driver_resolution_as_viewport_size
         ensure_running_session
       end
@@ -217,7 +203,7 @@ module Applitools::Selenium
                      end
       unless driver.nil?
         self.position_provider = self.class.position_provider(
-          stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
+            stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
         )
       end
       if stitch_mode == Applitools::STITCH_MODE[:css]
@@ -275,12 +261,16 @@ module Applitools::Selenium
 
       self.eyes_screenshot_factory = lambda do |image|
         Applitools::Selenium::ViewportScreenshot.new(
-          image,
-          region_provider: region_to_check
+            image,
+            region_provider: region_to_check
         )
       end
 
-      self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) || send_dom)
+      # self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
+      #     send_dom || stitch_mode == Applitools::STITCH_MODE[:css])
+
+      self.prevent_dom_processing = !((!target.options[:send_dom].nil? && target.options[:send_dom]) ||
+          send_dom)
 
       check_in_frame target_frames: target_to_check.frames do
         begin
@@ -291,7 +281,8 @@ module Applitools::Selenium
 
           unless force_full_page_screenshot
             region_visibility_strategy.move_to_region original_position_provider,
-              Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+                                                      Applitools::Location.new(eyes_element.location.x.to_i, eyes_element.location.y.to_i)
+            driver.find_element(:css, 'html').scroll_data_attribute = true
           end
 
           region_provider = Applitools::Selenium::RegionProvider.new(driver, region_for_element(eyes_element))
@@ -299,15 +290,17 @@ module Applitools::Selenium
           self.region_to_check = region_provider
 
           match_data.read_target(target_to_check, driver)
+          match_data.use_dom = use_dom unless match_data.use_dom
+          match_data.enable_patterns = enable_patterns unless match_data.enable_patterns
 
           is_element = eyes_element.is_a? Applitools::Selenium::Element
           inside_a_frame = !driver.frame_chain.empty?
 
           self.screenshot_type = self.class.obtain_screenshot_type(
-            is_element,
-            inside_a_frame,
-            target_to_check.options[:stitch_content],
-            force_full_page_screenshot
+              is_element,
+              inside_a_frame,
+              target_to_check.options[:stitch_content],
+              force_full_page_screenshot
           )
 
           case screenshot_type
@@ -315,15 +308,17 @@ module Applitools::Selenium
             if eyes_element.is_a? Applitools::Selenium::Element
               original_overflow = eyes_element.overflow
               eyes_element.overflow = 'hidden'
+              eyes_element.scroll_data_attribute = true
+              eyes_element.overflow_data_attribute = original_overflow
               self.position_provider = Applitools::Selenium::CssTranslateElementPositionProvider.new(
-                driver,
-                eyes_element
+                  driver,
+                  eyes_element
               )
             end
           end
 
           check_window_base(
-            region_provider, timeout, match_data
+              region_provider, timeout, match_data
           )
         ensure
           eyes_element.overflow = original_overflow unless original_overflow.nil?
@@ -387,16 +382,16 @@ module Applitools::Selenium
       border_bottom_width = element.border_bottom_width
 
       Applitools::Region.new(
-        p.x.round + border_left_width,
-        p.y.round + border_top_width,
-        d.width - border_left_width - border_right_width,
-        d.height - border_top_width - border_bottom_width
+          p.x.round + border_left_width,
+          p.y.round + border_top_width,
+          d.width - border_left_width - border_right_width,
+          d.height - border_top_width - border_bottom_width
       ).tap do |r|
         border_padding = Applitools::PaddingBounds.new(
-          border_left_width,
-          border_top_width,
-          border_right_width,
-          border_bottom_width
+            border_left_width,
+            border_top_width,
+            border_right_width,
+            border_bottom_width
         )
         r.padding(border_padding)
       end
@@ -521,14 +516,14 @@ module Applitools::Selenium
     private
 
     attr_accessor :check_frame_or_element, :region_to_check, :dont_get_title,
-      :device_pixel_ratio, :position_provider, :scale_provider, :tag_for_debug,
-      :region_visibility_strategy, :eyes_screenshot_factory, :force_driver_resolution_as_viewport_size,
-      :prevent_dom_processing
+                  :device_pixel_ratio, :position_provider, :scale_provider, :tag_for_debug,
+                  :region_visibility_strategy, :eyes_screenshot_factory, :force_driver_resolution_as_viewport_size,
+                  :prevent_dom_processing
 
     def image_provider
       Applitools::Selenium::TakesScreenshotImageProvider.new(
-        driver,
-        debug_screenshot_provider: debug_screenshot_provider
+          driver,
+          debug_screenshot_provider: debug_screenshot_provider
       )
     end
 
@@ -540,6 +535,7 @@ module Applitools::Selenium
       if hide_scrollbars
         begin
           original_overflow = Applitools::Utils::EyesSeleniumUtils.hide_scrollbars driver
+          driver.find_element(:css, 'html').overflow_data_attribute = original_overflow
         rescue Applitools::EyesDriverOperationException => e
           logger.warn "Failed to hide scrollbars! Error: #{e.message}"
         end
@@ -547,7 +543,7 @@ module Applitools::Selenium
 
       begin
         algo = Applitools::Selenium::FullPageCaptureAlgorithm.new(
-          debug_screenshot_provider: debug_screenshot_provider
+            debug_screenshot_provider: debug_screenshot_provider
         )
         case screenshot_type
         when ENTIRE_ELEMENT_SCREENSHOT
@@ -573,15 +569,15 @@ module Applitools::Selenium
       region_provider = Applitools::Selenium::RegionProvider.new(driver, Applitools::Region::EMPTY)
 
       full_page_image = algo.get_stitched_region(
-        image_provider: image_provider,
-        region_to_check: region_provider,
-        origin_provider: Applitools::Selenium::ScrollPositionProvider.new(driver),
-        position_provider: position_provider,
-        scale_provider: scale_provider,
-        cut_provider: cut_provider,
-        wait_before_screenshots: wait_before_screenshots,
-        eyes_screenshot_factory: eyes_screenshot_factory,
-        stitching_overlap: stitching_overlap
+          image_provider: image_provider,
+          region_to_check: region_provider,
+          origin_provider: Applitools::Selenium::ScrollPositionProvider.new(driver),
+          position_provider: position_provider,
+          scale_provider: scale_provider,
+          cut_provider: cut_provider,
+          wait_before_screenshots: wait_before_screenshots,
+          eyes_screenshot_factory: eyes_screenshot_factory,
+          stitching_overlap: stitching_overlap
       )
 
       # binding.pry
@@ -592,8 +588,8 @@ module Applitools::Selenium
       end
       logger.info 'Creating EyesWebDriver screenshot instance..'
       result = Applitools::Selenium::FullpageScreenshot.new(
-        full_page_image,
-        region_provider: region_to_check
+          full_page_image,
+          region_provider: region_to_check
       )
       logger.info 'Done creating EyesWebDriver screenshot instance!'
       result
@@ -602,22 +598,22 @@ module Applitools::Selenium
     def entire_element_screenshot(algo)
       logger.info 'Entire element screenshot requested'
       entire_frame_or_element = algo.get_stitched_region(
-        image_provider: image_provider,
-        region_to_check: region_to_check,
-        origin_provider: position_provider,
-        position_provider: position_provider,
-        scale_provider: scale_provider,
-        cut_provider: cut_provider,
-        wait_before_screenshots: wait_before_screenshots,
-        eyes_screenshot_factory: eyes_screenshot_factory,
-        stitching_overlap: stitching_overlap,
-        top_left_position: full_page_capture_algorithm_left_top_offset
+          image_provider: image_provider,
+          region_to_check: region_to_check,
+          origin_provider: position_provider,
+          position_provider: position_provider,
+          scale_provider: scale_provider,
+          cut_provider: cut_provider,
+          wait_before_screenshots: wait_before_screenshots,
+          eyes_screenshot_factory: eyes_screenshot_factory,
+          stitching_overlap: stitching_overlap,
+          top_left_position: full_page_capture_algorithm_left_top_offset
       )
 
       logger.info 'Building screenshot object (EyesStitchedElementScreenshot)...'
       result = Applitools::Selenium::EntireElementScreenshot.new(
-        entire_frame_or_element,
-        region_provider: region_to_check
+          entire_frame_or_element,
+          region_provider: region_to_check
       )
       logger.info 'Done!'
       result
@@ -629,7 +625,7 @@ module Applitools::Selenium
       image = image_provider.take_screenshot
       scale_provider.scale_image(image) if scale_provider
       local_cut_provider = (
-        cut_provider || Applitools::Selenium::FixedCutProvider.viewport(image, viewport_size, region_to_check)
+      cut_provider || Applitools::Selenium::FixedCutProvider.viewport(image, viewport_size, region_to_check)
       )
       local_cut_provider.cut(image) if local_cut_provider
       eyes_screenshot_factory.call(image)
@@ -678,7 +674,7 @@ module Applitools::Selenium
 
       begin
         self.scale_provider = Applitools::Selenium::ContextBasedScaleProvider.new(position_provider.entire_size,
-          viewport_size, device_pixel_ratio)
+                                                                                  viewport_size, device_pixel_ratio)
       rescue StandardError
         logger.info 'Failed to set ContextBasedScaleProvider'
         logger.info 'Using FixedScaleProvider instead'
@@ -842,7 +838,7 @@ module Applitools::Selenium
 
     class << self
       def position_provider(stitch_mode, driver, disable_horizontal = false, disable_vertical = false,
-        explicit_entire_size = nil)
+                            explicit_entire_size = nil)
 
         max_width = nil
         max_height = nil
@@ -853,10 +849,10 @@ module Applitools::Selenium
         case stitch_mode
         when :SCROLL
           Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical,
-            max_width, max_height)
+                                                           max_width, max_height)
         when :CSS
           Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical,
-            max_width, max_height)
+                                                                 max_width, max_height)
         end
       end
     end
