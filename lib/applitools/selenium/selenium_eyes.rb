@@ -2,7 +2,7 @@
 
 module Applitools::Selenium
   # The main API gateway for the SDK
-  class Eyes < Applitools::EyesBase
+  class SeleniumEyes < Applitools::EyesBase
     # @!visibility private
     UNKNOWN_DEVICE_PIXEL_RATIO = 0
 
