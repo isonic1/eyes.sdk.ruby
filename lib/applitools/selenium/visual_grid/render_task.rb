@@ -37,7 +37,7 @@ module Applitools
             response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
           # rescue StandardError => _e
           #   response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
-          rescue Applitools::EyesError => e
+          rescue StandardError => e
             fetch_fails += 1
             sleep 2
           end
@@ -53,6 +53,17 @@ module Applitools
           cache_key = URI(dom_resource.url)
           cache_key.query = "modifier=#{dom_url_mod}" if dom_url_mod
 
+          running_render['needMoreResources'].each do |resource_url|
+            put_cache.fetch_and_store(URI(resource_url)) do |_s|
+              server_connector.render_put_resource(
+                  rendering_info['serviceUrl'],
+                  rendering_info['accessToken'],
+                  request_resources[URI(resource_url)],
+                  running_render
+              )
+            end
+          end if need_more_resources
+
           if need_more_dom
             put_cache.fetch_and_store(cache_key) do |_s|
               server_connector.render_put_resource(
@@ -65,16 +76,6 @@ module Applitools
             put_cache[cache_key]
           end
 
-          running_render['needMoreResources'].each do |resource_url|
-            put_cache.fetch_and_store(URI(resource_url)) do |_s|
-              server_connector.render_put_resource(
-                  rendering_info['serviceUrl'],
-                  rendering_info['accessToken'],
-                  request_resources[URI(resource_url)],
-                  running_render
-              )
-            end
-          end if need_more_resources
         end while(still_running)
         statuses = poll_render_status(rq)
         raise Applitools::EyesError, "Render failed for #{statuses.first['renderId']} with the message: " \

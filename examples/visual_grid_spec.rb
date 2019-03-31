@@ -77,7 +77,7 @@ RSpec.describe 'My first visual grid test' do
     https://wikipedia.org
     https://instagram.com
     https://www.target.com/c/blankets-throws/-/N-d6wsb?lnk=ThrowsBlankets%E2%80%9C,tc
-  ).each do |url|
+  )[1..2].each do |url|
     it_behaves_like 'Test for url', url
   end
 end
