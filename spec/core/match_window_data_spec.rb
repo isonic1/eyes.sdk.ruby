@@ -37,7 +37,11 @@ RSpec.describe Applitools::MatchWindowData do
     :scale,
     :scale=,
     :to_s,
-    :to_hash
+    :to_hash,
+    :use_dom,
+    :use_dom=,
+    :enable_patterns,
+    :enable_patterns=
   ]
 
   context 'app_output=' do
@@ -386,7 +390,9 @@ RSpec.describe Applitools::MatchWindowData do
             'Ignore',
             'Floating',
             'remainder',
-            'scale'
+            'scale',
+            'UseDom',
+            'EnablePatterns'
           )
         end
 

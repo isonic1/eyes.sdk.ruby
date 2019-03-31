@@ -5,6 +5,11 @@ require 'eyes_selenium'
 
 RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
   let(:element) { Selenium::WebDriver::Element.new('', nil) }
+  let(:applitools_element) do
+    double(Applitools::Selenium::Element).tap do |e|
+      allow(e).to receive(:scroll_data_attribute=)
+    end
+  end
   let(:target_locator) do
     double.tap do |t|
       allow(t).to receive(:frame)
@@ -19,6 +24,7 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
         .and_return(left: 0, top: 0)
       allow(d).to receive(:user_agent).and_return(nil)
       allow(d).to receive(:frame_chain).and_return([])
+      allow(d).to receive(:find_element).and_return(applitools_element)
     end
   end
   let(:driver) { Applitools::Selenium::Driver.new(subject, driver: original_driver) }
@@ -31,11 +37,17 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
   context ':respond_to_methods' do
     it_should_behave_like 'responds to method', [
       :send_dom,
-      :send_dom=
+      :send_dom=,
+      :use_dom,
+      :use_dom=,
+      :enable_patterns,
+      :enable_patterns=
     ]
 
     it 'sets default values' do
       expect(subject.send_dom).to be false
+      expect(subject.use_dom).to be false
+      expect(subject.enable_patterns).to be false
     end
   end
 
@@ -98,6 +110,33 @@ RSpec.describe Applitools::Selenium::Eyes, mock_connection: true do
         subject.send(:perform_driver_settings_for_appium_driver)
         expect(subject.send(:region_visibility_strategy)).to be_a Applitools::Selenium::NopRegionVisibilityStrategy
         expect(subject.send(:force_driver_resolution_as_viewport_size)).to be true
+      end
+    end
+
+    context 'eyes flags are passed to match_window_data:' do
+      before do
+        subject.open(driver: original_driver, app_name: 'app_name', test_name: 'test_name')
+        allow_any_instance_of(Applitools::MatchWindowTask).to(
+          receive(:match_window).and_return(Applitools::MatchResults.new)
+        )
+      end
+
+      after { subject.check('name', target) }
+
+      let(:target) { Applitools::Selenium::Target.window.enable_patterns(false).use_dom(false) }
+
+      it 'enable_patterns' do
+        expect_any_instance_of(Applitools::MatchWindowData).to receive(:enable_patterns=).with(false)
+        expect_any_instance_of(Applitools::MatchWindowData).to receive(:enable_patterns=).with(true)
+
+        subject.enable_patterns = true
+      end
+
+      it 'use_dom' do
+        expect_any_instance_of(Applitools::MatchWindowData).to receive(:use_dom=).with(false)
+        expect_any_instance_of(Applitools::MatchWindowData).to receive(:use_dom=).with(true)
+
+        subject.use_dom = true
       end
     end
   end

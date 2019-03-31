@@ -32,7 +32,9 @@ module Applitools
                 'MatchThreshold' => 0
               },
               'scale' => 0,
-              'remainder' => 0
+              'remainder' => 0,
+              'EnablePatterns' => false,
+              'UseDom' => false
             },
             'IgnoreExpectedOutputSettings' => false,
             'ForceMatch' => false,
@@ -158,6 +160,22 @@ module Applitools
       current_data['Options']['ImageMatchSettings']['Exact']
     end
 
+    def use_dom
+      current_data['Options']['ImageMatchSettings']['UseDom']
+    end
+
+    def use_dom=(value)
+      current_data['Options']['ImageMatchSettings']['UseDom'] = value
+    end
+
+    def enable_patterns
+      current_data['Options']['ImageMatchSettings']['EnablePatterns']
+    end
+
+    def enable_patterns=(value)
+      current_data['Options']['ImageMatchSettings']['EnablePatterns'] = value
+    end
+
     def exact=(value)
       raise Applitools::EyesError.new('You should pass a hash as a value!') unless value.nil? || value.is_a?(Hash)
       return current_data['Options']['ImageMatchSettings']['Exact'] = nil if value.nil?
@@ -206,7 +224,7 @@ module Applitools
     end
 
     def target_options_to_read
-      %w(trim ignore_caret match_level ignore_mismatch exact)
+      %w(trim ignore_caret match_level ignore_mismatch exact use_dom enable_patterns)
     end
 
     private :target_options_to_read

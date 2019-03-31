@@ -27,6 +27,8 @@ module Applitools::Selenium
 
     JS_GET_OVERFLOW = 'return arguments[0].style.overflow;'.freeze
     JS_SET_OVERFLOW_FORMATTED_STR = "arguments[0].style.overflow = '%s'".freeze
+    JS_SET_SCROLL_DATA_FORMATTED_STR = "arguments[0].setAttribute('data-applitools-scroll', '%s')".freeze
+    JS_SET_OVERFLOW_DATA_FORMATTED_STR = "arguments[0].setAttribute('data-applitools-original-overflow', '%s')".freeze
 
     TRACE_PREFIX = 'EyesWebElement'.freeze
 
@@ -125,6 +127,14 @@ module Applitools::Selenium
 
     def overflow=(overflow)
       driver.execute_script(JS_SET_OVERFLOW_FORMATTED_STR % overflow, self)
+    end
+
+    def scroll_data_attribute=(value)
+      driver.execute_script(JS_SET_SCROLL_DATA_FORMATTED_STR % value, self)
+    end
+
+    def overflow_data_attribute=(value)
+      driver.execute_script(JS_SET_OVERFLOW_DATA_FORMATTED_STR % value, self)
     end
 
     def computed_style(prop_style)

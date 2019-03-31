@@ -45,8 +45,8 @@ module Applitools::FluentInterface
     self
   end
 
-  def send_dom(value)
-    options[:send_dom] = value ? true : false
+  def enable_patterns(value = true)
+    options[:enable_patterns] = value ? true : false
     self
   end
 end
