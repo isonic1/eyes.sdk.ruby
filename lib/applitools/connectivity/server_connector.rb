@@ -13,9 +13,15 @@ module Applitools::Connectivity
 
     SSL_CERT = File.join(File.dirname(File.expand_path(__FILE__)), '../../../certs/cacert.pem').to_s.freeze
     DEFAULT_TIMEOUT = 300
+    API_SESSIONS = '/api/sessions'.freeze
+    API_SESSIONS_RUNNING = API_SESSIONS + '/running/'.freeze
+    API_SINGLE_TEST = API_SESSIONS + '/'.freeze
 
-    API_SESSIONS_RUNNING = '/api/sessions/running/'.freeze
-    API_SINGLE_TEST = '/api/sessions/'.freeze
+    RENDER_INFO_PATH = API_SESSIONS + "/renderinfo".freeze
+    RENDER = '/render'.freeze
+
+    RESOURCES_SHA_256 = '/resources/sha256/'.freeze
+    RENDER_STATUS = '/render-status'.freeze
 
     HTTP_STATUS_CODES = {
       created: 201,
@@ -31,6 +37,83 @@ module Applitools::Connectivity
 
     def initialize(url = nil)
       self.server_url = url
+    end
+
+    def rendering_info
+      response = get(server_url + RENDER_INFO_PATH, content_type: 'application/json')
+      raise Applitools::EyesError, 'Error getting render info' unless response.status == HTTP_STATUS_CODES[:ok]
+      Oj.load response.body
+    end
+
+    def render(service_url, access_key, requests)
+      uri = URI(service_url)
+      uri.path = RENDER
+      response = dummy_post(
+        uri,
+        body: requests.json,
+        headers: {
+          'X-Auth-Token' => access_key
+        },
+        timeout: 10
+      )
+      raise Applitools::EyesError, "Error render processing (#{response.status}, #{response.body})" unless response.status == HTTP_STATUS_CODES[:ok]
+      Oj.load response.body
+    end
+
+    def render_put_resource(service_url, access_key, resource, render)
+      uri = URI(service_url)
+      uri.path = RESOURCES_SHA_256 + resource.hash
+      Applitools::EyesLogger.debug("PUT resource: #{uri}")
+      # Applitools::EyesLogger.debug("Resource content: #{resource.content}")
+      response = dummy_put(
+        uri,
+        body: resource.content,
+        content_type: resource.content_type,
+        headers: {
+          'X-Auth-Token' => access_key
+        },
+        query: {'render-id' => render['renderId']}
+      )
+      raise Applitools::EyesError, "Error putting resource: #{response.status}, #{response.body}" unless response.status == HTTP_STATUS_CODES[:ok]
+      resource.hash
+    end
+
+    def render_status_by_id(service_url, access_key, running_renders_json)
+      uri = URI(service_url)
+      uri.path = RENDER_STATUS
+      response = dummy_post(
+        uri,
+        body: running_renders_json,
+        content_type: 'application/json',
+        headers: {
+            'X-Auth-Token' => access_key
+        },
+        timeout: 2
+      )
+      raise Applitools::EyesError, "Error getting server status, #{response.status} #{response.body}" unless response.status == HTTP_STATUS_CODES[:ok]
+      Oj.load(response.body)
+    end
+
+    def download_resource(url)
+      Applitools::EyesLogger.debug "Fetching #{url}..."
+      resp_proc = proc do |u|
+        Faraday::Connection.new(
+          u,
+          ssl: { ca_file: SSL_CERT },
+          proxy: @proxy.nil? ? nil : @proxy.to_hash
+        ).send(:get) do |req|
+          req.options.timeout = DEFAULT_TIMEOUT
+          req.headers['Accept-Encoding'] = 'identity'
+        end
+      end
+      response = resp_proc.call(url)
+      redirect_count = 10
+      while response.status == 301 && redirect_count > 0 do
+        redirect_count -= 1
+        response = resp_proc.call(response.headers['location'])
+      end
+      Applitools::EyesLogger.debug 'Done!'
+      response
     end
 
     def server_url=(url)
@@ -63,6 +146,7 @@ module Applitools::Connectivity
       # Applitools::EyesLogger.debug json_data
       res = long_post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
+      # puts Oj.load(res.body)
       Applitools::MatchResult.new Oj.load(res.body)
     end
 
@@ -125,7 +209,7 @@ module Applitools::Connectivity
     end
 
     def post_dom_json(dom_data)
-      Applitools::EyesLogger.debug 'About to send captured DOM...'
+      # Applitools::EyesLogger.debug 'About to send captured DOM...'
       request_body = Oj.dump(dom_data)
       # Applitools::EyesLogger.debug request_body
       processed_request_body = yield(request_body) if block_given?
@@ -153,9 +237,13 @@ module Applitools::Connectivity
     MAX_LONG_REQUEST_DELAY = 10 # seconds
     LONG_REQUEST_DELAY_MULTIPLICATIVE_INCREASE_FACTOR = 1.5
 
-    [:get, :post, :delete].each do |method|
+    [:get, :post, :delete, :put].each do |method|
       define_method method do |url, options = {}|
         request(url, method, options)
+      end
+
+      define_method "dummy_#{method}" do |url, options = {}|
+        dummy_request(url, method, options)
       end
 
       define_method "long_#{method}" do |url, options = {}, request_delay = LONG_REQUEST_DELAY|
@@ -181,11 +269,27 @@ module Applitools::Connectivity
         url,
         ssl: { ca_file: SSL_CERT },
         proxy: @proxy.nil? ? nil : @proxy.to_hash
+        # proxy: Applitools::Connectivity::Proxy.new('http://localhost:8000').to_hash
       ).send(method) do |req|
         req.options.timeout = DEFAULT_TIMEOUT
         req.headers = DEFAULT_HEADERS.merge(options[:headers] || {})
         req.headers['Content-Type'] = options[:content_type] if options.key?(:content_type)
         req.params = { apiKey: api_key }.merge(options[:query] || {})
+        req.body = options[:body]
+      end
+    end
+
+    def dummy_request(url, method, options = {})
+      Faraday::Connection.new(
+          url,
+          ssl: { ca_file: SSL_CERT },
+          proxy: @proxy.nil? ? nil : @proxy.to_hash
+          # proxy: Applitools::Connectivity::Proxy.new('http://localhost:8000').to_hash
+      ).send(method) do |req|
+        req.options.timeout = options[:timeout] || DEFAULT_TIMEOUT
+        req.headers = DEFAULT_HEADERS.merge(options[:headers] || {})
+        req.headers['Content-Type'] = options[:content_type] if options.key?(:content_type)
+        req.params = options[:query] || {}
         req.body = options[:body]
       end
     end
@@ -231,3 +335,103 @@ module Applitools::Connectivity
     end
   end
 end
+
+#
+# /**
+#      *
+#      * @return The server timeout. (Seconds).
+#      */
+# int getTimeout();
+#
+#
+# /**
+#      * Deletes the given test result
+#      *
+#      * @param testResults The session to delete by test results.
+#      * @throws EyesException the exception is being thrown when deleteSession failed
+#      */
+# void deleteSession(TestResults testResults);
+#
+#
+# /**
+#      * Downloads string from a given Url
+#      *
+#      * @param uri The URI from which the IServerConnector will download the string
+#      * @param isSecondRetry Indicates if a retry is mandatory onFailed - 2 retries per request
+#      * @param listener the listener will be called when the request will be resolved.
+#      */
+# void downloadString(URL uri, boolean isSecondRetry, IDownloadListener<String> listener);
+#
+# /**
+#      * Downloads string from a given Url.
+#      *
+#      * @param uri The URI from which the IServerConnector will download the string
+#      * @param isSecondRetry Indicates if a retry is mandatory onFailed - 2 retries per request
+#      * @param listener the listener will be called when the request will be resolved.
+#      * @return A future which will be resolved when the resources is downloaded.
+#      */
+# IResourceFuture downloadResource(URL uri, boolean isSecondRetry, IDownloadListener<Byte[]> listener);
+#
+#
+# /**
+#      * Posting the DOM snapshot to the server and returns
+#      * @param domJson JSON as String.
+#      * @return URL to the JSON that is stored by the server.
+#      */
+# String postDomSnapshot(String domJson);
+#
+#
+# /**
+#      * @return the render info from the server to be used later on.
+#      */
+# RenderingInfo getRenderInfo();
+#
+# /**
+#      * Initiate a rendering using RenderingGrid API
+#      *
+#      * @param renderRequests renderRequest The current agent's running session.
+#      * @return {@code List<RunningRender>} The results of the render request
+#      */
+# List<RunningRender> render(RenderRequest... renderRequests);
+#
+# /**
+#      * Check if resource exists on the server
+#      *
+#      * @param runningRender The running render (for second request only)
+#      * @param resource The resource to use
+#      * @return Whether resource exists on the server or not
+#      */
+# boolean renderCheckResource(RunningRender runningRender, RGridResource resource);
+#
+# /**
+#      * Upload resource to the server
+#      *
+#      * @param runningRender The running render (for second request only)
+#      * @param resource The resource to upload
+#      * @param listener The callback wrapper for the upload result.
+#      * @return true if resource was uploaded
+#      */
+# PutFuture renderPutResource(RunningRender runningRender, RGridResource resource, IResourceUploadListener listener);
+#
+# /**
+#      * Get the rendering status for current render
+#      *
+#      * @param runningRender The running render
+#      * @return RenderStatusResults The render's status
+#      */
+# RenderStatusResults renderStatus(RunningRender runningRender);
+#
+# /**
+#      * Get the rendering status for current render
+#      *
+#      * @param renderIds The running renderId
+#      * @return The render's status
+#      */
+# List<RenderStatusResults> renderStatusById(String... renderIds);
+#
+# IResourceFuture createResourceFuture(RGridResource gridResource);
+#
+# void setRenderingInfo(RenderingInfo renderInfo);
+
+
+

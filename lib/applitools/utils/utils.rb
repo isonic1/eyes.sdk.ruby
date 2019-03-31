@@ -72,6 +72,18 @@ module Applitools::Utils
     {}
   end
 
+  def stringify_for_hash(value)
+    return value.stringify if value.respond_to? :stringify
+    case value
+    when Array
+      value.map { |el| stringify_for_hash(el) }.join('')
+    when Hash
+      value.keys.sort { |a, b| b.to_s <=> a.to_s }.map { |k| "#{k}#{stringify_for_hash(value[k])}"}.join('')
+    else
+      value.to_s
+    end
+  end
+
   private
 
   def convert_hash_keys(value, method)

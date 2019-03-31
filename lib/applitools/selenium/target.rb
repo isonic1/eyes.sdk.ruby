@@ -118,8 +118,8 @@ module Applitools
         self
       end
 
-      def fully
-        options[:stitch_content] = true
+      def fully(value = true)
+        options[:stitch_content] = value ? true : false
         handle_frames
         self
       end
