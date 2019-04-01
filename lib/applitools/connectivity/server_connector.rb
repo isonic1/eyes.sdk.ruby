@@ -41,7 +41,7 @@ module Applitools::Connectivity
 
     def rendering_info
       response = get(server_url + RENDER_INFO_PATH, content_type: 'application/json')
-      raise Applitools::EyesError, 'Error getting render info' unless response.status == HTTP_STATUS_CODES[:ok]
+      raise Applitools::EyesError, "Error getting render info (#{response.status}})" unless response.status == HTTP_STATUS_CODES[:ok]
       Oj.load response.body
     end
 

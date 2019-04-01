@@ -1,5 +1,5 @@
 require 'applitools/core/rectangle_size'
-require 'applitools/core/concerns/session_types'
+require 'applitools/core/session_types'
 require 'applitools/core/batch_info'
 
 module Applitools
@@ -60,7 +60,7 @@ module Applitools
     string_field :agent_id
     string_field :environment_name
     boolean_field :save_diffs
-    enum_field :session_type, Applitools::Concerns::SessionTypes.enum_values
+    enum_field :session_type, Applitools::SessionTypes.enum_values
     object_field :batch_info, Applitools::BatchInfo
     string_field :baseline_env_name
     string_field :app_name

@@ -1,8 +1,10 @@
+require 'applitools/core/eyes_configuration_dsl'
+
 module Applitools
   class AbstractConfiguration
     attr_reader :config_hash
     attr_accessor :validation_errors
-    extend Applitools::Concerns::EyesConfigurationDSL
+    extend Applitools::EyesConfigurationDSL
 
     def initialize
       @config_hash = {}

@@ -21,7 +21,7 @@ module Applitools
       end
 
       def ensure_config
-        self.config = Applitools::Selenium::SeleniumConfiguration.new
+        self.config = Applitools::Selenium::Configuration.new
       end
 
 

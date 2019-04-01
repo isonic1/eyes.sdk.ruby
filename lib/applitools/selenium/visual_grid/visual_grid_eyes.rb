@@ -1,4 +1,4 @@
-require 'applitools/selenium/selenium_configuration'
+require 'applitools/selenium/configuration'
 module Applitools
   module Selenium
     class VisualGridEyes
@@ -11,7 +11,7 @@ module Applitools
 
       attr_accessor :api_key, :server_url, :proxy, :opened
 
-      def_delegators 'config', *Applitools::Selenium::SeleniumConfiguration.methods_to_delegate
+      def_delegators 'config', *Applitools::Selenium::Configuration.methods_to_delegate
       def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
 
       def initialize(visual_grid_manager, server_url = nil)
@@ -22,7 +22,7 @@ module Applitools
       end
 
       def ensure_config
-        self.config = Applitools::Selenium::SeleniumConfiguration.new
+        self.config = Applitools::Selenium::Configuration.new
       end
 
 
@@ -31,13 +31,6 @@ module Applitools
         options = Applitools::Utils.extract_options!(args)
         Applitools::ArgumentGuard.hash(options, 'options', [:driver])
 
-        # self.current_config = options.delete(:config)
-        # self.current_config = yield(Applitools::Selenium::SeleniumConfiguration.new) if block_given?
-
-        # Applitools::ArgumentGuard.is_a? options[:driver], 'options[:driver]', ::Selenium::WebDriver
-        # Applitools::ArgumentGuard.is_a? current_config, 'options[:config]', Applitools::Selenium::SeleniumConfiguration
-
-        # batch_info.name = config.app_name
         self.driver = options.delete(:driver)
         self.current_url = driver.current_url
 
@@ -66,13 +59,17 @@ module Applitools
         script = <<-END
           var callback = arguments[arguments.length - 1]; return (#{Applitools::Selenium::Scripts::PROCESS_RESOURCES})().then(JSON.stringify).then(callback, function(err) {callback(err.stack || err.toString())});
         END
-
-        script_result = driver.execute_async_script(script).freeze
-        mod = Digest::SHA2.hexdigest(script_result)
-        test_list.each do |test|
-          test.check(tag, target, script_result.dup, visual_grid_manager, mod)
+        begin
+          script_result = driver.execute_async_script(script).freeze
+          mod = Digest::SHA2.hexdigest(script_result)
+          test_list.each do |t|
+            t.check(tag, target, script_result.dup, visual_grid_manager, mod)
+          end
+          test_list.each { |t| t.becomes_not_rendered}
+        rescue StandardError => e
+          Applitools::EyesLogger.error e.message
+          test_list.each { |t| t.becomes_tested}
         end
-        test_list.each { |t| t.becomes_not_rendered}
       end
 
       def close(throw_exception = true)

@@ -1,5 +1,6 @@
 require 'state_machine'
 require 'digest'
+require 'applitools/selenium/visual_grid/render_task'
 
 module Applitools
   module Selenium
@@ -106,7 +107,7 @@ module Applitools
         end
 
         event :becomes_tested do
-          transition :opened => :tested
+          transition [:new, :not_rendered, :opened] => :tested
         end
 
         event :becomes_completed do
@@ -120,7 +121,6 @@ module Applitools
 
       def initialize(eyes, browser_info, driver)
         Applitools::ArgumentGuard.is_a? eyes, 'eyes', Applitools::Selenium::EyesConnector
-        Applitools::ArgumentGuard.is_a? browser_info, 'browser_info', Applitools::Selenium::RenderBrowserInfo
 
         self.eyes = eyes
         self.browser_info = browser_info

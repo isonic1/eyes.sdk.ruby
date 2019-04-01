@@ -98,7 +98,8 @@ module Applitools::Selenium
     attr_accessor :base_agent_id, :screenshot, :force_full_page_screenshot, :hide_scrollbars,
                   :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
                   :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
-                  :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom, :use_dom, :enable_patterns
+                  :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom, :use_dom, :enable_patterns,
+                  :config
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=

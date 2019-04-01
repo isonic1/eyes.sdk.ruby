@@ -1,4 +1,4 @@
-require 'applitools/selenium/concerns/browser_types'
+require 'applitools/selenium/browser_types'
 
 module Applitools
   module Selenium
@@ -6,7 +6,7 @@ module Applitools
       DEFAULT_CONFIG = proc do
         {
           platform: 'linux',
-          browser_type: Applitools::Selenium::Concerns::BrowserTypes::CHROME,
+          browser_type: Applitools::Selenium::BrowserTypes::CHROME,
           size_mode: 'full-page',
           viewport_size: Applitools::RectangleSize.from_any_argument(width: 0, height: 0)
         }
@@ -18,7 +18,7 @@ module Applitools
       end
 
       object_field :viewport_size, Applitools::RectangleSize
-      enum_field :browser_type, Applitools::Selenium::Concerns::BrowserTypes.enum_values
+      enum_field :browser_type, Applitools::Selenium::BrowserTypes.enum_values
       string_field :platform
       string_field :size_mode
       string_field :baseline_env_name

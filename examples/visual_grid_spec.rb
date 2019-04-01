@@ -12,13 +12,13 @@ RSpec.shared_examples 'Test for url' do |url|
   let(:web_driver) { Selenium::WebDriver.for :chrome }
 
   let(:config) do
-    Applitools::Selenium::SeleniumConfiguration.new.tap do |config|
+    Applitools::Selenium::Configuration.new.tap do |config|
     config.app_name = 'Top 10 sites'
     config.test_name = "Top 10 sites - #{url}"
-    config.add_browser { |b| b.width(800).height(600).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
-        .add_browser { |b| b.width(700).height(500).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
-        .add_browser { |b| b.width(1600).height(1200).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
-        .add_browser { |b| b.width(1280).height(1024).type(Applitools::Selenium::Concerns::BrowserTypes::CHROME) }
+    config.add_browser(800, 600, Applitools::Selenium::BrowserTypes::CHROME)
+          .add_browser(700, 500, Applitools::Selenium::BrowserTypes::CHROME)
+          .add_browser(1600, 1200, Applitools::Selenium::BrowserTypes::CHROME)
+          .add_browser(1280, 1024, Applitools::Selenium::BrowserTypes::CHROME)
     end
   end
 
@@ -77,7 +77,7 @@ RSpec.describe 'My first visual grid test' do
     https://wikipedia.org
     https://instagram.com
     https://www.target.com/c/blankets-throws/-/N-d6wsb?lnk=ThrowsBlankets%E2%80%9C,tc
-  )[1..2].each do |url|
+  )[2..2].each do |url|
     it_behaves_like 'Test for url', url
   end
 end

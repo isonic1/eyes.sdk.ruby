@@ -87,6 +87,7 @@ module Applitools
       def poll_render_status(rq)
         iterations = 0
         statuses = []
+        raise Applitools::EyesError, 'RenderStatus: Got empty renderId!' unless rq.render_id.is_a?(String) && !rq.render_id.empty?
         begin
           fails_count = 0
           proc = proc do
@@ -118,7 +119,7 @@ module Applitools
       def prepare_data_for_rg(data)
         self.all_blobs = data["blobs"]
         self.resource_urls = data["resourceUrls"]
-        self.request_resources = Applitools::Selenium::Concerns::RenderResources.new
+        self.request_resources = Applitools::Selenium::RenderResources.new
         # self.request_resources = {}
         all_blobs.map {|blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob)}.each do |blob|
           request_resources[blob.url] = blob
@@ -148,7 +149,7 @@ module Applitools
           r.size_mode = running_test.browser_info.size_mode
         end
 
-        dom = Applitools::Selenium::Concerns::RGridDom.new(
+        dom = Applitools::Selenium::RGridDom.new(
           url: script_data["url"], dom_nodes: script_data['cdt'], resources: request_resources
         )
 
