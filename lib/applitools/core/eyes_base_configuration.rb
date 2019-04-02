@@ -49,7 +49,7 @@ module Applitools
       validation_errors.clear
       validation_errors[:app_name] = ':app_name is required' if app_name.empty?
       validation_errors[:test_name] = ':test_name is required' if test_name.empty?
-      validation_errors[:viewport_size] = ':viewport_size is required' if viewport_size.square.zero?
+      # validation_errors[:viewport_size] = ':viewport_size is required' if viewport_size.square.zero?
       return true if validation_errors.keys.size.zero?
       false
     end

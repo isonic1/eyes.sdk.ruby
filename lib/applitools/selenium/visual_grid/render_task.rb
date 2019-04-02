@@ -147,6 +147,7 @@ module Applitools
           r.width = running_test.browser_info.viewport_size.width
           r.height = running_test.browser_info.viewport_size.height
           r.size_mode = running_test.browser_info.size_mode
+          r.emulation_info = running_test.browser_info.emulation_info if running_test.browser_info.emulation_info
         end
 
         dom = Applitools::Selenium::RGridDom.new(

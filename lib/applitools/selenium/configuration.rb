@@ -49,6 +49,12 @@ module Applitools
         self
       end
 
+      def add_device_emulation(emu)
+        Applitools::ArgumentGuard.not_nil emu, 'emulation_info'
+        Applitools::ArgumentGuard.is_a? emu, 'emulation_info', Applitools::Selenium::EmulationBaseInfo
+        add_browser { |b| b.emulation_info(emu) }
+      end
+
       def deep_clone
         new_config = self.class.new
         config_keys.each do |k|

@@ -35,6 +35,11 @@ module Applitools
         browser_info.baseline_env_name = value
         self
       end
+
+      def emulation_info(value)
+        browser_info.emulation_info = value
+        self
+      end
     end
   end
 end

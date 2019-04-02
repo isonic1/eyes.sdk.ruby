@@ -15,10 +15,14 @@ RSpec.shared_examples 'Test for url' do |url|
     Applitools::Selenium::Configuration.new.tap do |config|
     config.app_name = 'Top 10 sites'
     config.test_name = "Top 10 sites - #{url}"
+    emu = Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT)
+
     config.add_browser(800, 600, Applitools::Selenium::BrowserTypes::CHROME)
           .add_browser(700, 500, Applitools::Selenium::BrowserTypes::CHROME)
           .add_browser(1600, 1200, Applitools::Selenium::BrowserTypes::CHROME)
           .add_browser(1280, 1024, Applitools::Selenium::BrowserTypes::CHROME)
+          .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT))
+          .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.i_phone_4(:portrait))
     end
   end
 
@@ -77,7 +81,7 @@ RSpec.describe 'My first visual grid test' do
     https://wikipedia.org
     https://instagram.com
     https://www.target.com/c/blankets-throws/-/N-d6wsb?lnk=ThrowsBlankets%E2%80%9C,tc
-  )[2..2].each do |url|
+  )[0..0].each do |url|
     it_behaves_like 'Test for url', url
   end
 end

@@ -43,7 +43,6 @@ module Applitools
         match_data.tag = name
         update_default_settings(match_data)
         match_data.read_target(target_to_check, driver)
-
         check_result = check_window_base(
             dummy_region_provider, timeout, match_data
         )
@@ -109,6 +108,12 @@ module Applitools
 
       end
 
+      def viewport_size
+        status = render_statuses[render_statuses.keys.first]
+        size = status['deviceSize']
+        Applitools::RectangleSize.new(size['width'], size['height'])
+      end
+
       def title
         return driver.title unless dont_get_title
       rescue StandardError => e
@@ -118,7 +123,7 @@ module Applitools
       end
 
       def get_app_output_with_screenshot(region_provider, last_screenshot)
-        dom_url = ''
+        # dom_url = ''
         # captured_dom_data = dom_data
         # unless captured_dom_data.empty?
         #   begin
@@ -158,7 +163,7 @@ module Applitools
         Applitools::AppOutputWithScreenshot.new(
             Applitools::AppOutput.new(a_title, '').tap do |o|
               o.location = region.location unless region.empty?
-              # o.dom_url = dom_url
+              o.dom_url = dom_url
               o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
             end,
             nil,
