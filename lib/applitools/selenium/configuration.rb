@@ -58,7 +58,14 @@ module Applitools
       def deep_clone
         new_config = self.class.new
         config_keys.each do |k|
-          new_config.send("#{k}=", self.send(k).clone)
+          new_config.send(
+            "#{k}=", case value = self.send(k)
+                     when Symbol, FalseClass, TrueClass, Fixnum, Float
+                       value
+                     else
+                       value.clone
+                     end
+          )
         end
         new_config
       end
