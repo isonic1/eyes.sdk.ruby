@@ -105,7 +105,6 @@ module Applitools
       end
 
       def set_viewport_size(*_args)
-
       end
 
       def viewport_size

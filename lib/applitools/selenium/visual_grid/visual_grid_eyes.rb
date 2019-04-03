@@ -34,6 +34,12 @@ module Applitools
         self.driver = options.delete(:driver)
         self.current_url = driver.current_url
 
+        if viewport_size
+          set_viewport_size(viewport_size)
+        else
+          self.viewport_size = get_viewport_size
+        end
+
         visual_grid_manager.open(self)
 
         logger.info("getting all browsers info...")
@@ -43,7 +49,13 @@ module Applitools
           test_list.push Applitools::Selenium::RunningTest.new(eyes_connector, bi, driver)
         end
         self.opened = true
+
         driver
+      end
+
+      def get_viewport_size(web_driver = driver)
+        Applitools::ArgumentGuard.not_nil 'web_driver', web_driver
+        Applitools::Utils::EyesSeleniumUtils.extract_viewport_size(driver)
       end
 
       def eyes_connector
@@ -59,6 +71,7 @@ module Applitools
           var callback = arguments[arguments.length - 1]; return (#{Applitools::Selenium::Scripts::PROCESS_RESOURCES})().then(JSON.stringify).then(callback, function(err) {callback(err.stack || err.toString())});
         END
         begin
+          sleep wait_before_screenshots
           script_result = driver.execute_async_script(script).freeze
           mod = Digest::SHA2.hexdigest(script_result)
           test_list.each do |t|
@@ -105,6 +118,16 @@ module Applitools
 
       def get_all_test_results
         test_list.map(&:test_result)
+      end
+
+      def set_viewport_size(value)
+        begin
+          Applitools::Utils::EyesSeleniumUtils.set_viewport_size driver, value
+        rescue => e
+          logger.error e.class.to_s
+          logger.error e.message
+          raise Applitools::TestFailedError.new "#{e.class} - #{e.message}"
+        end
       end
 
       def new_test_error_message(result)

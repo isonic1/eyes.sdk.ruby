@@ -14,7 +14,8 @@ RSpec.shared_examples 'Test for url' do |url|
     Applitools::Selenium::Configuration.new.tap do |config|
     config.app_name = 'Top 10 sites'
     config.test_name = "Top 10 sites - #{url}"
-    # config.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
+    config.viewport_size = Applitools::RectangleSize.new(1280,600)
+    config.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
     # emu = Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT)
 
     config.add_browser(800, 600, Applitools::Selenium::BrowserTypes::CHROME)
@@ -23,6 +24,10 @@ RSpec.shared_examples 'Test for url' do |url|
           .add_browser(1280, 1024, Applitools::Selenium::BrowserTypes::CHROME)
           .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT))
           .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.i_phone_4(:portrait))
+
+    # config.add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT))
+    #       .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.i_phone_4(:portrait))
+
     end
   end
 

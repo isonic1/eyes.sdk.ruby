@@ -44,7 +44,7 @@ module Applitools
         end
         yield(Applitools::Selenium::RenderBrowserInfoFluent.new(browser)) if block_given?
         browsers_info.add browser
-        self.viewport_size = browser.viewport_size unless viewport_size
+        # self.viewport_size = browser.viewport_size unless viewport_size
         self
       end
 
@@ -67,6 +67,15 @@ module Applitools
           )
         end
         new_config
+      end
+
+      def viewport_size
+        user_defined_vp = super
+        user_defined_vp = nil if user_defined_vp.respond_to?(:square) && user_defined_vp.square == 0
+        return user_defined_vp if user_defined_vp
+        from_browsers_info = browsers_info.select {|bi| bi.viewport_size.square > 0 }.first
+        return from_browsers_info.viewport_size if from_browsers_info
+        nil
       end
     end
   end
