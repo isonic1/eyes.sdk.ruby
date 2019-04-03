@@ -38,7 +38,6 @@ module Applitools
     def string_field(field_name)
       collect_method field_name
       define_method(field_name) do
-        return '' unless config_hash[field_name.to_sym].is_a? String
         config_hash[field_name.to_sym]
       end
 
@@ -49,7 +48,9 @@ module Applitools
       end
 
       define_method("defined_#{field_name}?") do
-        !send(field_name).empty?
+        value = send(field_name)
+        return false if value.nil?
+        !value.empty?
       end
     end
 

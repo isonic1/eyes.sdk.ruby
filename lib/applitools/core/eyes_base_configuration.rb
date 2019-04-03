@@ -1,6 +1,7 @@
 require 'applitools/core/rectangle_size'
 require 'applitools/core/session_types'
 require 'applitools/core/batch_info'
+require 'applitools/connectivity/proxy'
 
 module Applitools
   class EyesBaseConfiguration < AbstractConfiguration
@@ -8,7 +9,9 @@ module Applitools
       branch_name: ENV['APPLITOOLS_BRANCH'] || '',
       parent_branch_name: ENV['APPLITOOLS_PARENT_BRANCH'] || '',
       baseline_branch_name: ENV['APPLITOOLS_BASELINE_BRANCH'] || '',
-      save_diffs: false
+      save_diffs: false,
+      server_url: 'https://eyessdk.applitools.com',
+      api_key: ENV['APPLITOOLS_API_KEY'] || ''
     }.freeze
 
     class << self
@@ -66,6 +69,11 @@ module Applitools
     string_field :app_name
     string_field :test_name
     object_field :viewport_size, Applitools::RectangleSize
+    string_field :api_key
+    string_field :server_url
+    string_field :host_os
+    string_field :host_app
+    object_field :proxy, Applitools::Connectivity::Proxy
 
     def short_description
       "#{test_name} of #{app_name}"

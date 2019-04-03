@@ -51,7 +51,6 @@ module Applitools
         ::Applitools::Selenium::EyesConnector.new(server_url).tap do |connector|
           connector.batch = batch_info
           connector.config = config.deep_clone
-          connector.proxy = proxy if proxy.is_a? Applitools::Connectivity::Proxy
         end
       end
 
@@ -96,7 +95,8 @@ module Applitools
             raise Applitools::TestFailedError.new test_failed_error_message(r), r if r.failed?
           end
         end
-        test_list.map(&:test_result).first
+        failed_results = test_list.map(&:test_result).compact.select { |r| !r.as_expected? }
+        failed_results.empty? ? test_list.map(&:test_result).compact.first : failed_results
       end
 
       def open?

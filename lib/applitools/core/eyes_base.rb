@@ -31,8 +31,8 @@ module Applitools
     attr_accessor :config
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
-    def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
-      :set_proxy, :proxy, :proxy=
+    # def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
+    #   :set_proxy, :proxy, :proxy=
 
     # @!attribute [rw] verbose_results
     #   If set to true it will display test results in verbose format, including all fields returned by the server
@@ -45,7 +45,7 @@ module Applitools
 
     attr_accessor :batch, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
-      :scale_ratio, :host_os, :host_app, :position_provider, :viewport_size, :verbose_results,
+      :scale_ratio, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
       :compare_with_parent_branch, :results
 
@@ -62,8 +62,9 @@ module Applitools
     def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
 
     def initialize(server_url = nil)
-      self.server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
+      @server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
       ensure_config
+      self.server_url = server_url if server_url
       self.disabled = false
       @viewport_size = nil
       self.match_timeout = DEFAULT_MATCH_TIMEOUT
@@ -99,6 +100,20 @@ module Applitools
 
     def ensure_config
       self.config = Applitools::EyesBaseConfiguration.new
+    end
+
+    def config=(value)
+      Applitools::ArgumentGuard.not_nil value, 'config'
+      Applitools::ArgumentGuard.is_a? value, 'config', Applitools::EyesBaseConfiguration
+      raise Applitools::EyesError, 'You can\'t use new config if eyes are opened' if open?
+      @config = value
+    end
+
+    def server_connector
+      @server_connector.server_url = config.server_url
+      @server_connector.api_key = config.api_key
+      @server_connector.proxy = config.proxy if config.proxy
+      @server_connector
     end
 
     def match_level=(value)
@@ -502,7 +517,7 @@ module Applitools
     private
 
     attr_accessor :running_session, :last_screenshot, :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider,
-      :failed, :server_connector
+      :failed
 
     attr_reader :user_inputs, :properties
 

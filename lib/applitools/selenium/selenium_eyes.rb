@@ -103,12 +103,14 @@ module Applitools::Selenium
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
+    def_delegators 'config', *Applitools::Selenium::Configuration.methods_to_delegate
 
     # Creates a new (possibly disabled) Eyes instance that interacts with the
     # Eyes Server at the specified url.
     #
     # @param server_url The Eyes Server URL.
     def initialize(server_url = nil)
+      ensure_config
       super
       self.base_agent_id = "eyes.selenium.ruby/#{Applitools::VERSION}".freeze
       self.check_frame_or_element = false
@@ -136,6 +138,12 @@ module Applitools::Selenium
       self.prevent_dom_processing = false
     end
 
+
+    def ensure_config
+      self.config = Applitools::Selenium::Configuration.new
+    end
+
+
     # Starts a test
     #
     # @param options [Hash] options
@@ -154,7 +162,7 @@ module Applitools::Selenium
       options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size] if
           options[:viewport_size]
       Applitools::ArgumentGuard.not_nil original_driver, 'options[:driver]'
-      Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
+      # Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
 
       if disabled?
         logger.info('Ignored')

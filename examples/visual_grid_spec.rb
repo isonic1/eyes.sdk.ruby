@@ -8,14 +8,14 @@ Applitools::EyesLogger.log_handler = Logger.new(STDOUT)
 
 RSpec.shared_examples 'Test for url' do |url|
   let(:url) { url }
-  # let(:runner) { Applitools::Selenium::VisualGridRunner }
   let(:web_driver) { Selenium::WebDriver.for :chrome }
 
   let(:config) do
     Applitools::Selenium::Configuration.new.tap do |config|
     config.app_name = 'Top 10 sites'
     config.test_name = "Top 10 sites - #{url}"
-    emu = Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT)
+    # config.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
+    # emu = Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT)
 
     config.add_browser(800, 600, Applitools::Selenium::BrowserTypes::CHROME)
           .add_browser(700, 500, Applitools::Selenium::BrowserTypes::CHROME)
@@ -57,9 +57,6 @@ RSpec.describe 'My first visual grid test' do
   before(:all) do
     @runner = Applitools::Selenium::VisualGridRunner.new(12)
     @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: @runner )
-    # @eyes = Applitools::Selenium::Eyes.new
-    #
-    @eyes.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
   end
 
   after(:all) do

@@ -269,7 +269,6 @@ module Applitools::Connectivity
         url,
         ssl: { ca_file: SSL_CERT },
         proxy: @proxy.nil? ? nil : @proxy.to_hash
-        # proxy: Applitools::Connectivity::Proxy.new('http://localhost:8000').to_hash
       ).send(method) do |req|
         req.options.timeout = DEFAULT_TIMEOUT
         req.headers = DEFAULT_HEADERS.merge(options[:headers] || {})
@@ -284,7 +283,6 @@ module Applitools::Connectivity
           url,
           ssl: { ca_file: SSL_CERT },
           proxy: @proxy.nil? ? nil : @proxy.to_hash
-          # proxy: Applitools::Connectivity::Proxy.new('http://localhost:8000').to_hash
       ).send(method) do |req|
         req.options.timeout = options[:timeout] || DEFAULT_TIMEOUT
         req.headers = DEFAULT_HEADERS.merge(options[:headers] || {})

@@ -24,7 +24,7 @@ module Applitools
       end
 
       def stop
-        while all_running_tests.map { |t| t.score }.sum > 0 do
+        while all_running_tests.map(&:score).reduce(0, :+) > 0 do
           sleep 0.5
         end
         @thread_pool.stop
@@ -35,7 +35,10 @@ module Applitools
       end
 
       def get_all_test_results
-        all_eyes.select {|e| !e.open?}.map { |e| e.test_list.map(&:test_result) }.flatten
+        while !(all_eyes.select {|e| e.open?}.empty?)
+          sleep 0.5
+        end
+        all_eyes.map { |e| e.test_list.map(&:test_result) }.flatten
       end
 
       private
