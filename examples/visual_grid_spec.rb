@@ -23,9 +23,9 @@ RSpec.shared_examples 'Test for url' do |url|
           .add_browser(1600, 1200, BrowserTypes::CHROME)
           .add_browser(1280, 1024, BrowserTypes::CHROME)
           .add_browser(1280, 1024, BrowserTypes::EDGE)
-          .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Orientations::PORTRAIT))
-          .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.i_phone_4(Orientations::PORTRAIT))
-          .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.new(Devices::BlackBerryZ30, Orientations::PORTRAIT))
+          .add_device_emulation(Devices::BlackBerryZ30, Orientations::PORTRAIT)
+          .add_device_emulation(Devices::MicrosoftLumia950)
+          .add_device_emulation(Devices::NokiaLumia520, Orientations::LANDSCAPE)
 
     # config.add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT))
     #       .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.i_phone_4(:portrait))

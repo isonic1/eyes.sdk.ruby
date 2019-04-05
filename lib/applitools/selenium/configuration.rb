@@ -48,9 +48,10 @@ module Applitools
         self
       end
 
-      def add_device_emulation(emu)
-        Applitools::ArgumentGuard.not_nil emu, 'emulation_info'
-        Applitools::ArgumentGuard.is_a? emu, 'emulation_info', Applitools::Selenium::EmulationBaseInfo
+      def add_device_emulation(device_name, orientation = Orientations::PORTRAIT)
+        Applitools::ArgumentGuard.not_nil device_name, 'device_name'
+        raise Applitools::EyesIllegalArgument, 'Wrong device name!' unless Devices.enum_values.include? device_name
+        emu = Applitools::Selenium::ChromeEmulationInfo.new(device_name, orientation)
         add_browser { |b| b.emulation_info(emu) }
       end
 

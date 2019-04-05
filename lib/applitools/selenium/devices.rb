@@ -1,4 +1,5 @@
 module Devices
+  extend self
   IPhone4 = 'iPhone 4'.freeze
   IPhone5SE = 'iPhone 5/SE'.freeze
   IPhone678 = 'iPhone 6/7/8'.freeze
@@ -31,4 +32,13 @@ module Devices
   LaptopWithTouch = 'Laptop with touch'.freeze
   LaptopWithHDPIScreen = 'Laptop with HiDPI screen'.freeze
   LaptopWithMDPIScreen = 'Laptop with MDPI screen'.freeze
+
+  def enum_values
+    [
+      IPhone4, IPhone5SE, IPhone678, IPhone678Plus, IPhoneX, IPad, IPadPro, BlackBerryZ30, Nexus4, Nexus5, Nexus5X,
+      Nexus6, Nexus6P, Pixel2, Pixel2XL, LGOptimusL70, NokiaN9, NokiaLumia520, MicrosoftLumia550, MicrosoftLumia950,
+      GalaxyS3, GalaxyS5, KindleFireHDX, IPadMini, BlackberryPlayBook, Nexus10, Nexus7, GalaxyNote3, GalaxyNote2,
+      LaptopWithTouch, LaptopWithHDPIScreen, LaptopWithMDPIScreen
+    ]
+  end
 end
