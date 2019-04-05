@@ -167,14 +167,6 @@ module Applitools
       }
     end
 
-    def batch
-      if @batch.nil?
-        logger.info 'No batch set'
-        self.batch = BatchInfo.new
-      end
-      @batch
-    end
-
     def full_agent_id
       if !agent_id.nil? && !agent_id.empty?
         "#{agent_id} [#{base_agent_id}]"
@@ -269,10 +261,7 @@ module Applitools
       default_options = { session_type: 'SEQUENTIAL' }
       options = default_options.merge options
 
-      if app_name && app_name.empty?
-        # Applitools::ArgumentGuard.not_nil options[:app_name], 'options[:app_name]'
-        self.app_name = options[:app_name] if options[:app_name]
-      end
+      self.app_name = options[:app_name] if options[:app_name]
 
       # Applitools::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
       self.test_name = options[:test_name] if options[:test_name]

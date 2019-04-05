@@ -47,6 +47,7 @@ RSpec.shared_examples 'Test for url' do |url|
     eyes.close
     puts eyes.get_all_test_results.map(&:as_expected?)
     driver.quit
+    eyes.abort_if_not_closed
   end
 
   after(:all) do

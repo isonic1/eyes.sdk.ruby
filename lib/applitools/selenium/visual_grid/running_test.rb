@@ -7,6 +7,7 @@ module Applitools
     class RunningTest
       extend Forwardable
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
+      def_delegators 'eyes', :abort_if_not_closed
 
       state_machine :initial => :new do
         state :new do

@@ -61,7 +61,7 @@ module Applitools
       def eyes_connector
         logger.info("creating VisualGridEyes server connector")
         ::Applitools::Selenium::EyesConnector.new(server_url).tap do |connector|
-          connector.batch = batch_info
+          connector.batch = batch
           connector.config = config.deep_clone
         end
       end
@@ -110,6 +110,12 @@ module Applitools
         end
         failed_results = test_list.map(&:test_result).compact.select { |r| !r.as_expected? }
         failed_results.empty? ? test_list.map(&:test_result).compact.first : failed_results
+      end
+
+      def abort_if_not_closed
+        test_list.each do |t|
+          t.abort_if_not_closed
+        end
       end
 
       def open?
