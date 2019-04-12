@@ -2,7 +2,7 @@ module Applitools
   module Selenium
     class RenderInfo
       include Applitools::Jsonable
-      json_fields :width, :height, :sizeMode, :emulationInfo
+      json_fields :width, :height, :sizeMode, :emulationInfo, :region, :selector
       # , :region, :emulationInfo
 
       def json_data
@@ -12,6 +12,8 @@ module Applitools
           sizeMode: size_mode
         }
         result['emulationInfo'] = json_value(emulation_info) if emulation_info
+        result['region'] = json_value(region) if size_mode == 'region'
+        result['selector'] = json_value(region) if size_mode == 'selector'
         result
       end
     end

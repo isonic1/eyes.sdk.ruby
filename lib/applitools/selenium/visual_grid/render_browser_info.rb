@@ -7,7 +7,7 @@ module Applitools
         {
           platform: 'linux',
           browser_type: BrowserTypes::CHROME,
-          size_mode: 'full-page',
+          # size_mode: 'full-page',
           viewport_size: Applitools::RectangleSize.from_any_argument(width: 0, height: 0)
         }
       end

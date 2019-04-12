@@ -40,6 +40,9 @@ RSpec.shared_examples 'Test for url' do |url|
 
   let(:target1) { Applitools::Selenium::Target.window.send_dom(true) }
   let(:target2) { Applitools::Selenium::Target.window.fully(true).send_dom(true) }
+  let(:target3) { Applitools::Selenium::Target.region(:css, '#ulogo img').send_dom(true) }
+  let(:target4) { Applitools::Selenium::Target.region(Applitools::Region.new(80,80, 350, 100)) }
+
 
   let(:eyes) { @eyes }
 
@@ -56,8 +59,10 @@ RSpec.shared_examples 'Test for url' do |url|
 
   it url do
     driver.get(url)
-    eyes.check('Step1' + url, target1)
-    eyes.check('Step2' + url, target2)
+    eyes.check('Step1 ' + url, target1)
+    eyes.check('Step2 ' + url, target2)
+    eyes.check('Step3 ' + url, target3)
+    eyes.check('Step4 ' + url, target4)
   end
 end
 

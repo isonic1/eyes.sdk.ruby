@@ -153,7 +153,7 @@ module Applitools
         watch_open[open_task] = false
       end
 
-      def check(tag, target, script_result, visual_grid_manager, mod = nil)
+      def check(tag, target, script_result, visual_grid_manager, region_selectors, size_mod, region_to_check, mod = nil)
         render_task = RenderTask.new(
           "Render #{eyes.config.short_description} - #{tag}",
           script_result,
@@ -162,6 +162,9 @@ module Applitools
           visual_grid_manager.put_cache,
           visual_grid_manager.rendering_info(eyes.server_connector),
           eyes.server_connector,
+          region_selectors,
+          size_mod,
+          region_to_check,
           mod
         )
 

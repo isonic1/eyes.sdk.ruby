@@ -11,6 +11,9 @@ module Applitools
 
       attr_accessor :api_key, :server_url, :proxy, :opened
 
+      attr_accessor :size_mod, :region_to_check
+      private :size_mod, :size_mod=, :region_to_check, :region_to_check=
+
       def_delegators 'config', *Applitools::Selenium::Configuration.methods_to_delegate
       def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
 
@@ -74,13 +77,71 @@ module Applitools
           sleep wait_before_screenshots
           script_result = driver.execute_async_script(script).freeze
           mod = Digest::SHA2.hexdigest(script_result)
+
+          region_x_paths = get_regions_x_paths(target)
+
+          # require 'pry'
+          # binding.pry
+
           test_list.each do |t|
-            t.check(tag, target, script_result.dup, visual_grid_manager, mod)
+            t.check(tag, target, script_result.dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)
           end
           test_list.each { |t| t.becomes_not_rendered}
         rescue StandardError => e
           Applitools::EyesLogger.error e.message
           test_list.each { |t| t.becomes_tested}
+        end
+      end
+
+      def get_regions_x_paths(target)
+        regions_hash = collect_selenium_regions(target).each do |k,v|
+          v.map! do |el|
+            if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
+              xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
+              web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, k)
+              self.region_to_check = web_element_region if k ==:target && size_mod == 'selector'
+              web_element_region
+            end
+          end.compact!
+        end
+        regions_hash.values.flatten.compact
+      end
+
+      def collect_selenium_regions(target)
+        selenium_regions = {:target => []}
+        # ignore_regions = target.ignored_regions
+        # floating_regions = target.floating_regions
+        target_element = target.region_to_check
+        setup_size_mode(target_element)
+        # selenium_regions.map do |r|
+        #   element_or_region(r)
+        # end
+        selenium_regions[:target] << region_to_check if size_mod == 'selector'
+        selenium_regions
+      end
+
+      def setup_size_mode(target_element)
+        self.size_mod = 'full-page'
+
+        element_or_region = element_or_region(target_element)
+
+        case element_or_region
+        when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+          self.size_mod = 'selector'
+        when Applitools::Region
+          self.size_mod = 'region' unless element_or_region == Applitools::Region::EMPTY
+        else
+          self.size_mod = 'full-page'
+        end
+
+        self.region_to_check = element_or_region
+      end
+
+      def element_or_region(target_element)
+        if target_element.respond_to?(:call)
+          target_element.call(driver)
+        else
+          target_element
         end
       end
 

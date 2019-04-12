@@ -2,7 +2,7 @@ module BrowserTypes
   extend self
   CHROME = :chrome
   FIREFOX = :firefox
-  IE11 = :ie
+  IE11 = :IE_11
   EDGE = :edge
   IE10 = :ie10
 

@@ -4,7 +4,7 @@ module Applitools
     class RenderRequest
       include Applitools::Jsonable
       json_fields :renderId, :webhook, :url, :dom, :resources, :scriptHooks,
-                  :selectorsToFindRegionsFor, :send_dom
+                  :selectorsToFindRegionsFor, :sendDom
 
       json_fields :renderInfo, :browser
 

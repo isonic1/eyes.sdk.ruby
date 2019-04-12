@@ -9,8 +9,9 @@ module Applitools
       MAX_ITERATIONS = 100
 
       attr_accessor :script, :running_test, :all_blobs, :resource_urls, :resource_cache, :put_cache, :server_connector,
-                    :rendering_info, :request_resources, :dom_url_mod, :result
-      def initialize(name, script, running_test, resource_cache, put_cache, rendering_info, server_connector, mod = nil)
+                    :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode, :region_to_check
+
+      def initialize(name, script, running_test, resource_cache, put_cache, rendering_info, server_connector, region_selectors, size_mode, region, mod = nil)
         self.result = nil
         self.script = script
         self.running_test = running_test
@@ -18,6 +19,10 @@ module Applitools
         self.put_cache = put_cache
         self.server_connector = server_connector
         self.rendering_info = rendering_info
+        self.region_selectors = region_selectors
+        self.size_mode = size_mode
+        self.region_to_check = region
+
         self.dom_url_mod = mod
         super(name) do
           perform
@@ -38,6 +43,7 @@ module Applitools
           # rescue StandardError => _e
           #   response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
           rescue StandardError => e
+            Applitools::EyesLogger.error(e.message)
             fetch_fails += 1
             sleep 2
           end
@@ -146,7 +152,8 @@ module Applitools
         r_info = Applitools::Selenium::RenderInfo.new.tap do |r|
           r.width = running_test.browser_info.viewport_size.width
           r.height = running_test.browser_info.viewport_size.height
-          r.size_mode = running_test.browser_info.size_mode
+          r.size_mode = size_mode
+          r.region = region_to_check
           r.emulation_info = running_test.browser_info.emulation_info if running_test.browser_info.emulation_info
         end
 
@@ -162,9 +169,8 @@ module Applitools
           render_info: r_info,
           browser: {name: running_test.browser_info.browser_type, platform: running_test.browser_info.platform},
           script_hooks: nil,
-          selectors_to_find_region_for: nil,
-          send_dom: running_test.eyes.config.send_dom,
-          task: nil
+          selectors_to_find_regions_for: region_selectors,
+          send_dom: running_test.eyes.config.send_dom.nil? ? false.to_s : running_test.eyes.config.send_dom.to_s
         )
       end
 
