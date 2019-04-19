@@ -2,7 +2,7 @@ module Applitools
   module Selenium
     module Scripts
       PROCESS_RESOURCES = <<'END'
-
+// @applitools/dom-snapshot@1.1.2
 function __processPageAndSerialize() {
   var processPageAndSerialize = (function () {
   'use strict';
@@ -94,6 +94,7 @@ function __processPageAndSerialize() {
       TEXT: 3,
       DOCUMENT: 9,
       DOCUMENT_TYPE: 10,
+      DOCUMENT_FRAGMENT_NODE: 11,
     };
 
     const domNodes = [
@@ -121,7 +122,7 @@ function __processPageAndSerialize() {
     function elementNodeFactory(domNodes, elementNode) {
       let node;
       const {nodeType} = elementNode;
-      if (nodeType === NODE_TYPES.ELEMENT) {
+      if ([NODE_TYPES.ELEMENT, NODE_TYPES.DOCUMENT_FRAGMENT_NODE].includes(nodeType)) {
         if (elementNode.nodeName !== 'SCRIPT') {
           if (
             elementNode.nodeName === 'STYLE' &&
@@ -137,9 +138,9 @@ function __processPageAndSerialize() {
           }
 
           node = {
-            nodeType: NODE_TYPES.ELEMENT,
+            nodeType: nodeType,
             nodeName: elementNode.nodeName,
-            attributes: Object.keys(elementNode.attributes).map(key => {
+            attributes: Object.keys(elementNode.attributes || {}).map(key => {
               let value = elementNode.attributes[key].value;
               const name = elementNode.attributes[key].localName;
 
@@ -156,8 +157,20 @@ function __processPageAndSerialize() {
               ? childrenFactory(domNodes, elementNode.childNodes)
               : [],
           };
+
+          if (elementNode.shadowRoot) {
+            node.shadowRootIndex = elementNodeFactory(domNodes, elementNode.shadowRoot);
+          }
+
           if (elementNode.checked && !elementNode.attributes.checked) {
             node.attributes.push({name: 'checked', value: 'checked'});
+          }
+          if (
+            elementNode.value !== undefined &&
+            elementNode.attributes.value === undefined &&
+            elementNode.tagName === 'INPUT'
+          ) {
+            node.attributes.push({name: 'value', value: elementNode.value});
           }
         }
       } else if (nodeType === NODE_TYPES.TEXT) {
@@ -213,7 +226,9 @@ function __processPageAndSerialize() {
   var extractFrames_1 = extractFrames;
 
   function uniq(arr) {
-    return Array.from(new Set(arr)).filter(x => !!x);
+    const result = [];
+    new Set(arr).forEach(v => v && result.push(v));
+    return result;
   }
 
   var uniq_1 = uniq;

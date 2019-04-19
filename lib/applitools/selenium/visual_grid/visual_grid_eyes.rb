@@ -75,13 +75,11 @@ module Applitools
         END
         begin
           sleep wait_before_screenshots
+
           script_result = driver.execute_async_script(script).freeze
           mod = Digest::SHA2.hexdigest(script_result)
 
           region_x_paths = get_regions_x_paths(target)
-
-          # require 'pry'
-          # binding.pry
 
           test_list.each do |t|
             t.check(tag, target, script_result.dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)
@@ -109,8 +107,8 @@ module Applitools
 
       def collect_selenium_regions(target)
         selenium_regions = {:target => []}
-        # ignore_regions = target.ignored_regions
-        # floating_regions = target.floating_regions
+        ignore_regions = target.ignored_regions
+        floating_regions = target.floating_regions
         target_element = target.region_to_check
         setup_size_mode(target_element)
         # selenium_regions.map do |r|

@@ -9,9 +9,10 @@ module Applitools
       MAX_ITERATIONS = 100
 
       attr_accessor :script, :running_test, :all_blobs, :resource_urls, :resource_cache, :put_cache, :server_connector,
-                    :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode, :region_to_check
+                    :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode,
+                    :region_to_check, :script_hooks
 
-      def initialize(name, script, running_test, resource_cache, put_cache, rendering_info, server_connector, region_selectors, size_mode, region, mod = nil)
+      def initialize(name, script, running_test, resource_cache, put_cache, rendering_info, server_connector, region_selectors, size_mode, region, script_hooks, mod = nil)
         self.result = nil
         self.script = script
         self.running_test = running_test
@@ -22,6 +23,7 @@ module Applitools
         self.region_selectors = region_selectors
         self.size_mode = size_mode
         self.region_to_check = region
+        self.script_hooks = script_hooks if script_hooks.is_a?(Hash)
 
         self.dom_url_mod = mod
         super(name) do
@@ -168,7 +170,7 @@ module Applitools
           resources: request_resources,
           render_info: r_info,
           browser: {name: running_test.browser_info.browser_type, platform: running_test.browser_info.platform},
-          script_hooks: nil,
+          script_hooks: script_hooks,
           selectors_to_find_regions_for: region_selectors,
           send_dom: running_test.eyes.config.send_dom.nil? ? false.to_s : running_test.eyes.config.send_dom.to_s
         )

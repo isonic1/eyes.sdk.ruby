@@ -165,6 +165,7 @@ module Applitools
           region_selectors,
           size_mod,
           region_to_check,
+          target.options[:script_hooks],
           mod
         )
 

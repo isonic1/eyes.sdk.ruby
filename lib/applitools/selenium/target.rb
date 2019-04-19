@@ -29,7 +29,8 @@ module Applitools
         self.options = {
           ignore_caret: true,
           ignore_mismatch: false,
-          send_dom: nil
+          send_dom: nil,
+          script_hooks: { beforeCaptureScreenshot: '' }
         }
         reset_for_fullscreen
       end
@@ -170,6 +171,11 @@ module Applitools
 
       def use_dom(value = true)
         options[:use_dom] = value ? true : false
+        self
+      end
+
+      def script_hook(hook)
+        options[:script_hooks][:beforeCaptureScreenshot] = hook
         self
       end
 
