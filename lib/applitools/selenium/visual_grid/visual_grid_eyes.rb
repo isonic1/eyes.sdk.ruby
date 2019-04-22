@@ -19,6 +19,7 @@ module Applitools
 
       def initialize(visual_grid_manager, server_url = nil)
         ensure_config
+        self.server_url = server_url if server_url
         self.visual_grid_manager = visual_grid_manager
         self.test_list = Applitools::Selenium::TestList.new
         self.opened = false
