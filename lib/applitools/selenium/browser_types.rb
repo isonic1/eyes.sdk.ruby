@@ -2,11 +2,11 @@ module BrowserTypes
   extend self
   CHROME = :chrome
   FIREFOX = :firefox
-  IE11 = :IE_11
+  IE_11 = :ie
   EDGE = :edge
-  IE10 = :ie10
+  IE_10 = :ie10
 
   def enum_values
-    [CHROME, FIREFOX, IE11, EDGE, IE10]
+    [CHROME, FIREFOX, IE_11, EDGE, IE_10]
   end
 end
