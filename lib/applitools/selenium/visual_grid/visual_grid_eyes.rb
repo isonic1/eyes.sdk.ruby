@@ -39,8 +39,8 @@ module Applitools
         options = Applitools::Utils.extract_options!(args)
         Applitools::ArgumentGuard.hash(options, 'options', [:driver])
 
-        config.app_name = options[:app_name] unless config.app_name && config.app_name.empty?
-        config.test_name = options[:test_name] unless config.test_name && config.test_name.empty?
+        config.app_name = options[:app_name] if config.app_name.nil? || config.app_name && config.app_name.empty?
+        config.test_name = options[:test_name] if config.test_name.nil? || config.test_name && config.test_name.empty?
 
         self.driver = options.delete(:driver)
         self.current_url = driver.current_url
