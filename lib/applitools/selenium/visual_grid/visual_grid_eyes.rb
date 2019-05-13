@@ -80,6 +80,9 @@ module Applitools
           script_result = driver.execute_async_script(script).freeze
           mod = Digest::SHA2.hexdigest(script_result)
 
+          # require 'pry'
+          # binding.pry
+
           region_x_paths = get_regions_x_paths(target)
 
           test_list.each do |t|
@@ -93,21 +96,31 @@ module Applitools
       end
 
       def get_regions_x_paths(target)
-        regions_hash = collect_selenium_regions(target).each do |k,v|
-          v.map! do |el|
-            if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
-              xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
-              web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, k)
-              self.region_to_check = web_element_region if k ==:target && size_mod == 'selector'
-              web_element_region
-            end
-          end.compact!
+        # regions_hash = collect_selenium_regions(target).each do |k,v|
+        #   v.map! do |el|
+        #     if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
+        #       xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
+        #       web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, k)
+        #       self.region_to_check = web_element_region if k ==:target && size_mod == 'selector'
+        #       web_element_region
+        #     end
+        #   end.compact!
+        # end
+        result = []
+        regions_hash = collect_selenium_regions(target).each do |el, v|
+          if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
+            xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
+            web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, v)
+            self.region_to_check = web_element_region if v == :target && size_mod == 'selector'
+            result << web_element_region
+            target.regions[el] = result.size - 1
+          end
         end
-        regions_hash.values.flatten.compact
+        result
       end
 
       def collect_selenium_regions(target)
-        selenium_regions = {:target => []}
+        selenium_regions = {}
         ignore_regions = target.ignored_regions
         floating_regions = target.floating_regions
         target_element = target.region_to_check
@@ -115,7 +128,14 @@ module Applitools
         # selenium_regions.map do |r|
         #   element_or_region(r)
         # end
-        selenium_regions[:target] << region_to_check if size_mod == 'selector'
+
+        target.ignored_regions.each do |r|
+          selenium_regions[element_or_region(r)] = :ignore
+        end
+        selenium_regions[region_to_check] = :target if size_mod == 'selector'
+
+        # selenium_regions[:ignore] += [target.ignored_regions.map { |r| element_or_region(r) }].flatten.compact
+        # selenium_regions[:target] << region_to_check if size_mod == 'selector'
         selenium_regions
       end
 
@@ -138,7 +158,7 @@ module Applitools
 
       def element_or_region(target_element)
         if target_element.respond_to?(:call)
-          target_element.call(driver)
+          target_element.call(driver, true)
         else
           target_element
         end

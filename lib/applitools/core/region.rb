@@ -109,6 +109,8 @@ module Applitools
       {
         x: left,
         y: top,
+        left: left,
+        top: top,
         height: height,
         width: width
       }

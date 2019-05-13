@@ -19,7 +19,7 @@ module Applitools
       end
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
-        :floating_regions, :frame_or_element
+        :floating_regions, :frame_or_element, :regions
 
       private :frame_or_element, :frame_or_element=
 
@@ -32,6 +32,7 @@ module Applitools
           send_dom: nil,
           script_hooks: { beforeCaptureScreenshot: '' }
         }
+        self.regions = {}
         reset_for_fullscreen
       end
 
@@ -55,15 +56,17 @@ module Applitools
                              when Applitools::Region
                                proc { args.first.padding(requested_padding) }
                              when Applitools::Selenium::Element, ::Selenium::WebDriver::Element
-                               proc do
+                               proc do |_driver, return_element = false|
                                  region = args.first
+                                 next region if return_element
                                  Applitools::Region.from_location_size(
                                    region.location, region.size
                                  ).padding(requested_padding)
                                end
                              else
-                               proc do |driver|
+                               proc do |driver, return_element = false|
                                  region = driver.find_element(*args)
+                                 next region if return_element
                                  Applitools::Region.from_location_size(
                                    region.location, region.size
                                  ).padding(requested_padding)

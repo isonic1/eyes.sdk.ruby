@@ -12,6 +12,7 @@ module Applitools
       class << self
         def parse_blob_from_script(blob)
           content = Base64.decode64(blob["value"])
+          # puts "#{blob['url']} ===> #{blob['type']}"
           self.new blob["url"], blob["type"], content
         end
 

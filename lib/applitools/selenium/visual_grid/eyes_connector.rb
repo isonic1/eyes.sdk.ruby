@@ -39,10 +39,10 @@ module Applitools
         target_to_check = target.finalize
         timeout = target_to_check.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
 
-        match_data = Applitools::MatchWindowData.new
+        match_data = Applitools::Selenium::VgMatchWindowData.new
         match_data.tag = name
         update_default_settings(match_data)
-        match_data.read_target(target_to_check, driver)
+        match_data.read_target(target_to_check, driver, selector_regions)
         check_result = check_window_base(
             dummy_region_provider, timeout, match_data
         )
@@ -79,6 +79,10 @@ module Applitools
 
       def dom_url
         render_status['domLocation']
+      end
+
+      def selector_regions
+        render_status['selectorRegions']
       end
 
       def match_level_keys
@@ -160,13 +164,13 @@ module Applitools
         a_title = title
         # logger.info 'Done!'
         Applitools::AppOutputWithScreenshot.new(
-            Applitools::AppOutput.new(a_title, '').tap do |o|
-              o.location = region.location unless region.empty?
-              o.dom_url = dom_url
-              o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
-            end,
-            nil,
-            true
+          Applitools::AppOutput.new(a_title, '').tap do |o|
+            o.location = region.location unless region.empty?
+            o.dom_url = dom_url
+            o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
+          end,
+          nil,
+          true
         )
       end
     end
