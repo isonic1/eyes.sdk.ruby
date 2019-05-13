@@ -8,6 +8,15 @@ require 'zlib'
 require_relative 'match_level_setter'
 
 module Applitools
+  module MatchLevel
+    NONE = 'None'.freeze
+    LAYOUT = 'Layout'.freeze
+    LAYOUT2 = 'Layout2'.freeze
+    CONTENT = 'Content'.freeze
+    STRICT = 'Strict'.freeze
+    EXACT = 'Exact'.freeze
+  end
+
   MATCH_LEVEL = {
     none: 'None',
     layout: 'Layout',
@@ -92,7 +101,7 @@ module Applitools
       end
 
       self.exact = nil
-      self.match_level = Applitools::MATCH_LEVEL[:strict]
+      self.match_level = Applitools::MatchLevel::STRICT
       self.server_scale = 0
       self.server_remainder = 0
       self.compare_with_parent_branch = false

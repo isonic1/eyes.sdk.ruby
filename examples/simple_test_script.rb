@@ -9,9 +9,18 @@ eyes = Applitools::Selenium::Eyes.new
 eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 eyes.match_level = Applitools::MATCH_LEVEL[:layout]
+eyes.server_url = 'https://testeyes.applitools.com'
 
 begin
   web_driver = Selenium::WebDriver.for :chrome
+
+  drv = eyes.open(app_name: 'Ruby SDK', test_name: 'Applitools example', viewport_size: { width: 800, height: 600 }, driver: web_driver)
+  drv.get('https://applitools.com/helloworld?diff2')
+  eyes.check('Example1', Applitools::Selenium::Target.window.fully)
+  drv.find_element(:css, '.section.button-section button').click()
+  eyes.check('Example2', Applitools::Selenium::Target.window.fully)
+  eyes.close
+
   eyes.test(
     app_name: 'Ruby SDK',
     test_name: 'Applitools website test',
@@ -22,32 +31,6 @@ begin
     eyes.check_window('initial')
     eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
   end
-
-  driver = eyes.open(driver: web_driver) do |config|
-    config.app_name = 'Ruby SDK'
-    config.test_name = 'Applitools website test 1'
-    config.viewport_size = Applitools::RectangleSize.from_any_argument(width: 850, height: 600)
-  end
-
-  driver.get 'http://www.applitools.com'
-  eyes.check_window('initial')
-  eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
-  z = eyes.close
-  require 'pry'
-  binding.pry
-
-  cnf = Applitools::Selenium::SeleniumConfiguration.new.tap do |config|
-    config.app_name = 'Ruby SDK'
-    config.test_name = 'Applitools website test 2'
-    config.viewport_size = Applitools::RectangleSize.from_any_argument(width: 900, height: 600)
-  end
-
-  driver = eyes.open(driver: web_driver, config: cnf)
-  driver.get 'http://www.applitools.com'
-  eyes.check_window('initial')
-  eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
-  eyes.close
-
 ensure
   web_driver.quit
 end

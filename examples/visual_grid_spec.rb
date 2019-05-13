@@ -16,6 +16,7 @@ RSpec.shared_examples 'Test for url' do |url|
     config.test_name = "Top 10 sites - #{url}"
     config.viewport_size = Applitools::RectangleSize.new(1280,600)
     config.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
+    config.server_url = 'https://testeyes.applitools.com'
     # emu = Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT)
 
     config.add_browser(800, 600, BrowserTypes::CHROME)

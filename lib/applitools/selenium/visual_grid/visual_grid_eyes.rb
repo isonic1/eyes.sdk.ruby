@@ -29,11 +29,18 @@ module Applitools
         self.config = Applitools::Selenium::Configuration.new
       end
 
+      def configure
+        return unless block_given?
+        yield(config)
+      end
 
       def open(*args)
         self.test_list = Applitools::Selenium::TestList.new
         options = Applitools::Utils.extract_options!(args)
         Applitools::ArgumentGuard.hash(options, 'options', [:driver])
+
+        config.app_name = options[:app_name] unless config.app_name && config.app_name.empty?
+        config.test_name = options[:test_name] unless config.test_name && config.test_name.empty?
 
         self.driver = options.delete(:driver)
         self.current_url = driver.current_url
@@ -49,7 +56,7 @@ module Applitools
         logger.info("getting all browsers info...")
         browsers_info_list = config.browsers_info
         logger.info("creating test descriptors for each browser info...")
-        browsers_info_list.each do |bi|
+        browsers_info_list.each(viewport_size) do |bi|
           test_list.push Applitools::Selenium::RunningTest.new(eyes_connector, bi, driver)
         end
         self.opened = true
