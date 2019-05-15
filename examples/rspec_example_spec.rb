@@ -2,15 +2,20 @@ require 'rspec'
 require 'eyes_selenium'
 require 'pry'
 
+OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+
 RSpec.describe 'Eyes example' do
   before(:all) do
-    @runner = Applitools::Selenium::VisualGridRunner.new(12)
-    @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: @runner)
+    # @runner = Applitools::Selenium::VisualGridRunner.new(12)
+    # @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: @runner)
+    @eyes = Applitools::Selenium::Eyes.new
+
     @eyes.api_key = ENV['APPLITOOLS_API_KEY']
     @eyes.log_handler = Logger.new(STDOUT)
     @eyes.match_level = Applitools::MatchLevel::LAYOUT
     @eyes.server_url = 'https://testeyes.applitools.com'
     @eyes.batch = Applitools::BatchInfo.new('Eyes RSpec example')
+    @eyes.set_proxy 'http://localhost:8000'
   end
 
   after do

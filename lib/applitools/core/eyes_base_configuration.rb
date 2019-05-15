@@ -102,5 +102,10 @@ module Applitools
       "#{test_name} of #{app_name}"
     end
 
+    def set_proxy(uri, user = nil, password = nil)
+      self.proxy = Applitools::Connectivity::Proxy.new(uri, user, password)
+    end
+
+    methods_to_delegate.push(:set_proxy)
   end
 end
