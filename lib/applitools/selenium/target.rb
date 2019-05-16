@@ -58,18 +58,24 @@ module Applitools
                              when Applitools::Selenium::Element, ::Selenium::WebDriver::Element
                                proc do |_driver, return_element = false|
                                  region = args.first
-                                 next region if return_element
-                                 Applitools::Region.from_location_size(
-                                   region.location, region.size
-                                 ).padding(requested_padding)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
                                end
                              else
                                proc do |driver, return_element = false|
                                  region = driver.find_element(*args)
-                                 next region if return_element
-                                 Applitools::Region.from_location_size(
-                                   region.location, region.size
-                                 ).padding(requested_padding)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
                                end
                              end
 

@@ -80,9 +80,6 @@ module Applitools
           script_result = driver.execute_async_script(script).freeze
           mod = Digest::SHA2.hexdigest(script_result)
 
-          # require 'pry'
-          # binding.pry
-
           region_x_paths = get_regions_x_paths(target)
 
           test_list.each do |t|
@@ -128,7 +125,6 @@ module Applitools
         # selenium_regions.map do |r|
         #   element_or_region(r)
         # end
-
         target.ignored_regions.each do |r|
           selenium_regions[element_or_region(r)] = :ignore
         end
@@ -158,7 +154,8 @@ module Applitools
 
       def element_or_region(target_element)
         if target_element.respond_to?(:call)
-          target_element.call(driver, true)
+          region, _padding_proc = target_element.call(driver, true)
+          region
         else
           target_element
         end
@@ -166,9 +163,7 @@ module Applitools
 
       def close(throw_exception = true)
         return false if test_list.empty?
-        test_list.each do |t|
-          t.close
-        end
+        test_list.each(&:close)
 
         while (!((states = test_list.map(&:state_name).uniq).count == 1 && states.first == :completed)) do
           sleep 0.5
@@ -193,9 +188,7 @@ module Applitools
       end
 
       def abort_if_not_closed
-        test_list.each do |t|
-          t.abort_if_not_closed
-        end
+        test_list.each(&:abort_if_not_closed)
       end
 
       def open?

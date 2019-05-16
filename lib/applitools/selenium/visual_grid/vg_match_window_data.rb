@@ -13,10 +13,15 @@ module Applitools
         # ignored regions
         if target.respond_to? :ignored_regions
           target.ignored_regions.each do |r|
+            @need_convert_ignored_regions_coordinates = true unless @need_convert_ignored_regions_coordinates
             case r
             when Proc
-              @ignored_regions << r.call(driver, true)
-              @need_convert_ignored_regions_coordinates = true
+              region, padding_proc = r.call(driver, true)
+              # require 'pry'
+              # binding.pry
+              region = selector_regions[target.regions[region]]
+              retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
+              @ignored_regions << padding_proc.call(retrieved_region) if padding_proc.is_a? Proc
             when Applitools::Region
               @ignored_regions << r
             end
@@ -42,14 +47,15 @@ module Applitools
 
       def convert_ignored_regions_coordinates
         return unless @need_convert_ignored_regions_coordinates
-        self.ignored_regions = @ignored_regions.map do |r|
-          puts "***1 #{r.inspect}"
-          puts "***2 #{selector_regions}"
-          puts "***3 #{target.regions}"
-          puts "***4 #{selector_regions[target.regions[r]]}"
-          region = selector_regions[target.regions[r]]
-          Applitools::Region.new(region['x'], region['y'], region['width'], region['height']).to_hash
-        end
+        # self.ignored_regions = @ignored_regions.map do |r|
+        #   puts "***1 #{r.inspect}"
+        #   puts "***2 #{selector_regions}"
+        #   puts "***3 #{target.regions}"
+        #   puts "***4 #{selector_regions[target.regions[r]]}"
+        #   region = selector_regions[target.regions[r]]
+        #   Applitools::Region.new(region['x'], region['y'], region['width'], region['height']).to_hash
+        # end
+        self.ignored_regions = @ignored_regions.map(&:with_padding).map(&:to_hash)
         @need_convert_ignored_regions_coordinates = false
       end
 
