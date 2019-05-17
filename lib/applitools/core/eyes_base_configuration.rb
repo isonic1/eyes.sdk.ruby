@@ -93,6 +93,7 @@ module Applitools
     string_field :host_os
     string_field :host_app
     object_field :proxy, Applitools::Connectivity::Proxy
+    string_field :match_level
 
     methods_to_delegate.delete(:batch_info)
     methods_to_delegate.delete(:batch_info=)
@@ -101,5 +102,10 @@ module Applitools
       "#{test_name} of #{app_name}"
     end
 
+    def set_proxy(uri, user = nil, password = nil)
+      self.proxy = Applitools::Connectivity::Proxy.new(uri, user, password)
+    end
+
+    methods_to_delegate.push(:set_proxy)
   end
 end
