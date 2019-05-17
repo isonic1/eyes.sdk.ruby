@@ -19,7 +19,7 @@ module Applitools
       end
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
-        :floating_regions, :frame_or_element
+        :floating_regions, :frame_or_element, :regions
 
       private :frame_or_element, :frame_or_element=
 
@@ -32,6 +32,7 @@ module Applitools
           send_dom: nil,
           script_hooks: { beforeCaptureScreenshot: '' }
         }
+        self.regions = {}
         reset_for_fullscreen
       end
 
@@ -55,18 +56,26 @@ module Applitools
                              when Applitools::Region
                                proc { args.first.padding(requested_padding) }
                              when Applitools::Selenium::Element, ::Selenium::WebDriver::Element
-                               proc do
+                               proc do |_driver, return_element = false|
                                  region = args.first
-                                 Applitools::Region.from_location_size(
-                                   region.location, region.size
-                                 ).padding(requested_padding)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
                                end
                              else
-                               proc do |driver|
+                               proc do |driver, return_element = false|
                                  region = driver.find_element(*args)
-                                 Applitools::Region.from_location_size(
-                                   region.location, region.size
-                                 ).padding(requested_padding)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
                                end
                              end
 
@@ -105,14 +114,30 @@ module Applitools
                             end
         value = case args.first
                 when Applitools::FloatingRegion
-                  proc { args.first.padding(requested_padding) }
-                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element, ::Applitools::Region
-                  proc { Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding) }
+                  args.first.padding(requested_padding)
+                when ::Applitools::Region
+                  Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding)
+                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+                  proc do |_driver, return_element = false|
+                    args_dup = args.dup
+                    region = args_dup.shift
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(region, *args_dup).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
+                  end
                 else
-                  proc do |driver|
-                    Applitools::FloatingRegion.any(
-                      driver.find_element(args.shift, args.shift), *args
-                    ).padding(requested_padding)
+                  proc do |driver, return_element = false|
+                    args_dup = args.dup
+                    region = driver.find_element(args_dup.shift, args_dup.shift)
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(
+                          region, *args_dup
+                      ).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
                   end
                 end
         floating_regions << value

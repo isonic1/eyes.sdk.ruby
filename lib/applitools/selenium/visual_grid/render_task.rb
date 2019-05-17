@@ -128,7 +128,7 @@ module Applitools
         self.all_blobs = data["blobs"]
         self.resource_urls = data["resourceUrls"]
         self.request_resources = Applitools::Selenium::RenderResources.new
-        # self.request_resources = {}
+
         all_blobs.map {|blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob)}.each do |blob|
           request_resources[blob.url] = blob
         end
