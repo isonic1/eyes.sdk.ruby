@@ -114,14 +114,30 @@ module Applitools
                             end
         value = case args.first
                 when Applitools::FloatingRegion
-                  proc { args.first.padding(requested_padding) }
-                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element, ::Applitools::Region
-                  proc { Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding) }
+                  args.first.padding(requested_padding)
+                when ::Applitools::Region
+                  Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding)
+                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+                  proc do |_driver, return_element = false|
+                    args_dup = args.dup
+                    region = args_dup.shift
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(region, *args_dup).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
+                  end
                 else
-                  proc do |driver|
-                    Applitools::FloatingRegion.any(
-                      driver.find_element(args.shift, args.shift), *args
-                    ).padding(requested_padding)
+                  proc do |driver, return_element = false|
+                    args_dup = args.dup
+                    region = driver.find_element(args_dup.shift, args_dup.shift)
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(
+                          region, *args_dup
+                      ).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
                   end
                 end
         floating_regions << value

@@ -118,8 +118,8 @@ module Applitools
 
       def collect_selenium_regions(target)
         selenium_regions = {}
-        ignore_regions = target.ignored_regions
-        floating_regions = target.floating_regions
+        # ignore_regions = target.ignored_regions
+        # floating_regions = target.floating_regions
         target_element = target.region_to_check
         setup_size_mode(target_element)
         # selenium_regions.map do |r|
@@ -127,6 +127,9 @@ module Applitools
         # end
         target.ignored_regions.each do |r|
           selenium_regions[element_or_region(r)] = :ignore
+        end
+        target.floating_regions.each do |r|
+          selenium_regions[element_or_region(r)] = :floating
         end
         selenium_regions[region_to_check] = :target if size_mod == 'selector'
 
