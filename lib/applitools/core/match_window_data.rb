@@ -23,6 +23,7 @@ module Applitools
               'SplitTopHeight' => 0,
               'SplitBottomHeight' => 0,
               'IgnoreCaret' => true,
+              'IgnoreDisplacements' => false,
               'Ignore' => [],
               'Floating' => [],
               'Exact' => {
@@ -176,6 +177,14 @@ module Applitools
       current_data['Options']['ImageMatchSettings']['EnablePatterns'] = value
     end
 
+    def ignore_displacements
+      current_data['Options']['ImageMatchSettings']['IgnoreDisplacements']
+    end
+
+    def ignore_displacements=(value)
+      current_data['Options']['ImageMatchSettings']['IgnoreDisplacements'] = value
+    end
+
     def exact=(value)
       raise Applitools::EyesError.new('You should pass a hash as a value!') unless value.nil? || value.is_a?(Hash)
       return current_data['Options']['ImageMatchSettings']['Exact'] = nil if value.nil?
@@ -224,7 +233,7 @@ module Applitools
     end
 
     def target_options_to_read
-      %w(trim ignore_caret match_level ignore_mismatch exact use_dom enable_patterns)
+      %w(trim ignore_caret match_level ignore_mismatch exact use_dom enable_patterns ignore_displacements)
     end
 
     private :target_options_to_read
