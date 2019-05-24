@@ -40,7 +40,7 @@ RSpec.shared_examples 'Test for url' do |url|
     eyes.open(driver: web_driver)
   end
 
-  let(:target1) { Applitools::Selenium::Target.window.send_dom(true).ignore(:css, '#hlogo img') }#.script_hook('document.getElementsByTagName("html")[0].appendChild(document.createTextNode("some text"));') }
+  let(:target1) { Applitools::Selenium::Target.window.send_dom(true).ignore(:css, '#hlogo img').ignore_displacements }#.script_hook('document.getElementsByTagName("html")[0].appendChild(document.createTextNode("some text"));') }
   let(:target2) { Applitools::Selenium::Target.window.fully(true).send_dom(true).floating(:css, '#hlogo img', 15, 15, 15, 15) }
   let(:target3) { Applitools::Selenium::Target.region(:css, '#ulogo img').send_dom(true) }
   let(:target4) { Applitools::Selenium::Target.region(Applitools::Region.new(80,80, 350, 100)) }
