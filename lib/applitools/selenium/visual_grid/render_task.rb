@@ -12,9 +12,9 @@ module Applitools
                     :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode,
                     :region_to_check, :script_hooks
 
-      def initialize(name, script, running_test, resource_cache, put_cache, rendering_info, server_connector, region_selectors, size_mode, region, script_hooks, mod = nil)
+      def initialize(name, script_result, running_test, resource_cache, put_cache, rendering_info, server_connector, region_selectors, size_mode, region, script_hooks, mod = nil)
         self.result = nil
-        self.script = script
+        self.script = script_result
         self.running_test = running_test
         self.resource_cache = resource_cache
         self.put_cache = put_cache
@@ -121,7 +121,8 @@ module Applitools
       end
 
       def script_data
-        @script_data ||= Oj.load script
+        # @script_data ||= Oj.load script
+        @script_data ||= script
       end
 
       def prepare_data_for_rg(data)

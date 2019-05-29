@@ -2,6 +2,7 @@ require 'applitools/selenium/configuration'
 module Applitools
   module Selenium
     class VisualGridEyes
+      DOM_EXTRACTION_TIMEOUT = 300 #seconds or 5 minutes
       extend Forwardable
 
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -81,16 +82,35 @@ module Applitools
         script = <<-END
           var callback = arguments[arguments.length - 1]; return (#{Applitools::Selenium::Scripts::PROCESS_RESOURCES})().then(JSON.stringify).then(callback, function(err) {callback(err.stack || err.toString())});
         END
+        script = <<-END
+          #{Applitools::Selenium::Scripts::PROCESS_PAGE_AND_POLL} return __processPageAndPoll();
+        END
         begin
           sleep wait_before_screenshots
 
-          script_result = driver.execute_async_script(script).freeze
+          # script_result = driver.execute_async_script(script).freeze
+
+          dom_snapshot_start_time = Time.now()
+          result = {}
+          script_result = nil
+          loop do
+            script_result = driver.execute_script(script)
+            begin
+              result = Oj.load(script_result)
+              break if result['status'] == 'SUCCESS'
+              dom_snapshot_time = Time.now - dom_snapshot_start_time
+              raise Applitools::EyesError, 'Timeout error while getting dom snapshot!' if dom_snapshot_time > DOM_EXTRACTION_TIMEOUT
+            rescue Oj::ParseError => e
+              Applitools::EyesLogger.warn e.message
+            end
+          end
+
           mod = Digest::SHA2.hexdigest(script_result)
 
           region_x_paths = get_regions_x_paths(target)
 
           test_list.each do |t|
-            t.check(tag, target, script_result.dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)
+            t.check(tag, target, result['value'].dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)
           end
           test_list.each { |t| t.becomes_not_rendered}
         rescue StandardError => e
