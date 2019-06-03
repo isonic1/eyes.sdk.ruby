@@ -19,7 +19,7 @@ module Applitools
       end
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
-        :floating_regions, :frame_or_element, :regions
+        :floating_regions, :frame_or_element, :regions, :match_level
 
       private :frame_or_element, :frame_or_element=
 
@@ -143,6 +143,27 @@ module Applitools
         floating_regions << value
         self
       end
+
+      def layout(*args)
+
+      end
+
+      def content(*args)
+
+      end
+
+      def strict(*args)
+
+      end
+
+      def exact(*args)
+
+      end
+
+      # def match_level(*args)
+      #   value = args.shift
+      #   self
+      # end
 
       def fully(value = true)
         options[:stitch_content] = value ? true : false
