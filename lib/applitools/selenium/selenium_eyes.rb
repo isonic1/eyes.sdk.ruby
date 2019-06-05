@@ -143,6 +143,10 @@ module Applitools::Selenium
       self.config = Applitools::Selenium::Configuration.new
     end
 
+    def configure
+      return unless block_given?
+      yield(config)
+    end
 
     # Starts a test
     #

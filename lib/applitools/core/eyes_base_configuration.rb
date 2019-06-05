@@ -106,6 +106,12 @@ module Applitools
       self.proxy = Applitools::Connectivity::Proxy.new(uri, user, password)
     end
 
+    def match_level=(value)
+      return config_hash[:match_level] = value if Applitools::MATCH_LEVEL.values.include?(value)
+      return config_hash[:match_level] = Applitools::MATCH_LEVEL[value.to_sym] if Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
+      raise Applitools::EyesError, "Unknown match level #{value}"
+    end
+
     methods_to_delegate.push(:set_proxy)
   end
 end
