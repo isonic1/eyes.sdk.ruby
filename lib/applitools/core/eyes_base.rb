@@ -55,7 +55,7 @@ module Applitools
     attr_accessor :batch, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :position_provider, :viewport_size, :verbose_results,
-      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
+      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :exact,
       :compare_with_parent_branch, :results
 
     abstract_attr_accessor :base_agent_id
@@ -123,12 +123,6 @@ module Applitools
       @server_connector.api_key = config.api_key
       @server_connector.proxy = config.proxy if config.proxy
       @server_connector
-    end
-
-    def match_level=(value)
-      return @match_level = value if Applitools::MATCH_LEVEL.values.include?(value)
-      return @match_level = Applitools::MATCH_LEVEL[value.to_sym] if Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
-      raise Applitools::EyesError, "Unknown match level #{value}"
     end
 
     # Sets default match_level which will be applied to any test, unless match_level is set for a test explicitly
