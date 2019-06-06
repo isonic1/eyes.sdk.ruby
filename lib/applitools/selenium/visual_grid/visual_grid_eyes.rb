@@ -112,10 +112,10 @@ module Applitools
           test_list.each do |t|
             t.check(tag, target, result['value'].dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)
           end
-          test_list.each { |t| t.becomes_not_rendered}
+          test_list.each { |t| t.becomes_not_rendered }
         rescue StandardError => e
           Applitools::EyesLogger.error e.message
-          test_list.each { |t| t.becomes_tested}
+          test_list.each { |t| t.becomes_tested }
         end
       end
 

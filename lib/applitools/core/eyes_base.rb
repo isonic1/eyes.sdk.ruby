@@ -3,20 +3,12 @@
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
 require 'applitools/core/eyes_base_configuration'
+require 'applitools/core/match_level'
 require 'zlib'
 
 require_relative 'match_level_setter'
 
 module Applitools
-  module MatchLevel
-    NONE = 'None'.freeze
-    LAYOUT = 'Layout'.freeze
-    LAYOUT2 = 'Layout2'.freeze
-    CONTENT = 'Content'.freeze
-    STRICT = 'Strict'.freeze
-    EXACT = 'Exact'.freeze
-  end
-
   MATCH_LEVEL = {
     none: 'None',
     layout: 'Layout',
@@ -100,7 +92,7 @@ module Applitools
         end
       end
 
-      self.exact = nil
+      # self.exact = nil
       self.match_level = Applitools::MatchLevel::STRICT
       self.server_scale = 0
       self.server_remainder = 0
@@ -134,9 +126,9 @@ module Applitools
     # @option exact_options [Integer] :match_threshold
     # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
 
-    def set_default_match_settings(value, exact_options = {})
-      (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
-    end
+    # def set_default_match_settings(value, exact_options = {})
+    #   (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
+    # end
 
     # Sets default match settings
     # @param [Hash] value
@@ -145,30 +137,29 @@ module Applitools
     # @option value [Fixnum] scale
     # @option value [Fixnum] remainder
 
-    def default_match_settings=(value)
-      Applitools::ArgumentGuard.is_a? value, 'value', Hash
-      extra_keys = value.keys - match_level_keys
-      unless extra_keys.empty?
-        raise Applitools::EyesIllegalArgument.new(
-          "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
-        )
-      end
-      result = default_match_settings.merge!(value)
-      self.match_level = result[:match_level]
-      self.exact = result[:exact]
-      self.server_scale = result[:scale]
-      self.server_remainder = result[:remainder]
-      result
-    end
-
-    def default_match_settings
-      {
-        match_level: match_level,
-        exact: exact,
-        scale: server_scale,
-        remainder: server_remainder
-      }
-    end
+    # def default_match_settings=(value)
+    #   Applitools::ArgumentGuard.is_a? value, 'value', Hash
+    #   extra_keys = value.keys - match_level_keys
+    #   unless extra_keys.empty?
+    #     raise Applitools::EyesIllegalArgument.new(
+    #       "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
+    #     )
+    #   end
+    #   result = default_match_settings.merge!(value)
+    #   (self.match_level, self.exact) = match_level_with_exact(result[:match_level], result[:exact])
+    #   self.server_scale = result[:scale]
+    #   self.server_remainder = result[:remainder]
+    #   result
+    # end
+    #
+    # def default_match_settings
+    #   {
+    #     match_level: match_level,
+    #     exact: exact,
+    #     scale: server_scale,
+    #     remainder: server_remainder
+    #   }
+    # end
 
     def full_agent_id
       if !agent_id.nil? && !agent_id.empty?
@@ -519,9 +510,9 @@ module Applitools
       {}
     end
 
-    def match_level_keys
-      %w(match_level exact scale remainder).map(&:to_sym)
-    end
+    # def match_level_keys
+    #   %w(match_level exact scale remainder).map(&:to_sym)
+    # end
 
     def update_default_settings(match_data)
       match_level_keys.each do |k|
