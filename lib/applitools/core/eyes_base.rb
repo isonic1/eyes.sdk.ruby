@@ -515,7 +515,7 @@ module Applitools
     # end
 
     def update_default_settings(match_data)
-      match_level_keys.each do |k|
+      config.match_level_keys.each do |k|
         match_data.send("#{k}=", default_match_settings[k])
       end
     end
