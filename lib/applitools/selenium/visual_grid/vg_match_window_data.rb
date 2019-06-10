@@ -28,6 +28,21 @@ module Applitools
           end
         end
 
+        if target.respond_to? :layout_regions
+          @layout_regions = obtain_regions_coordinates(target.layout_regions, driver)
+          @need_convert_layout_regions_coordinates = true unless @layout_regions.empty?
+        end
+
+        if target.respond_to? :content_regions
+          @content_regions = obtain_regions_coordinates(target.content_regions, driver)
+          @need_convert_content_regions_coordinates = true unless @content_regions.empty?
+        end
+
+        if target.respond_to? :strict_regions
+          @strict_regions = obtain_regions_coordinates(target.strict_regions, driver)
+          @need_convert_strict_regions_coordinates = true unless @strict_regions.empty?
+        end
+
         # # floating regions
         return unless target.respond_to? :floating_regions
         target.floating_regions.each do |r|
@@ -48,6 +63,21 @@ module Applitools
         end
       end
 
+      def obtain_regions_coordinates(regions, driver)
+        result = []
+        regions.each do |r|
+          case r
+          when Proc
+            region = r.call(driver)
+            region = selector_regions[target.regions[region]]
+            result << Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
+          when Applitools::Region
+            result << r
+          end
+        end
+        result
+      end
+
       def convert_ignored_regions_coordinates
         return unless @need_convert_ignored_regions_coordinates
         self.ignored_regions = @ignored_regions.map(&:with_padding).map(&:to_hash)
@@ -60,6 +90,23 @@ module Applitools
         @need_convert_floating_regions_coordinates = false
       end
 
+      def convert_layout_regions_coordinates
+        return unless @need_convert_layout_regions_coordinates
+        self.layout_regions = @layout_regions
+        @need_convert_layout_regions_coordinates = false
+      end
+
+      def convert_strict_regions_coordinates
+        return unless @need_convert_strict_regions_coordinates
+        self.strict_regions = @strict_regions
+        @need_convert_strict_regions_coordinates = false
+      end
+
+      def convert_content_regions_coordinates
+        return unless @need_convert_content_regions_coordinates
+        self.content_regions = @content_regions
+        @need_convert_content_regions_coordinates = false
+      end
     end
   end
 end

@@ -3,6 +3,7 @@ module Applitools
   module Selenium
     class VisualGridEyes
       DOM_EXTRACTION_TIMEOUT = 300 #seconds or 5 minutes
+      USE_DEFAULT_MATCH_TIMEOUT = -1
       extend Forwardable
 
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -131,7 +132,7 @@ module Applitools
         #   end.compact!
         # end
         result = []
-        regions_hash = collect_selenium_regions(target).each do |el, v|
+        collect_selenium_regions(target).each do |el, v|
           if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
             xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
             web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, v)
@@ -145,23 +146,25 @@ module Applitools
 
       def collect_selenium_regions(target)
         selenium_regions = {}
-        # ignore_regions = target.ignored_regions
-        # floating_regions = target.floating_regions
         target_element = target.region_to_check
         setup_size_mode(target_element)
-        # selenium_regions.map do |r|
-        #   element_or_region(r)
-        # end
         target.ignored_regions.each do |r|
           selenium_regions[element_or_region(r)] = :ignore
         end
         target.floating_regions.each do |r|
           selenium_regions[element_or_region(r)] = :floating
         end
+        target.layout_regions.each do |r|
+          selenium_regions[element_or_region(r)] = :layout
+        end
+        target.strict_regions.each do |r|
+          selenium_regions[element_or_region(r)] = :strict
+        end
+        target.content_regions.each do |r|
+          selenium_regions[element_or_region(r)] = :content
+        end
         selenium_regions[region_to_check] = :target if size_mod == 'selector'
 
-        # selenium_regions[:ignore] += [target.ignored_regions.map { |r| element_or_region(r) }].flatten.compact
-        # selenium_regions[:target] << region_to_check if size_mod == 'selector'
         selenium_regions
       end
 

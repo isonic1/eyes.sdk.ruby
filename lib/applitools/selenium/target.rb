@@ -19,7 +19,8 @@ module Applitools
       end
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
-        :floating_regions, :frame_or_element, :regions
+        :floating_regions, :frame_or_element, :regions, :match_level, :layout_regions, :content_regions,
+        :strict_regions
 
       private :frame_or_element, :frame_or_element=
 
@@ -144,6 +145,53 @@ module Applitools
         self
       end
 
+      def layout(*args)
+        return match_level(Applitools::MatchLevel::LAYOUT) if args.empty?
+        region = process_region(*args)
+        layout_regions << region
+        self
+      end
+
+      def content(*args)
+        return match_level(Applitools::MatchLevel::CONTENT) if args.empty?
+        region = process_region(*args)
+        content_regions << region
+        self
+      end
+
+      def strict(*args)
+        return match_level(Applitools::MatchLevel::STRICT) if args.empty?
+        region = process_region(*args)
+        strict_regions << region
+        self
+      end
+
+      def exact(*args)
+        return match_level(Applitools::MatchLevel::EXACT) if args.empty?
+        raise Applitools::EyesError('Target.exact() is supposed to be called without args!')
+        # region = process_region(args)
+        # exact_regions << region
+        # self
+      end
+
+      def process_region(*args)
+        r = args.first
+        case r
+        when Applitools::Region, ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+          proc { r }
+        else
+          proc do |driver|
+            args_dup = args.dup
+            driver.find_element(args_dup.shift, args_dup.shift)
+          end
+        end
+      end
+
+      def match_level(*args)
+        value = args.shift
+        self
+      end
+
       def fully(value = true)
         options[:stitch_content] = value ? true : false
         handle_frames
@@ -218,6 +266,9 @@ module Applitools
         self.region_to_check = proc { Applitools::Region::EMPTY }
         reset_ignore
         reset_floating
+        reset_content_regions
+        reset_layout_regions
+        reset_strict_regions
         options[:stitch_content] = false
         options[:timeout] = nil
         options[:trim] = false
@@ -229,6 +280,18 @@ module Applitools
 
       def reset_floating
         self.floating_regions = []
+      end
+
+      def reset_layout_regions
+        self.layout_regions = []
+      end
+
+      def reset_content_regions
+        self.content_regions = []
+      end
+
+      def reset_strict_regions
+        self.strict_regions = []
       end
 
       def handle_frames
