@@ -1,5 +1,4 @@
 require 'css_parser'
-# require 'pry'
 
 module Applitools
   module Selenium

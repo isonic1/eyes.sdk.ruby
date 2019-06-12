@@ -4,7 +4,7 @@ module Applitools
       USE_DEFAULT_MATCH_TIMEOUT = -1
 
       attr_accessor :browser_info, :test_result, :driver, :dummy_region_provider, :dont_get_title,
-                    :current_uuid, :render_statuses
+                    :current_uuid, :render_statuses, :device_name
       public :server_connector
 
       class RegionProvider
@@ -28,6 +28,7 @@ module Applitools
       def open(driver, browser_info)
         self.driver = driver
         self.browser_info = browser_info
+        self.device_name = browser_info && browser_info.emulation_info && browser_info.emulation_info.device_name
         logger.info "opening EyesConnector for #{config.short_description} with viewport size: #{browser_info}"
         config.viewport_size = browser_info.viewport_size
         open_base
@@ -108,7 +109,12 @@ module Applitools
         }
       end
 
-      def set_viewport_size(*_args)
+      def set_viewport_size(*_args); end
+
+      def app_environment
+        super.tap do |env|
+          env.device_info = device_name
+        end
       end
 
       def viewport_size

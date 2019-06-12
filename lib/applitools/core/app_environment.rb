@@ -2,21 +2,23 @@
 
 module Applitools
   class AppEnvironment
-    attr_accessor :os, :hosting_app, :display_size, :inferred_environment
+    attr_accessor :os, :hosting_app, :display_size, :inferred_environment, :device_info
 
     def initialize(options = {})
-      @os = options[:os]
-      @hosting_app = options[:hosting_app]
-      @display_size = options[:display_size]
-      @inferred = options[:inferred]
+      self.os = options[:os]
+      self.hosting_app = options[:hosting_app]
+      self.display_size = options[:display_size]
+      self.inferred_environment = options[:inferred]
+      self.device_info = options[:device_info]
     end
 
     def to_hash
       {
-        'os' => @os,
-        'hostingApp' => @hosting_app,
-        'displaySize' => @display_size && @display_size.to_hash,
-        'inferred' => @inferred
+        'os' => os,
+        'hostingApp' => hosting_app,
+        'displaySize' => display_size && display_size.to_hash,
+        'inferred' => inferred_environment,
+        'deviceInfo' => device_info.nil? || device_info.empty? ? 'Desktop' : device_info + ' (Chrome emulation)'
       }
     end
 

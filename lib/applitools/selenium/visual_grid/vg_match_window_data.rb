@@ -17,8 +17,6 @@ module Applitools
             case r
             when Proc
               region, padding_proc = r.call(driver, true)
-              # require 'pry'
-              # binding.pry
               region = selector_regions[target.regions[region]]
               retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
               @ignored_regions << padding_proc.call(retrieved_region) if padding_proc.is_a? Proc
