@@ -232,16 +232,6 @@ module Applitools
       if target.respond_to? :ignored_regions
         @ignored_regions = obtain_regions_coordinates(target.ignored_regions, driver)
         @need_convert_ignored_regions_coordinates = true unless @ignored_regions.empty?
-        # target.ignored_regions.each do |r|
-        #   case r
-        #   when Proc
-        #     @ignored_regions << r.call(driver)
-        #     @need_convert_ignored_regions_coordinates = true
-        #   when Applitools::Region
-        #     @ignored_regions << r
-        #     @need_convert_ignored_regions_coordinates = true
-        #   end
-        # end
       end
 
       # floating regions

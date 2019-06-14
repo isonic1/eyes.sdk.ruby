@@ -4,6 +4,7 @@ module Applitools
   module Selenium
     class Target
       include Applitools::FluentInterface
+      include Applitools::MatchLevelSetter
       class << self
         def frame(element)
           new.frame(element)
@@ -167,11 +168,7 @@ module Applitools
       end
 
       def exact(*args)
-        return match_level(Applitools::MatchLevel::EXACT) if args.empty?
-        raise Applitools::EyesError('Target.exact() is supposed to be called without args!')
-        # region = process_region(args)
-        # exact_regions << region
-        # self
+        match_level(Applitools::MatchLevel::EXACT, *args)
       end
 
       def process_region(*args)
@@ -188,7 +185,9 @@ module Applitools
       end
 
       def match_level(*args)
-        value = args.shift
+        match_level = args.shift
+        exact_options = args.shift || {}
+        (options[:match_level], options[:exact]) = match_level_with_exact(match_level, exact_options)
         self
       end
 
