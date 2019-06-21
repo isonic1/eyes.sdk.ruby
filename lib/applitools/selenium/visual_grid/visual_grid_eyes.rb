@@ -81,9 +81,6 @@ module Applitools
 
       def check(tag, target)
         script = <<-END
-          var callback = arguments[arguments.length - 1]; return (#{Applitools::Selenium::Scripts::PROCESS_RESOURCES})().then(JSON.stringify).then(callback, function(err) {callback(err.stack || err.toString())});
-        END
-        script = <<-END
           #{Applitools::Selenium::Scripts::PROCESS_PAGE_AND_POLL} return __processPageAndPoll();
         END
         begin
@@ -109,6 +106,21 @@ module Applitools
           mod = Digest::SHA2.hexdigest(script_result)
 
           region_x_paths = get_regions_x_paths(target)
+
+          render_task = RenderTask.new(
+            "Render #{config.short_description} - #{tag}",
+              result,
+              self,
+            visual_grid_manager.resource_cache,
+            visual_grid_manager.put_cache,
+            visual_grid_manager.rendering_info(eyes.server_connector),
+              eyes.server_connector,
+              region_selectors,
+              size_mod,
+              region_to_check,
+              target.options[:script_hooks],
+              mod
+          )
 
           test_list.each do |t|
             t.check(tag, target, result['value'].dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)

@@ -169,6 +169,8 @@ module Applitools
           mod
         )
 
+        render_task.add_running_test(self)
+
         check_task = VGTask.new("perform check #{tag} #{target}") do
           eyes.check(tag, target, render_task.uuid)
         end
