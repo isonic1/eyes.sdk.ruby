@@ -81,9 +81,6 @@ module Applitools
 
       def check(tag, target)
         script = <<-END
-          var callback = arguments[arguments.length - 1]; return (#{Applitools::Selenium::Scripts::PROCESS_RESOURCES})().then(JSON.stringify).then(callback, function(err) {callback(err.stack || err.toString())});
-        END
-        script = <<-END
           #{Applitools::Selenium::Scripts::PROCESS_PAGE_AND_POLL} return __processPageAndPoll();
         END
         begin
@@ -121,16 +118,6 @@ module Applitools
       end
 
       def get_regions_x_paths(target)
-        # regions_hash = collect_selenium_regions(target).each do |k,v|
-        #   v.map! do |el|
-        #     if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
-        #       xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
-        #       web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, k)
-        #       self.region_to_check = web_element_region if k ==:target && size_mod == 'selector'
-        #       web_element_region
-        #     end
-        #   end.compact!
-        # end
         result = []
         collect_selenium_regions(target).each do |el, v|
           if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)

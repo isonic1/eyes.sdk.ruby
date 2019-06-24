@@ -57,7 +57,18 @@ module Applitools
           ignored_regions << case args.first
                              when Applitools::Region
                                proc { args.first.padding(requested_padding) }
-                             when Applitools::Selenium::Element, ::Selenium::WebDriver::Element
+                             when ::Selenium::WebDriver::Element
+                               proc do |driver, return_element = false|
+                                 region = applitools_element_from_selenium_element(driver, args.first)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
+                               end
+                             when Applitools::Selenium::Element
                                proc do |_driver, return_element = false|
                                  region = args.first
                                  padding_proc = proc do |region|
@@ -119,7 +130,17 @@ module Applitools
                   args.first.padding(requested_padding)
                 when ::Applitools::Region
                   Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding)
-                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+                when ::Selenium::WebDriver::Element
+                  proc do |driver, return_element = false|
+                    args_dup = args.dup
+                    region = applitools_element_from_selenium_element(driver, args_dup.shift)
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(region, *args_dup).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
+                  end
+                when ::Applitools::Selenium::Element
                   proc do |_driver, return_element = false|
                     args_dup = args.dup
                     region = args_dup.shift
@@ -174,7 +195,11 @@ module Applitools
       def process_region(*args)
         r = args.first
         case r
-        when Applitools::Region, ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+        when ::Selenium::WebDriver::Element
+          proc do |driver|
+            applitools_element_from_selenium_element(driver, args.dup.first)
+          end
+        when Applitools::Region, Applitools::Selenium::Element
           proc { r }
         else
           proc do |driver|
@@ -218,7 +243,11 @@ module Applitools
       def region(*args)
         handle_frames
         self.region_to_check = case args.first
-                               when Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element
+                               when ::Selenium::WebDriver::Element
+                                 proc do |driver|
+                                   applitools_element_from_selenium_element(driver, args.first)
+                                 end
+                               when Applitools::Selenium::Element, Applitools::Region
                                  proc { args.first }
                                when String
                                  proc do |driver|
@@ -297,6 +326,11 @@ module Applitools
         return unless frame_or_element
         frames << frame_or_element
         self.frame_or_element = nil
+      end
+
+      def applitools_element_from_selenium_element(driver, selenium_element)
+        xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, selenium_element)
+        driver.find_element(:xpath, xpath)
       end
     end
   end
