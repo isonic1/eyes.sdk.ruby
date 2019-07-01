@@ -153,23 +153,23 @@ module Applitools
         watch_open[open_task] = false
       end
 
-      def check(tag, target, result, visual_grid_manager, region_selectors, size_mod, region_to_check, mod = nil)
-        render_task = RenderTask.new(
-          "Render #{eyes.config.short_description} - #{tag}",
-          result,
-          self,
-          visual_grid_manager.resource_cache,
-          visual_grid_manager.put_cache,
-          visual_grid_manager.rendering_info(eyes.server_connector),
-          eyes.server_connector,
-          region_selectors,
-          size_mod,
-          region_to_check,
-          target.options[:script_hooks],
-          mod
-        )
+      def check(tag, target, render_task)
+        # render_task = RenderTask.new(
+        #   "Render #{eyes.config.short_description} - #{tag}",
+        #   result,
+        #   self,
+        #   visual_grid_manager.resource_cache,
+        #   visual_grid_manager.put_cache,
+        #   visual_grid_manager.rendering_info(eyes.server_connector),
+        #   eyes.server_connector,
+        #   region_selectors,
+        #   size_mod,
+        #   region_to_check,
+        #   target.options[:script_hooks],
+        #   mod
+        # )
 
-        render_task.add_running_test(self)
+        result_index = render_task.add_running_test(self)
 
         check_task = VGTask.new("perform check #{tag} #{target}") do
           eyes.check(tag, target, render_task.uuid)
@@ -185,13 +185,18 @@ module Applitools
         watch_task[check_task] = false
 
         render_task.on_task_succeeded do |r|
-          eyes.render_status_for_task(render_task.uuid, r) if r
-          watch_render[render_task] = true
-          becomes_rendered if all_tasks_completed?(watch_render)
+          if (r[result_index] && r[result_index]["status"] == "rendered")
+            eyes.render_status_for_task(render_task.uuid, r[result_index])
+            watch_render[render_task] = true
+            becomes_rendered if all_tasks_completed?(watch_render)
+          else
+            logger.error "Render returned status #{r[result_index]["status"]}"
+            becomes_completed
+          end
         end.on_task_error do
           becomes_completed
         end
-        render_queue << render_task
+        # render_queue << render_task
         watch_render[render_task] = false
       end
 

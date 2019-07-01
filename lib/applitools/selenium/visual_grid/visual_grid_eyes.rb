@@ -21,6 +21,7 @@ module Applitools
 
       def initialize(visual_grid_manager, server_url = nil)
         ensure_config
+        @server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
         self.server_url = server_url if server_url
         self.visual_grid_manager = visual_grid_manager
         self.test_list = Applitools::Selenium::TestList.new
@@ -106,26 +107,22 @@ module Applitools
           mod = Digest::SHA2.hexdigest(script_result)
 
           region_x_paths = get_regions_x_paths(target)
-
           render_task = RenderTask.new(
             "Render #{config.short_description} - #{tag}",
-              result,
-              self,
-            visual_grid_manager.resource_cache,
-            visual_grid_manager.put_cache,
-            visual_grid_manager.rendering_info(eyes.server_connector),
-              eyes.server_connector,
-              region_selectors,
-              size_mod,
-              region_to_check,
-              target.options[:script_hooks],
-              mod
+            result["value"],
+            visual_grid_manager,
+            server_connector,
+            region_x_paths,
+            size_mod,
+            region_to_check,
+            target.options[:script_hooks],
+            mod
           )
-
           test_list.each do |t|
-            t.check(tag, target, result['value'].dup, visual_grid_manager, region_x_paths, size_mod, region_to_check, mod)
+            t.check(tag, target, render_task)
           end
           test_list.each { |t| t.becomes_not_rendered }
+          visual_grid_manager.enqueue_render_task render_task
         rescue StandardError => e
           Applitools::EyesLogger.error e.message
           test_list.each { |t| t.becomes_tested }
@@ -273,6 +270,14 @@ module Applitools
         "Test '#{original_results['name']}' of '#{original_results['appName']}' " \
             "is failed! See details at #{original_results['appUrls']['session']}"
       end
+
+      def server_connector
+        @server_connector.server_url = config.server_url
+        @server_connector.api_key = config.api_key
+        @server_connector.proxy = config.proxy if config.proxy
+        @server_connector
+      end
+
       private :new_test_error_message, :diffs_found_error_message, :test_failed_error_message
 
       # Takes a snapshot of the application under test and matches it with the expected output.

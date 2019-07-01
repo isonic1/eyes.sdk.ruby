@@ -65,7 +65,7 @@ module Applitools
       end
 
       def render_status_for_task(uuid, status)
-        render_statuses[uuid] = status.first
+        render_statuses[uuid] = status
       end
 
       def render_status
