@@ -45,9 +45,8 @@ module Applitools
         match_data = Applitools::Selenium::VgMatchWindowData.new
         match_data.tag = name
         update_default_settings(match_data)
-        driver_lock.synchronize do
-          match_data.read_target(target_to_check, driver, selector_regions)
-        end
+        match_data.read_target(target_to_check, driver, selector_regions)
+
         check_result = check_window_base(
             dummy_region_provider, timeout, match_data
         )

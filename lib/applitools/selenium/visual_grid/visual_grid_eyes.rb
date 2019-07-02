@@ -148,31 +148,31 @@ module Applitools
       def collect_selenium_regions(target)
         selenium_regions = {}
         target_element = target.region_to_check
-        setup_size_mode(target_element)
+        setup_size_mode(target_element, target, :none)
         target.ignored_regions.each do |r|
-          selenium_regions[element_or_region(r)] = :ignore
+          selenium_regions[element_or_region(r, target, :ignore)] = :ignore
         end
         target.floating_regions.each do |r|
-          selenium_regions[element_or_region(r)] = :floating
+          selenium_regions[element_or_region(r, target, :floating)] = :floating
         end
         target.layout_regions.each do |r|
-          selenium_regions[element_or_region(r)] = :layout
+          selenium_regions[element_or_region(r, target, :layout_regions)] = :layout
         end
         target.strict_regions.each do |r|
-          selenium_regions[element_or_region(r)] = :strict
+          selenium_regions[element_or_region(r, target, :strict_regions)] = :strict
         end
         target.content_regions.each do |r|
-          selenium_regions[element_or_region(r)] = :content
+          selenium_regions[element_or_region(r, target, :content_regions)] = :content
         end
         selenium_regions[region_to_check] = :target if size_mod == 'selector'
 
         selenium_regions
       end
 
-      def setup_size_mode(target_element)
+      def setup_size_mode(target_element, target, key)
         self.size_mod = 'full-page'
 
-        element_or_region = element_or_region(target_element)
+        element_or_region = element_or_region(target_element, target, key)
 
         case element_or_region
         when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
@@ -186,9 +186,10 @@ module Applitools
         self.region_to_check = element_or_region
       end
 
-      def element_or_region(target_element)
+      def element_or_region(target_element, target, options_key)
         if target_element.respond_to?(:call)
-          region, _padding_proc = target_element.call(driver, true)
+          region, padding_proc = target_element.call(driver, true)
+          target.replace_region(target_element, Applitools::Selenium::VGRegion.new(region, padding_proc), options_key)
           region
         else
           target_element

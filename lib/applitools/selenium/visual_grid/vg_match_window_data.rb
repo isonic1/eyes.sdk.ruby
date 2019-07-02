@@ -22,6 +22,10 @@ module Applitools
               @ignored_regions << padding_proc.call(retrieved_region) if padding_proc.is_a? Proc
             when Applitools::Region
               @ignored_regions << r
+            when Applitools::Selenium::VGRegion
+              region = selector_regions[target.regions[r.region]]
+              retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
+              @ignored_regions << r.padding_proc.call(retrieved_region)
             end
           end
         end
@@ -57,6 +61,15 @@ module Applitools
           when Applitools::FloatingRegion
             @floating_regions << r
             @need_convert_floating_regions_coordinates = true
+          when Applitools::Selenium::VGRegion
+            region = r.region
+            region = selector_regions[target.regions[region]]
+            retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
+            floating_region = r.padding_proc.call(retrieved_region) if r.padding_proc.is_a? Proc
+            raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless
+                floating_region.is_a? Applitools::FloatingRegion
+            @floating_regions << floating_region
+            @need_convert_floating_regions_coordinates = true
           end
         end
       end
@@ -71,6 +84,10 @@ module Applitools
             result << Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
           when Applitools::Region
             result << r
+          when Applitools::Selenium::VGRegion
+            region = r.region
+            region = selector_regions[target.regions[region]]
+            result << Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
           end
         end
         result
