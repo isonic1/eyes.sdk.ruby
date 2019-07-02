@@ -4,7 +4,7 @@ module Applitools
       USE_DEFAULT_MATCH_TIMEOUT = -1
 
       attr_accessor :browser_info, :test_result, :driver, :dummy_region_provider, :dont_get_title,
-                    :current_uuid, :render_statuses, :device_name
+                    :current_uuid, :render_statuses, :device_name, :driver_lock
       public :server_connector
 
       class RegionProvider
@@ -14,10 +14,12 @@ module Applitools
       end
 
       def initialize(*args)
+        options = Applitools::Utils.extract_options!(args)
         super
         self.render_statuses = {}
         self.dummy_region_provider = RegionProvider.new
         self.dont_get_title = false
+        self.driver_lock = options[:driver_lock]
       end
 
       def ensure_config
@@ -43,7 +45,9 @@ module Applitools
         match_data = Applitools::Selenium::VgMatchWindowData.new
         match_data.tag = name
         update_default_settings(match_data)
-        match_data.read_target(target_to_check, driver, selector_regions)
+        driver_lock.synchronize do
+          match_data.read_target(target_to_check, driver, selector_regions)
+        end
         check_result = check_window_base(
             dummy_region_provider, timeout, match_data
         )

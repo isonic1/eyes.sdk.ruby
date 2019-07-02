@@ -8,7 +8,8 @@ module Applitools
 
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
-      attr_accessor :visual_grid_manager, :driver, :current_url, :current_config, :fetched_cache_map, :config
+      attr_accessor :visual_grid_manager, :driver, :current_url, :current_config, :fetched_cache_map,
+        :config, :driver_lock
       attr_accessor :test_list
 
       attr_accessor :api_key, :server_url, :proxy, :opened
@@ -26,6 +27,7 @@ module Applitools
         self.visual_grid_manager = visual_grid_manager
         self.test_list = Applitools::Selenium::TestList.new
         self.opened = false
+        self.driver_lock = Mutex.new
       end
 
       def ensure_config
@@ -74,7 +76,7 @@ module Applitools
 
       def eyes_connector
         logger.info("creating VisualGridEyes server connector")
-        ::Applitools::Selenium::EyesConnector.new(server_url).tap do |connector|
+        ::Applitools::Selenium::EyesConnector.new(server_url, driver_lock: driver_lock).tap do |connector|
           connector.batch = batch
           connector.config = config.deep_clone
         end
