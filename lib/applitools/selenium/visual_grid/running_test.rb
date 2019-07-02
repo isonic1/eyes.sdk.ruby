@@ -84,9 +84,11 @@ module Applitools
             end
             close_task.on_task_succeeded do |task_result|
               self.test_result = task_result
-            end.on_task_error do |e|
-              self.pending_exceptions << e
-            end.on_task_completed do
+            end
+            close_task.on_task_error do |e|
+              pending_exceptions << e
+            end
+            close_task.on_task_completed do
               watch_close[close_task] = true
               becomes_completed if all_tasks_completed?(watch_close)
             end
@@ -116,7 +118,8 @@ module Applitools
         end
       end
 
-      attr_accessor :open_queue, :task_queue, :render_queue, :close_queue, :watch_open, :watch_task, :watch_render, :watch_close
+      attr_accessor :open_queue, :task_queue, :render_queue, :close_queue, :watch_open, :watch_task,
+        :watch_render, :watch_close
 
       attr_accessor :eyes, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock
 
@@ -147,28 +150,21 @@ module Applitools
       def init
         open_task = Applitools::Selenium::VGTask.new("open #{browser_info}") { eyes.open(driver, browser_info) }
 
-        open_task.on_task_succeeded { watch_open[open_task] = true; becomes_opened if all_tasks_completed?(watch_open) }.
-            on_task_error { |e| pending_exceptions << e; becomes_completed }
+        open_task.on_task_succeeded do
+          watch_open[open_task] = true
+          becomes_opened if all_tasks_completed?(watch_open)
+        end
+
+        open_task.on_task_error do |e|
+          pending_exceptions << e
+          becomes_completed
+        end
+
         open_queue << open_task
         watch_open[open_task] = false
       end
 
       def check(tag, target, render_task)
-        # render_task = RenderTask.new(
-        #   "Render #{eyes.config.short_description} - #{tag}",
-        #   result,
-        #   self,
-        #   visual_grid_manager.resource_cache,
-        #   visual_grid_manager.put_cache,
-        #   visual_grid_manager.rendering_info(eyes.server_connector),
-        #   eyes.server_connector,
-        #   region_selectors,
-        #   size_mod,
-        #   region_to_check,
-        #   target.options[:script_hooks],
-        #   mod
-        # )
-
         result_index = render_task.add_running_test(self)
 
         check_task = VGTask.new("perform check #{tag} #{target}") do
@@ -185,18 +181,18 @@ module Applitools
         watch_task[check_task] = false
 
         render_task.on_task_succeeded do |r|
-          if (r[result_index] && r[result_index]["status"] == "rendered")
+          if r[result_index] && r[result_index]['status'] == 'rendered'
             eyes.render_status_for_task(render_task.uuid, r[result_index])
             watch_render[render_task] = true
             becomes_rendered if all_tasks_completed?(watch_render)
           else
-            logger.error "Render returned status #{r[result_index]["status"]}"
+            logger.error "Wrong render status! Render returned status #{r[result_index]['status']}"
             becomes_completed
           end
-        end.on_task_error do
+        end
+        render_task.on_task_error do
           becomes_completed
         end
-        # render_queue << render_task
         watch_render[render_task] = false
       end
 
