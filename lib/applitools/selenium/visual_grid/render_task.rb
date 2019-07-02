@@ -12,7 +12,9 @@ module Applitools
         :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode,
         :region_to_check, :script_hooks, :visual_grid_manager
 
-      def initialize(name, script_result, visual_grid_manager, server_connector, region_selectors, size_mode, region, script_hooks, mod = nil)
+      def initialize(name, script_result, visual_grid_manager, server_connector, region_selectors, size_mode,
+        region, script_hooks, mod = nil)
+
         self.result = nil
         self.script = script_result
         self.visual_grid_manager = visual_grid_manager
@@ -39,8 +41,6 @@ module Applitools
           response = nil
           begin
             response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], rq)
-          # rescue StandardError => _e
-          #   response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], requests)
           rescue StandardError => e
             Applitools::EyesLogger.error(e.message)
             fetch_fails += 1
@@ -89,8 +89,10 @@ module Applitools
           still_running = need_more_resources || need_more_dom || fetch_fails > MAX_FAILS_COUNT
         end while still_running
         statuses = poll_render_status(rq)
-        raise Applitools::EyesError, "Render failed for #{statuses.first['renderId']} with the message: " \
-          "#{statuses.first['error']}" if statuses.first['status'] == 'error'
+        if statuses.first['status'] == 'error'
+          raise Applitools::EyesError, "Render failed for #{statuses.first['renderId']} with the message: " \
+          "#{statuses.first['error']}"
+        end
         self.result = statuses.first
         statuses
       end
@@ -167,7 +169,7 @@ module Applitools
           end
 
           dom = Applitools::Selenium::RGridDom.new(
-              url: script_data["url"], dom_nodes: script_data['cdt'], resources: request_resources
+            url: script_data["url"], dom_nodes: script_data['cdt'], resources: request_resources
           )
 
           requests << Applitools::Selenium::RenderRequest.new(
@@ -186,7 +188,9 @@ module Applitools
       end
 
       def add_running_test(running_test)
-        raise Applitools::EyesError, "The running test #{running_test} already exists in the render task" if running_tests.include?(running_test)
+        if running_tests.include?(running_test)
+          raise Applitools::EyesError, "The running test #{running_test} already exists in the render task"
+        end
         running_tests << running_test
         running_tests.length - 1
       end
