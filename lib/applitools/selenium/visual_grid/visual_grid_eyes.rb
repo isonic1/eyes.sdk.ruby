@@ -132,16 +132,6 @@ module Applitools
       end
 
       def get_regions_x_paths(target)
-        # regions_hash = collect_selenium_regions(target).each do |k,v|
-        #   v.map! do |el|
-        #     if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
-        #       xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
-        #       web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, k)
-        #       self.region_to_check = web_element_region if k ==:target && size_mod == 'selector'
-        #       web_element_region
-        #     end
-        #   end.compact!
-        # end
         result = []
         collect_selenium_regions(target).each do |el, v|
           if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
