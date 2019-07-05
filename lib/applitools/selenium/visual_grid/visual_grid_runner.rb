@@ -2,10 +2,13 @@ module Applitools
   module Selenium
     class VisualGridRunner
       EMPTY_QUEUE = []
-      attr_accessor :all_eyes, :resource_cache, :put_cache, :rendering_info
+      attr_accessor :all_eyes, :resource_cache, :put_cache, :rendering_info, :render_queue
+
+      alias queue render_queue
 
       def initialize(concurrent_open_sessions = 10)
         self.all_eyes = []
+        self.render_queue = []
         @thread_pool = Applitools::Selenium::VGThreadPool.new(concurrent_open_sessions)
         self.resource_cache = Applitools::Selenium::ResourceCache.new
         self.put_cache = Applitools::Selenium::ResourceCache.new
@@ -21,6 +24,10 @@ module Applitools
 
       def open(eyes)
         all_eyes << eyes
+      end
+
+      def enqueue_render_task(render_task)
+        render_queue.push render_task if render_task.is_a? Applitools::Selenium::RenderTask
       end
 
       def stop
@@ -52,7 +59,11 @@ module Applitools
       end
 
       def get_task_queue
-        test_to_run = all_running_tests_by_score.first
+        test_to_run = if render_queue.empty?
+                        all_running_tests_by_score.first
+                      else
+                        self
+                      end
         test_to_run ? test_to_run.queue : EMPTY_QUEUE
       end
     end

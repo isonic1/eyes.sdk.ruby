@@ -60,7 +60,7 @@ module Applitools
         config_keys.each do |k|
           new_config.send(
             "#{k}=", case value = self.send(k)
-                     when Symbol, FalseClass, TrueClass, Fixnum, Float
+                     when Symbol, FalseClass, TrueClass, Integer, Float
                        value
                      else
                        value.clone

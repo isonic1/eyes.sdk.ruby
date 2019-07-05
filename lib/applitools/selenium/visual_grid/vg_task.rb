@@ -6,24 +6,24 @@ module Applitools
       def initialize(name, &block)
         self.name = name
         @block_to_run = block if block_given?
-        @callback = nil
-        @error_callback = nil
-        @completed_callback = nil
+        @callback = []
+        @error_callback = []
+        @completed_callback = []
         self.uuid = SecureRandom.uuid
       end
 
       def on_task_succeeded(&block)
-        @callback = block if block_given?
+        @callback.push block if block_given?
         self
       end
 
       def on_task_error(&block)
-        @error_callback = block if block_given?
+        @error_callback.push block if block_given?
         self
       end
 
       def on_task_completed(&block)
-        @completed_callback = block if block_given?
+        @completed_callback.push block if block_given?
         self
       end
 
@@ -31,14 +31,20 @@ module Applitools
         return unless @block_to_run.respond_to? :call
         begin
           res = @block_to_run.call
-          @callback.call(res) if @callback.respond_to? :call
+          @callback.each do |cb|
+            cb.call(res) if cb.respond_to? :call
+          end
         rescue StandardError => e
           Applitools::EyesLogger.logger.error 'Failed to execute task!'
           Applitools::EyesLogger.logger.error e.message
           Applitools::EyesLogger.logger.error e.backtrace.join('\n\t')
-          @error_callback.call(e) if @error_callback.respond_to? :call
+          @error_callback.each do |ecb|
+            ecb.call(e) if ecb.respond_to? :call
+          end
         ensure
-          @completed_callback.call if @completed_callback.respond_to? :call
+          @completed_callback.each do |ccb|
+            ccb.call if ccb.respond_to? :call
+          end
         end
       end
     end
