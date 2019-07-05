@@ -209,6 +209,25 @@ module Applitools
         end
       end
 
+      def replace_region(original_region, new_region, key)
+        case key
+        when :content_regions
+          replace_element(original_region, new_region, content_regions)
+        when :strict_regions
+          replace_element(original_region, new_region, strict_regions)
+        when :layout_regions
+          replace_element(original_region, new_region, layout_regions)
+        when :floating
+          replace_element(original_region, new_region, floating_regions)
+        when :ignore
+          replace_element(original_region, new_region, ignored_regions)
+        end
+      end
+
+      def replace_element(original, new, array)
+        array[array.index(original)] = new
+      end
+
       def match_level(*args)
         match_level = args.shift
         exact_options = args.shift || {}
