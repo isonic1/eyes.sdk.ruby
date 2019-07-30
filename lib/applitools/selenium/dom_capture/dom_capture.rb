@@ -1,113 +1,153 @@
-# frozen_string_literal: false
-
-require 'benchmark'
-require 'timeout'
-
-require 'css_parser'
-include Benchmark
-module Applitools::Selenium
-  module DomCapture
-    CSS_DOWNLOAD_TIMEOUT = 2 # 2 seconds
-    DOM_CAPTURE_TIMEOUT = 10 # 10 seconds
-
-    extend self
-
-    def get_window_dom(driver, logger)
-      args_obj = {
-        'styleProps' => %w(
-          background-color background-image background-size color border-width
-          border-color border-style padding margin
-        ),
-        'attributeProps' => nil,
-        'rectProps' => %w(width height top left),
-        'ignoredTagNames' => %w(HEAD SCRIPT)
-      }
-      dom_tree = ''
-      if Timeout.respond_to?(:timeout)
-        Timeout.timeout(DOM_CAPTURE_TIMEOUT) do
-          dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-          get_frame_dom(driver, { 'childNodes' => [dom_tree], 'tagName' => 'OUTER_HTML' }, logger)
-        end
-      else
-        timeout(DOM_CAPTURE_TIMEOUT) do
-          dom_tree = driver.execute_script(Applitools::Selenium::DomCapture::DOM_CAPTURE_SCRIPT, args_obj)
-          get_frame_dom(driver, { 'childNodes' => [dom_tree], 'tagName' => 'OUTER_HTML' }, logger)
+module Applitools
+  module Selenium
+    module DomCapture
+      extend self
+      DOM_EXTRACTION_TIMEOUT = 300 #seconds
+      def full_window_dom(driver, logger, position_provider = nil)
+        return get_dom(driver, logger) unless position_provider
+        scroll_top_and_return_back(position_provider) do
+          get_dom(driver, logger)
         end
       end
-      dom_tree
-    end
 
-    private
+      def get_dom(driver, logger)
+        original_frame_chain = driver.frame_chain
+        dom = get_frame_dom(driver, logger)
+        unless original_frame_chain.empty?
+          driver.switch_to.default_content
+          driver.switch_to.frames(frame_chain: original_frame_chain)
+        end
+        # CSS processing
 
-    def get_frame_dom(driver, dom_tree, logger)
-      tag_name = dom_tree['tagName']
-      return unless tag_name
-      frame_index = 0
-      loop(driver, dom_tree, logger) do |dom_sub_tree|
-        # this block is called if IFRAME found
-        driver.switch_to.frame(index: frame_index)
-        get_frame_dom(driver, dom_sub_tree, logger)
-        driver.switch_to.parent_frame
-        frame_index += 1
+        dom
       end
-    end
 
-    def loop(driver, dom_tree, logger)
-      child_nodes = dom_tree['childNodes']
-      return unless child_nodes
-      iterate_child_nodes = proc do |node_childs|
-        node_childs.each do |node|
-          if node['tagName'].casecmp('IFRAME') == 0
-            yield(node) if block_given?
+      def get_frame_dom(driver, logger)
+        result = ''
+        logger.info 'Trying to get DOM from driver'
+        start_time = Time.now
+        script_response = nil
+        loop do
+          result_as_string = driver.execute_script(CAPTURE_FRAME_SCRIPT + ' return __captureDomAndPoll();')
+          script_response = Oj.load(result_as_string)
+          status = script_response['status']
+          break if status == 'SUCCESS'
+          raise Applitools::EyesError, 'DOM extraction timeout!' if Time.now - start_time > DOM_EXTRACTION_TIMEOUT
+          raise Applitools::EyesError, "DOM extraction error: #{script_response['error']}" if script_response['error']
+          sleep(0.2)
+        end
+        response_lines = script_response['value'].split /\r?\n/
+        separators = Oj.load(response_lines.shift)
+        missing_css_list = []
+        missing_frame_list = []
+        data = []
+
+        puts separators
+
+        blocks = DomParts.new(missing_css_list, missing_frame_list, data)
+        collector = blocks.collectors.next
+        response_lines.each do |line|
+          if line == separators['separator']
+            collector = blocks.collectors.next
           else
-            node['css'] = get_frame_bundled_css(driver, logger) if node['tagName'].casecmp('HTML') == 0
-            iterate_child_nodes.call(node['childNodes']) unless node['childNodes'].nil?
+            collector << line
           end
         end
-      end
-      iterate_child_nodes.call(child_nodes)
-    end
+        logger.info "Missing CSS: #{missing_css_list.count}"
+        logger.info "Missing frames: #{missing_frame_list.count}"
+        #fetch_css_files(missing_css_list)
 
-    def get_frame_bundled_css(driver, logger)
-      base_url = URI.parse(driver.current_url)
-      parser = CssParser::Parser.new import: true, absolute_paths: true
-      css_threads = []
-      css_items = []
-      driver.execute_script(Applitools::Selenium::DomCapture::CSS_CAPTURE_SCRIPT).each_with_index do |item, i|
-        if (v = item['text'])
-          css_items[i] = [v]
-        elsif (v = item['href'])
-          target_url = URI.parse(v)
-          url_to_load = target_url.absolute? ? target_url : base_url.merge(target_url)
-          css_threads << Thread.new(url_to_load) do |url|
-            if Timeout.respond_to?(:timeout)
-              Timeout.timeout(CSS_DOWNLOAD_TIMEOUT) do
-                css_string, = parser.send(:read_remote_file, url)
-                css_items[i] = [css_string, { base_uri: url }]
-              end
-            else
-              timeout(CSS_DOWNLOAD_TIMEOUT) do
-                css_string, = parser.send(:read_remote_file, url)
-                css_items[i] = [css_string, { base_uri: url }]
-              end
+        frame_data = recurse_frames(driver, logger, missing_frame_list)
+        result = replace(separators['iframeStartToken'], separators['iframeEndToken'], data.first, frame_data)
+
+        css_data = fetch_css_files(missing_css_list)
+        replace(separators['cssStartToken'], separators['cssEndToken'], result, css_data)
+      rescue StandardError
+        logger.error(e.class)
+        logger.error(e.message)
+        logger.error(e)
+        return ''
+      end
+
+      def fetch_css_files(missing_css_list)
+        result = {}
+        missing_css_list.each do |url|
+          next if url.empty?
+          next if /^blob:/ =~ url
+
+          begin
+            parser = CssParser::Parser.new(absolute_paths: true, import: true)
+            parser.load_uri!(url)
+            css = ''
+            parser.each_rule_set do |s|
+              css += s.to_s
+            end
+            result[url] = css
+          rescue StandardError
+            result[url] = ''
+          end
+        end
+        result
+      end
+
+      def recurse_frames(driver, logger, missing_frame_list)
+        return if missing_frame_list.empty?
+        frame_data = {}
+        frame_chain = driver.frame_chain
+        origin_location = driver.execute_script('return document.location.href')
+        missing_frame_list.each do |missing_frame_line|
+          logger.info "Switching to frame line: #{missing_frame_line}"
+          missing_frame_line.split(/,/).each do |xpath|
+            logger.info "switching to specific frame: #{xpath}"
+            frame_element = driver.find_element(:xpath, xpath)
+            frame_src = frame_element.attribute('src')
+            driver.switch_to.frame(frame_element)
+            logger.info "Switched to frame ( #{xpath} ) with src( #{frame_src} )"
+          end
+          location_after_switch = driver.execute_script('return document.location.href')
+
+          if origin_location == location_after_switch
+            logger.info "Switch to frame (#{missing_frame_line}) failed"
+            frame_data[missing_frame_line] = ''
+          else
+            result = get_frame_dom(driver, logger)
+            frame_data[missing_frame_line] = result
+          end
+        end
+        driver.switch_to.default_content
+        driver.switch_to.frames(frame_chain: frame_chain)
+        frame_data
+      end
+
+      def scroll_top_and_return_back(position_provider)
+        original_position = position_provider.current_position
+        position_provider.scroll_to Applitools::Location.new(0, 0)
+        result = yield if block_given?
+        position_provider.scroll_to original_position
+        result
+      end
+
+      def replace(open_token, close_token, input, replacements)
+        pattern = /#{open_token}(?<key>.+?)#{close_token}/
+        input.gsub(pattern) { |_m| replacements[Regexp.last_match(1)] }
+      end
+
+      class DomParts
+        attr_accessor :dom_part_collectors
+        def initialize(*args)
+          self.dom_part_collectors = args
+          @index = 0
+        end
+
+        def collectors
+          @collectors ||= Enumerator.new(dom_part_collectors.length) do |y|
+            loop do
+              y << dom_part_collectors[@index]
+              @index += 1
             end
           end
         end
       end
-      begin
-        css_threads.each(&:join)
-      rescue CssParser::CircularReferenceError => e
-        logger.respond_to?(:error) && logger.error("Got a circular reference error! #{e.message}")
-      rescue CssParser::RemoteFileError => e
-        logger.respond_to?(:error) && logger.error("File download error - #{e.message}")
-      rescue StandardError => e
-        logger.respond_to?(:error) && logger.error("#{e.class} - #{e.message}")
-      end
-
-      css_items.each { |css| parser.add_block!(*css) if css && css[0] }
-      css_result = ''
-      parser.each_rule_set { |s| css_result.concat(s.to_s) }
-      css_result
     end
   end
 end
