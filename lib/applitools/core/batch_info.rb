@@ -10,6 +10,7 @@ module Applitools
 
     environment_attribute :name, 'APPLITOOLS_BATCH_NAME'
     environment_attribute :id, 'APPLITOOLS_BATCH_ID'
+    environment_attribute :sequence_name, 'APPLITOOLS_BATCH_SEQUENCE'
 
     def initialize(name = nil, started_at = Time.now)
       self.name = name if name
@@ -21,7 +22,8 @@ module Applitools
       {
         'id' => id,
         'name' => name,
-        'startedAt' => @started_at.iso8601
+        'startedAt' => @started_at.iso8601,
+        'batchSequenceName' => sequence_name
       }
     end
 

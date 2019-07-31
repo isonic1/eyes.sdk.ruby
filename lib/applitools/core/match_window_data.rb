@@ -23,8 +23,12 @@ module Applitools
               'SplitTopHeight' => 0,
               'SplitBottomHeight' => 0,
               'IgnoreCaret' => true,
+              'IgnoreDisplacements' => false,
               'Ignore' => [],
               'Floating' => [],
+              'Layout' => [],
+              'Strict' => [],
+              'Content' => [],
               'Exact' => {
                 'MinDiffIntensity' => 0,
                 'MinDiffWidth' => 0,
@@ -79,9 +83,13 @@ module Applitools
       @floating_regions = []
       @need_convert_ignored_regions_coordinates = false
       @need_convert_floating_regions_coordinates = false
+      @need_convert_strict_regions_coordinates = false
+      @need_convert_content_regions_coordinates = false
+      @need_convert_layout_regions_coordinates = false
     end
 
     def screenshot
+      return '' unless app_output.screenshot.respond_to?(:image)
       app_output.screenshot.image.to_blob
     end
 
@@ -113,6 +121,27 @@ module Applitools
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
         current_data['Options']['ImageMatchSettings']['Floating'] << r.to_hash
+      end
+    end
+
+    def layout_regions=(value)
+      Applitools::ArgumentGuard.is_a? value, 'value', Array
+      value.each do |r|
+        current_data['Options']['ImageMatchSettings']['Layout'] << r.to_hash if self.class.valid_region(r)
+      end
+    end
+
+    def strict_regions=(value)
+      Applitools::ArgumentGuard.is_a? value, 'value', Array
+      value.each do |r|
+        current_data['Options']['ImageMatchSettings']['Strict'] << r.to_hash if self.class.valid_region(r)
+      end
+    end
+
+    def content_regions=(value)
+      Applitools::ArgumentGuard.is_a? value, 'value', Array
+      value.each do |r|
+        current_data['Options']['ImageMatchSettings']['Content'] << r.to_hash if self.class.valid_region(r)
       end
     end
 
@@ -175,6 +204,14 @@ module Applitools
       current_data['Options']['ImageMatchSettings']['EnablePatterns'] = value
     end
 
+    def ignore_displacements
+      current_data['Options']['ImageMatchSettings']['IgnoreDisplacements']
+    end
+
+    def ignore_displacements=(value)
+      current_data['Options']['ImageMatchSettings']['IgnoreDisplacements'] = value
+    end
+
     def exact=(value)
       raise Applitools::EyesError.new('You should pass a hash as a value!') unless value.nil? || value.is_a?(Hash)
       return current_data['Options']['ImageMatchSettings']['Exact'] = nil if value.nil?
@@ -193,16 +230,8 @@ module Applitools
       end
       # ignored regions
       if target.respond_to? :ignored_regions
-        target.ignored_regions.each do |r|
-          case r
-          when Proc
-            @ignored_regions << r.call(driver)
-            @need_convert_ignored_regions_coordinates = true
-          when Applitools::Region
-            @ignored_regions << r
-            @need_convert_ignored_regions_coordinates = true
-          end
-        end
+        @ignored_regions = obtain_regions_coordinates(target.ignored_regions, driver)
+        @need_convert_ignored_regions_coordinates = true unless @ignored_regions.empty?
       end
 
       # floating regions
@@ -220,10 +249,43 @@ module Applitools
           @need_convert_floating_regions_coordinates = true
         end
       end
+
+      # Layout regions
+      if target.respond_to? :layout_regions
+        @layout_regions = obtain_regions_coordinates(target.layout_regions, driver)
+        @need_convert_layout_regions_coordinates = true unless @layout_regions.empty?
+      end
+
+      # Strict regions
+      if target.respond_to? :strict_regions
+        @strict_regions = obtain_regions_coordinates(target.strict_regions, driver)
+        @need_convert_strict_regions_coordinates = true unless @strict_regions.empty?
+      end
+
+      # Content regions
+      if target.respond_to? :content_regions
+        @content_regions = obtain_regions_coordinates(target.content_regions, driver)
+        @need_convert_content_regions_coordinates = true unless @content_regions.empty?
+      end
+      target
+    end
+
+    def obtain_regions_coordinates(regions, driver)
+      result = []
+      regions.each do |r|
+        case r
+        when Proc
+          region = r.call(driver)
+          result << Applitools::Region.from_location_size(region.location, region.size)
+        when Applitools::Region
+          result << r
+        end
+      end
+      result
     end
 
     def target_options_to_read
-      %w(trim ignore_caret match_level ignore_mismatch exact use_dom enable_patterns)
+      %w(trim ignore_caret match_level ignore_mismatch exact use_dom enable_patterns ignore_displacements)
     end
 
     private :target_options_to_read
@@ -246,36 +308,79 @@ module Applitools
 
     def convert_ignored_regions_coordinates
       return unless @need_convert_ignored_regions_coordinates
-      self.ignored_regions = @ignored_regions.map do |r|
-        self.class.convert_coordinates(r, app_output.screenshot)
-      end
+      self.ignored_regions = convert_regions_coordinates(@ignored_regions)
+      # self.ignored_regions = @ignored_regions.map do |r|
+      #   self.class.convert_coordinates(r, app_output.screenshot)
+      # end unless app_output.screenshot.nil?
       @need_convert_ignored_regions_coordinates = false
+    end
+
+    def convert_layout_regions_coordinates
+      return unless @need_convert_layout_regions_coordinates
+      self.layout_regions = convert_regions_coordinates(@layout_regions)
+      @need_convert_layout_regions_coordinates = false
+    end
+
+    def convert_strict_regions_coordinates
+      return unless @need_convert_strict_regions_coordinates
+      self.strict_regions = convert_regions_coordinates(@strict_regions)
+      @need_convert_strict_regions_coordinates = false
+    end
+
+    def convert_content_regions_coordinates
+      return unless @need_convert_content_regions_coordinates
+      self.content_regions = convert_regions_coordinates(@content_regions)
+      @need_convert_content_regions_coordinates = false
+    end
+
+    def convert_regions_coordinates(regions)
+      regions.dup.map { |r| self.class.convert_coordinates(r, app_output.screenshot) } unless app_output.screenshot.nil?
     end
 
     def convert_floating_regions_coordinates
       return unless @need_convert_floating_regions_coordinates
-      self.floating_regions = @floating_regions.map do |r|
-        updated_region = app_output.screenshot.convert_region_location(
-          r,
-          Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
-          Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
-        )
-        updated_region.to_hash
-        Applitools::FloatingRegion.new(
-          updated_region.left,
-          updated_region.top,
-          r.width,
-          r.height,
-          r.max_left_offset,
-          r.max_top_offset,
-          r.max_right_offset,
-          r.max_bottom_offset
-        ).padding(r.current_padding)
+      unless app_output.screenshot.nil?
+        self.floating_regions = @floating_regions.map do |r|
+          updated_region = app_output.screenshot.convert_region_location(
+            r,
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
+            Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is]
+          )
+          updated_region.to_hash
+          Applitools::FloatingRegion.new(
+            updated_region.left,
+            updated_region.top,
+            r.width,
+            r.height,
+            r.max_left_offset,
+            r.max_top_offset,
+            r.max_right_offset,
+            r.max_bottom_offset
+          ).padding(r.current_padding)
+        end
       end
       @need_convert_floating_regions_coordinates = false
     end
 
     def to_hash
+      if @need_convert_content_regions_coordinates
+        raise Applitools::EyesError.new(
+            'You should convert coordinates for content_regions!'
+        )
+      end
+
+      if @need_convert_strict_regions_coordinates
+        raise Applitools::EyesError.new(
+            'You should convert coordinates for strict_regions!'
+        )
+      end
+
+      if @need_convert_layout_regions_coordinates
+        raise Applitools::EyesError.new(
+            'You should convert coordinates for layout_regions!'
+        )
+      end
+
       if @need_convert_ignored_regions_coordinates
         raise Applitools::EyesError.new(
           'You should convert coordinates for ignored_regions!'

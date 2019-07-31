@@ -2,6 +2,8 @@
 
 require 'applitools/core/helpers'
 require 'applitools/core/eyes_screenshot'
+require 'applitools/core/eyes_base_configuration'
+require 'applitools/core/match_level'
 require 'zlib'
 
 require_relative 'match_level_setter'
@@ -27,20 +29,26 @@ module Applitools
     SCREENSHOT_AS_IS = Applitools::EyesScreenshot::COORDINATE_TYPES[:screenshot_as_is].freeze
     CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
 
+    attr_accessor :config
+
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
-    def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
-      :set_proxy, :proxy, :proxy=
+    # def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
+    #   :set_proxy, :proxy, :proxy=
 
     # @!attribute [rw] verbose_results
     #   If set to true it will display test results in verbose format, including all fields returned by the server
     #   Default value is false.
     #   @return [boolean] verbose_results flag
 
-    attr_accessor :app_name, :batch, :agent_id, :full_agent_id,
+
+    # attr_accessor :agent_id, :session_type, :app_name, :test_name,
+
+
+    attr_accessor :batch, :full_agent_id,
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
-      :scale_ratio, :host_os, :host_app, :position_provider, :viewport_size, :verbose_results,
-      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :match_level, :exact,
-      :compare_with_parent_branch
+      :scale_ratio, :position_provider, :viewport_size, :verbose_results,
+      :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :exact,
+      :compare_with_parent_branch, :results
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -48,12 +56,16 @@ module Applitools
     abstract_method :set_viewport_size, true
     abstract_method :get_viewport_size, true
 
-    environment_attribute :branch_name, 'APPLITOOLS_BRANCH'
-    environment_attribute :parent_branch_name, 'APPLITOOLS_PARENT_BRANCH'
-    environment_attribute :baseline_env_name, 'APPLITOOLS_BASELINE_BRANCH'
+    # environment_attribute :branch_name, 'APPLITOOLS_BRANCH'
+    # environment_attribute :parent_branch_name, 'APPLITOOLS_PARENT_BRANCH'
+    # environment_attribute :baseline_env_name, 'APPLITOOLS_BASELINE_BRANCH'
+
+    def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
 
     def initialize(server_url = nil)
-      self.server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
+      @server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
+      ensure_config
+      self.server_url = server_url if server_url
       self.disabled = false
       @viewport_size = nil
       self.match_timeout = DEFAULT_MATCH_TIMEOUT
@@ -61,12 +73,13 @@ module Applitools
       self.save_new_tests = true
       self.save_failed_tests = false
       self.remove_session_if_matching = false
-      self.agent_id = nil
+      # self.agent_id = nil
       self.last_screenshot = nil
       @user_inputs = UserInputArray.new
       self.app_output_provider = Object.new
       self.verbose_results = false
       self.failed = false
+      self.results = []
       @inferred_environment = nil
       @properties = []
       @server_scale = 0
@@ -79,70 +92,29 @@ module Applitools
         end
       end
 
-      self.exact = nil
-      self.match_level = Applitools::MATCH_LEVEL[:strict]
+      # self.exact = nil
+      self.match_level = Applitools::MatchLevel::STRICT
       self.server_scale = 0
       self.server_remainder = 0
       self.compare_with_parent_branch = false
     end
 
-    def match_level=(value)
-      return @match_level = value if Applitools::MATCH_LEVEL.values.include?(value)
-      return @match_level = Applitools::MATCH_LEVEL[value.to_sym] if Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
-      raise Applitools::EyesError, "Unknown match level #{value}"
+    def ensure_config
+      self.config = Applitools::EyesBaseConfiguration.new
     end
 
-    # Sets default match_level which will be applied to any test, unless match_level is set for a test explicitly
-    # @param [Symbol] value Can be one of allowed match levels - :none, :layout, :layout2, :content, :strict or :exact
-    # @param [Hash] exact_options exact options are used only for :exact match level
-    # @option exact_options [Integer] :min_diff_intensity
-    # @option exact_options [Integer] :min_diff_width
-    # @option exact_options [Integer] :min_diff_height
-    # @option exact_options [Integer] :match_threshold
-    # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
-
-    def set_default_match_settings(value, exact_options = {})
-      (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
+    def config=(value)
+      Applitools::ArgumentGuard.not_nil value, 'config'
+      Applitools::ArgumentGuard.is_a? value, 'config', Applitools::EyesBaseConfiguration
+      raise Applitools::EyesError, 'You can\'t use new config if eyes are opened' if open?
+      @config = value
     end
 
-    # Sets default match settings
-    # @param [Hash] value
-    # @option value [Symbol] match_level
-    # @option value [Hash] exact exact values. Available keys are 'MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold'
-    # @option value [Fixnum] scale
-    # @option value [Fixnum] remainder
-
-    def default_match_settings=(value)
-      Applitools::ArgumentGuard.is_a? value, 'value', Hash
-      extra_keys = value.keys - match_level_keys
-      unless extra_keys.empty?
-        raise Applitools::EyesIllegalArgument.new(
-          "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
-        )
-      end
-      result = default_match_settings.merge!(value)
-      self.match_level = result[:match_level]
-      self.exact = result[:exact]
-      self.server_scale = result[:scale]
-      self.server_remainder = result[:remainder]
-      result
-    end
-
-    def default_match_settings
-      {
-        match_level: match_level,
-        exact: exact,
-        scale: server_scale,
-        remainder: server_remainder
-      }
-    end
-
-    def batch
-      if @batch.nil?
-        logger.info 'No batch set'
-        self.batch = BatchInfo.new
-      end
-      @batch
+    def server_connector
+      @server_connector.server_url = config.server_url
+      @server_connector.api_key = config.api_key
+      @server_connector.proxy = config.proxy if config.proxy
+      @server_connector
     end
 
     def full_agent_id
@@ -171,10 +143,6 @@ module Applitools
 
     def new_session?
       running_session && running_session.new_session?
-    end
-
-    def app_name
-      !current_app_name.nil? && !current_app_name.empty? ? current_app_name : @app_name
     end
 
     def add_property(name, value)
@@ -207,7 +175,8 @@ module Applitools
       self.running_session = nil
     end
 
-    def open_base(options)
+    def open_base(options = {})
+      self.results = []
       if disabled?
         logger.info "#{__method__} Ignored"
         return false
@@ -218,28 +187,16 @@ module Applitools
         raise Applitools::EyesError.new 'A test is already running'
       end
 
-      Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
-      default_options = { session_type: 'SEQUENTIAL' }
-      options = default_options.merge options
+      update_config_from_options(options)
 
-      if app_name.nil?
-        Applitools::ArgumentGuard.not_nil options[:app_name], 'options[:app_name]'
-        self.current_app_name = options[:app_name]
-      else
-        self.current_app_name = app_name
-      end
+      raise Applitools::EyesIllegalArgument, config.validation_errors.values.join('/n') unless config.valid?
 
-      Applitools::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
-      self.test_name = options[:test_name]
       logger.info "Agent = #{full_agent_id}"
-      logger.info "openBase(app_name: #{options[:app_name]}, test_name: #{options[:test_name]}," \
-          " viewport_size: #{options[:viewport_size]})"
+      logger.info "openBase(app_name: #{app_name}, test_name: #{test_name}," \
+          " viewport_size: #{viewport_size.to_s})"
 
       raise Applitools::EyesError.new 'API key is missing! Please set it using api_key=' if
         api_key.nil? || (api_key && api_key.empty?)
-
-      self.viewport_size = options[:viewport_size]
-      self.session_type = options[:session_type]
 
       yield if block_given?
 
@@ -247,6 +204,23 @@ module Applitools
     rescue Applitools::EyesError => e
       logger.error e.message
       raise e
+    end
+
+    def update_config_from_options(options)
+      # Applitools::ArgumentGuard.hash options, 'open_base parameter', [:test_name]
+      default_options = { session_type: 'SEQUENTIAL' }
+      options = default_options.merge options
+
+      self.app_name = options[:app_name] if options[:app_name]
+
+      # Applitools::ArgumentGuard.not_nil options[:test_name], 'options[:test_name]'
+      self.test_name = options[:test_name] if options[:test_name]
+      self.viewport_size = options[:viewport_size] if options[:viewport_size]
+      self.session_type = options[:session_type] if options[:session_type]
+    end
+
+    def merge_config(other_config)
+      config.merge(other_config)
     end
 
     def ensure_running_session
@@ -464,21 +438,25 @@ module Applitools
       end
 
       logger.info '--- Test passed'
+      self.results.push results
       return results
     ensure
       self.running_session = nil
-      self.current_app_name = nil
+      self.app_name = ''
     end
 
     def compare_with_parent_branch=(value)
       @compare_with_parent_branch = value ? true : false
     end
 
+    # def rendering_info
+    #   server_connector.rendering_info
+    # end
+    #
     private
 
-    attr_accessor :running_session, :last_screenshot, :current_app_name, :test_name, :session_type,
-      :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider,
-      :failed, :server_connector
+    attr_accessor :running_session, :last_screenshot, :scale_provider, :session_start_info, :should_match_window_run_once_on_timeout, :app_output_provider,
+      :failed
 
     attr_reader :user_inputs, :properties
 
@@ -488,19 +466,15 @@ module Applitools
       {}
     end
 
-    def match_level_keys
-      %w(match_level exact scale remainder).map(&:to_sym)
-    end
-
     def update_default_settings(match_data)
-      match_level_keys.each do |k|
+      config.match_level_keys.each do |k|
         match_data.send("#{k}=", default_match_settings[k])
       end
     end
 
     def app_environment
       Applitools::AppEnvironment.new os: host_os, hosting_app: host_app,
-          display_size: @viewport_size, inferred: inferred_environment
+          display_size: viewport_size, inferred: inferred_environment
     end
 
     def open=(value)
@@ -666,6 +640,7 @@ module Applitools
         Applitools::AppOutput.new(a_title, compress_result).tap do |o|
           o.location = region.location unless region.empty?
           o.dom_url = dom_url unless dom_url && dom_url.empty?
+          o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
         end,
         screenshot
       )

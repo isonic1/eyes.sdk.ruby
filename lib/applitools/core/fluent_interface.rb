@@ -16,6 +16,11 @@ module Applitools::FluentInterface
     self
   end
 
+  def ignore_displacements(value = true)
+    options[:ignore_displacements] = value ? true : false
+    self
+  end
+
   def timeout(value)
     options[:timeout] = value.to_i
     self

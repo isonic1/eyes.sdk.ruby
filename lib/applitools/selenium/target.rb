@@ -4,6 +4,7 @@ module Applitools
   module Selenium
     class Target
       include Applitools::FluentInterface
+      include Applitools::MatchLevelSetter
       class << self
         def frame(element)
           new.frame(element)
@@ -19,7 +20,8 @@ module Applitools
       end
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
-        :floating_regions, :frame_or_element
+        :floating_regions, :frame_or_element, :regions, :match_level, :layout_regions, :content_regions,
+        :strict_regions
 
       private :frame_or_element, :frame_or_element=
 
@@ -29,8 +31,10 @@ module Applitools
         self.options = {
           ignore_caret: true,
           ignore_mismatch: false,
-          send_dom: nil
+          send_dom: nil,
+          script_hooks: { beforeCaptureScreenshot: '' }
         }
+        self.regions = {}
         reset_for_fullscreen
       end
 
@@ -53,19 +57,38 @@ module Applitools
           ignored_regions << case args.first
                              when Applitools::Region
                                proc { args.first.padding(requested_padding) }
-                             when Applitools::Selenium::Element, ::Selenium::WebDriver::Element
-                               proc do
+                             when ::Selenium::WebDriver::Element
+                               proc do |driver, return_element = false|
+                                 region = applitools_element_from_selenium_element(driver, args.first)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
+                               end
+                             when Applitools::Selenium::Element
+                               proc do |_driver, return_element = false|
                                  region = args.first
-                                 Applitools::Region.from_location_size(
-                                   region.location, region.size
-                                 ).padding(requested_padding)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
                                end
                              else
-                               proc do |driver|
+                               proc do |driver, return_element = false|
                                  region = driver.find_element(*args)
-                                 Applitools::Region.from_location_size(
-                                   region.location, region.size
-                                 ).padding(requested_padding)
+                                 padding_proc = proc do |region|
+                                   Applitools::Region.from_location_size(
+                                       region.location, region.size
+                                   ).padding(requested_padding)
+                                 end
+                                 next region, padding_proc if return_element
+                                 padding_proc.call(region)
                                end
                              end
 
@@ -104,22 +127,116 @@ module Applitools
                             end
         value = case args.first
                 when Applitools::FloatingRegion
-                  proc { args.first.padding(requested_padding) }
-                when ::Selenium::WebDriver::Element, Applitools::Selenium::Element, ::Applitools::Region
-                  proc { Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding) }
+                  args.first.padding(requested_padding)
+                when ::Applitools::Region
+                  Applitools::FloatingRegion.any(args.shift, *args).padding(requested_padding)
+                when ::Selenium::WebDriver::Element
+                  proc do |driver, return_element = false|
+                    args_dup = args.dup
+                    region = applitools_element_from_selenium_element(driver, args_dup.shift)
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(region, *args_dup).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
+                  end
+                when ::Applitools::Selenium::Element
+                  proc do |_driver, return_element = false|
+                    args_dup = args.dup
+                    region = args_dup.shift
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(region, *args_dup).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
+                  end
                 else
-                  proc do |driver|
-                    Applitools::FloatingRegion.any(
-                      driver.find_element(args.shift, args.shift), *args
-                    ).padding(requested_padding)
+                  proc do |driver, return_element = false|
+                    args_dup = args.dup
+                    region = driver.find_element(args_dup.shift, args_dup.shift)
+                    padding_proc = proc do |region|
+                      Applitools::FloatingRegion.any(
+                          region, *args_dup
+                      ).padding(requested_padding)
+                    end
+                    next region, padding_proc if return_element
+                    padding_proc.call(region)
                   end
                 end
         floating_regions << value
         self
       end
 
-      def fully
-        options[:stitch_content] = true
+      def layout(*args)
+        return match_level(Applitools::MatchLevel::LAYOUT) if args.empty?
+        region = process_region(*args)
+        layout_regions << region
+        self
+      end
+
+      def content(*args)
+        return match_level(Applitools::MatchLevel::CONTENT) if args.empty?
+        region = process_region(*args)
+        content_regions << region
+        self
+      end
+
+      def strict(*args)
+        return match_level(Applitools::MatchLevel::STRICT) if args.empty?
+        region = process_region(*args)
+        strict_regions << region
+        self
+      end
+
+      def exact(*args)
+        match_level(Applitools::MatchLevel::EXACT, *args)
+      end
+
+      def process_region(*args)
+        r = args.first
+        case r
+        when ::Selenium::WebDriver::Element
+          proc do |driver|
+            applitools_element_from_selenium_element(driver, args.dup.first)
+          end
+        when Applitools::Region, Applitools::Selenium::Element
+          proc { r }
+        else
+          proc do |driver|
+            args_dup = args.dup
+            driver.find_element(args_dup.shift, args_dup.shift)
+          end
+        end
+      end
+
+      def replace_region(original_region, new_region, key)
+        case key
+        when :content_regions
+          replace_element(original_region, new_region, content_regions)
+        when :strict_regions
+          replace_element(original_region, new_region, strict_regions)
+        when :layout_regions
+          replace_element(original_region, new_region, layout_regions)
+        when :floating
+          replace_element(original_region, new_region, floating_regions)
+        when :ignore
+          replace_element(original_region, new_region, ignored_regions)
+        end
+      end
+
+      def replace_element(original, new, array)
+        array[array.index(original)] = new
+      end
+
+      def match_level(*args)
+        match_level = args.shift
+        exact_options = args.shift || {}
+        (options[:match_level], options[:exact]) = match_level_with_exact(match_level, exact_options)
+        self
+      end
+
+      def fully(value = true)
+        options[:stitch_content] = value ? true : false
         handle_frames
         self
       end
@@ -145,7 +262,11 @@ module Applitools
       def region(*args)
         handle_frames
         self.region_to_check = case args.first
-                               when Applitools::Selenium::Element, Applitools::Region, ::Selenium::WebDriver::Element
+                               when ::Selenium::WebDriver::Element
+                                 proc do |driver|
+                                   applitools_element_from_selenium_element(driver, args.first)
+                                 end
+                               when Applitools::Selenium::Element, Applitools::Region
                                  proc { args.first }
                                when String
                                  proc do |driver|
@@ -173,6 +294,11 @@ module Applitools
         self
       end
 
+      def script_hook(hook)
+        options[:script_hooks][:beforeCaptureScreenshot] = hook
+        self
+      end
+
       def finalize
         return self unless frame_or_element
         region = frame_or_element
@@ -187,6 +313,9 @@ module Applitools
         self.region_to_check = proc { Applitools::Region::EMPTY }
         reset_ignore
         reset_floating
+        reset_content_regions
+        reset_layout_regions
+        reset_strict_regions
         options[:stitch_content] = false
         options[:timeout] = nil
         options[:trim] = false
@@ -200,10 +329,27 @@ module Applitools
         self.floating_regions = []
       end
 
+      def reset_layout_regions
+        self.layout_regions = []
+      end
+
+      def reset_content_regions
+        self.content_regions = []
+      end
+
+      def reset_strict_regions
+        self.strict_regions = []
+      end
+
       def handle_frames
         return unless frame_or_element
         frames << frame_or_element
         self.frame_or_element = nil
+      end
+
+      def applitools_element_from_selenium_element(driver, selenium_element)
+        xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, selenium_element)
+        driver.find_element(:xpath, xpath)
       end
     end
   end
