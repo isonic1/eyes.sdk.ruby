@@ -135,43 +135,8 @@ module Applitools
       end
 
       def get_app_output_with_screenshot(region_provider, last_screenshot)
-        # dom_url = ''
-        # captured_dom_data = dom_data
-        # unless captured_dom_data.empty?
-        #   begin
-        #     logger.info 'Processing DOM..'
-        #     dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
-        #       io = StringIO.new
-        #       gz = Zlib::GzipWriter.new(io)
-        #       gz.write(json.encode('UTF-8'))
-        #       gz.close
-        #       result = io.string
-        #       io.close
-        #       result
-        #     end
-        #     logger.info 'Done'
-        #     logger.info dom_url
-        #   rescue Applitools::EyesError => e
-        #     logger.warn e.message
-        #     dom_url = nil
-        #   end
-        # end
-        # logger.info 'Getting screenshot...'
-        # screenshot = capture_screenshot
-        # logger.info 'Done getting screenshot!'
         region = region_provider.region
-
-        # unless region.empty?
-        #   screenshot = screenshot.sub_screenshot region, region_provider.coordinate_type, false
-        # end
-
-        # screenshot = yield(screenshot) if block_given?
-
-        # logger.info 'Compressing screenshot...'
-        # compress_result = compress_screenshot64 screenshot, last_screenshot
-        # logger.info 'Done! Getting title...'
         a_title = title
-        # logger.info 'Done!'
         Applitools::AppOutputWithScreenshot.new(
           Applitools::AppOutput.new(a_title, '').tap do |o|
             o.location = region.location unless region.empty?
