@@ -45,7 +45,12 @@ module Applitools
         match_data = Applitools::Selenium::VgMatchWindowData.new
         match_data.tag = name
         update_default_settings(match_data)
-        match_data.read_target(target_to_check, driver, selector_regions)
+        begin
+          match_data.read_target(target_to_check, driver, selector_regions)
+        rescue Applitools::Selenium::VgMatchWindowData::RegionCoordinatesError => e
+          logger.error "Error retrieving coordinates for region #{e.region}"
+          logger.error e.message
+        end
 
         check_result = check_window_base(
             dummy_region_provider, timeout, match_data
