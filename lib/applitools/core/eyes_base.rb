@@ -117,50 +117,6 @@ module Applitools
       @server_connector
     end
 
-    # Sets default match_level which will be applied to any test, unless match_level is set for a test explicitly
-    # @param [Symbol] value Can be one of allowed match levels - :none, :layout, :layout2, :content, :strict or :exact
-    # @param [Hash] exact_options exact options are used only for :exact match level
-    # @option exact_options [Integer] :min_diff_intensity
-    # @option exact_options [Integer] :min_diff_width
-    # @option exact_options [Integer] :min_diff_height
-    # @option exact_options [Integer] :match_threshold
-    # @return [Target] Applitools::Selenium::Target or Applitools::Images::target
-
-    # def set_default_match_settings(value, exact_options = {})
-    #   (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
-    # end
-
-    # Sets default match settings
-    # @param [Hash] value
-    # @option value [Symbol] match_level
-    # @option value [Hash] exact exact values. Available keys are 'MinDiffIntensity', 'MinDiffWidth', 'MinDiffHeight', 'MatchThreshold'
-    # @option value [Fixnum] scale
-    # @option value [Fixnum] remainder
-
-    # def default_match_settings=(value)
-    #   Applitools::ArgumentGuard.is_a? value, 'value', Hash
-    #   extra_keys = value.keys - match_level_keys
-    #   unless extra_keys.empty?
-    #     raise Applitools::EyesIllegalArgument.new(
-    #       "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
-    #     )
-    #   end
-    #   result = default_match_settings.merge!(value)
-    #   (self.match_level, self.exact) = match_level_with_exact(result[:match_level], result[:exact])
-    #   self.server_scale = result[:scale]
-    #   self.server_remainder = result[:remainder]
-    #   result
-    # end
-    #
-    # def default_match_settings
-    #   {
-    #     match_level: match_level,
-    #     exact: exact,
-    #     scale: server_scale,
-    #     remainder: server_remainder
-    #   }
-    # end
-
     def full_agent_id
       if !agent_id.nil? && !agent_id.empty?
         "#{agent_id} [#{base_agent_id}]"

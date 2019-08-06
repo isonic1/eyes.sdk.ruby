@@ -1,6 +1,13 @@
 module Applitools
   module Selenium
     class VgMatchWindowData < Applitools::MatchWindowData
+      class RegionCoordinatesError < ::Applitools::EyesError
+        attr_accessor :region
+        def initialize(region, message)
+          super(message)
+          self.region = region
+        end
+      end
       attr_accessor :target, :selector_regions
       def read_target(target, driver, selector_regions)
         self.target = target
@@ -24,6 +31,7 @@ module Applitools
               @ignored_regions << r
             when Applitools::Selenium::VGRegion
               region = selector_regions[target.regions[r.region]]
+              raise RegionCoordinatesError.new(r, region['error']) if region['error']
               retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
               @ignored_regions << r.padding_proc.call(retrieved_region)
             end
@@ -64,6 +72,7 @@ module Applitools
           when Applitools::Selenium::VGRegion
             region = r.region
             region = selector_regions[target.regions[region]]
+            raise RegionCoordinatesError.new(r, region['error']) if region['error']
             retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
             floating_region = r.padding_proc.call(retrieved_region) if r.padding_proc.is_a? Proc
             raise Applitools::EyesError.new "Wrong floating region: #{region.class}" unless
@@ -87,6 +96,7 @@ module Applitools
           when Applitools::Selenium::VGRegion
             region = r.region
             region = selector_regions[target.regions[region]]
+            raise RegionCoordinatesError.new(r, region['error']) if region['error']
             result << Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
           end
         end
