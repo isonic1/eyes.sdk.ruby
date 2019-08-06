@@ -3,16 +3,16 @@ module Applitools
     module DomCapture
       extend self
       DOM_EXTRACTION_TIMEOUT = 300 #seconds
-      def full_window_dom(driver, logger, position_provider = nil)
-        return get_dom(driver, logger) unless position_provider
+      def full_window_dom(driver, server_connector, logger, position_provider = nil)
+        return get_dom(driver, server_connector, logger) unless position_provider
         scroll_top_and_return_back(position_provider) do
-          get_dom(driver, logger)
+          get_dom(driver, server_connector, logger)
         end
       end
 
-      def get_dom(driver, logger)
+      def get_dom(driver, server_connector, logger)
         original_frame_chain = driver.frame_chain
-        dom = get_frame_dom(driver, logger)
+        dom = get_frame_dom(driver, server_connector, logger)
         unless original_frame_chain.empty?
           driver.switch_to.default_content
           driver.switch_to.frames(frame_chain: original_frame_chain)
@@ -22,8 +22,7 @@ module Applitools
         dom
       end
 
-      def get_frame_dom(driver, logger)
-        result = ''
+      def get_frame_dom(driver, server_connector, logger)
         logger.info 'Trying to get DOM from driver'
         start_time = Time.now
         script_response = nil
@@ -57,10 +56,9 @@ module Applitools
         logger.info "Missing frames: #{missing_frame_list.count}"
         #fetch_css_files(missing_css_list)
 
-        frame_data = recurse_frames(driver, logger, missing_frame_list)
+        frame_data = recurse_frames(driver, server_connector, logger, missing_frame_list)
         result = replace(separators['iframeStartToken'], separators['iframeEndToken'], data.first, frame_data)
-
-        css_data = fetch_css_files(missing_css_list)
+        css_data = fetch_css_files(missing_css_list, server_connector)
         replace(separators['cssStartToken'], separators['cssEndToken'], result, css_data)
       rescue StandardError
         logger.error(e.class)
@@ -69,20 +67,28 @@ module Applitools
         return ''
       end
 
-      def fetch_css_files(missing_css_list)
+      def fetch_css_files(missing_css_list, server_connector)
         result = {}
         missing_css_list.each do |url|
           next if url.empty?
           next if /^blob:/ =~ url
 
           begin
-            parser = CssParser::Parser.new(absolute_paths: true, import: true)
-            parser.load_uri!(url)
-            css = ''
-            parser.each_rule_set do |s|
-              css += s.to_s
+            missing_css_response = server_connector.download_resource(url)
+            response_headers = missing_css_response.headers
+            raise Applitools::EyesError, "Wrong response header: #{response_headers['content-type']}" unless
+                %r{^text/css.*}i =~ response_headers['content-type']
+
+            css = missing_css_response.body
+
+            found_and_missing_css = Applitools::Selenium::CssParser::FindEmbeddedResources.new(css).imported_css.map do |found_url|
+              base_url(url).merge(found_url).to_s
             end
-            result[url] = css
+            fetch_css_files(found_and_missing_css, server_connector).each do |_k, v|
+              css += v
+            end
+
+            result[url] = Oj.dump("\n/** #{url} **/\n" + css).gsub(/^\"|\"$/, '')
           rescue StandardError
             result[url] = ''
           end
@@ -90,7 +96,7 @@ module Applitools
         result
       end
 
-      def recurse_frames(driver, logger, missing_frame_list)
+      def recurse_frames(driver, server_connector, logger, missing_frame_list)
         return if missing_frame_list.empty?
         frame_data = {}
         frame_chain = driver.frame_chain
@@ -110,7 +116,7 @@ module Applitools
             logger.info "Switch to frame (#{missing_frame_line}) failed"
             frame_data[missing_frame_line] = ''
           else
-            result = get_frame_dom(driver, logger)
+            result = get_frame_dom(driver, server_connector, logger)
             frame_data[missing_frame_line] = result
           end
         end
@@ -121,6 +127,7 @@ module Applitools
 
       def scroll_top_and_return_back(position_provider)
         original_position = position_provider.current_position
+        return yield if block_given? && original_position.nil?
         position_provider.scroll_to Applitools::Location.new(0, 0)
         result = yield if block_given?
         position_provider.scroll_to original_position
@@ -130,6 +137,13 @@ module Applitools
       def replace(open_token, close_token, input, replacements)
         pattern = /#{open_token}(?<key>.+?)#{close_token}/
         input.gsub(pattern) { |_m| replacements[Regexp.last_match(1)] }
+      end
+
+      def base_url(url)
+        uri = URI.parse(url)
+        uri.query = uri.fragment = nil;
+        uri.path = ''
+        uri
       end
 
       class DomParts

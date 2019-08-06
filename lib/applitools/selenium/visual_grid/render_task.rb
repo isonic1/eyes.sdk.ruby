@@ -10,7 +10,7 @@ module Applitools
 
       attr_accessor :script, :running_tests, :all_blobs, :resource_urls, :resource_cache, :put_cache, :server_connector,
         :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode,
-        :region_to_check, :script_hooks, :visual_grid_manager
+        :region_to_check, :script_hooks, :visual_grid_manager, :discovered_resources
 
       def initialize(name, script_result, visual_grid_manager, server_connector, region_selectors, size_mode,
         region, script_hooks, mod = nil)
@@ -133,12 +133,14 @@ module Applitools
         self.all_blobs = data["blobs"]
         self.resource_urls = data["resourceUrls"]
         self.request_resources = Applitools::Selenium::RenderResources.new
+        self.discovered_resources = []
 
-        all_blobs.map { |blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob)}.each do |blob|
+        all_blobs.map { |blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob) }.each do |blob|
           request_resources[blob.url] = blob
         end
 
         resource_urls.each do |url|
+          puts "111111 #{url}"
           resource_cache.fetch_and_store(URI(url)) do |s|
             resp_proc = proc { |u| server_connector.download_resource(u) }
             retry_count = 3
@@ -147,7 +149,13 @@ module Applitools
               response = resp_proc.call(url)
             end while response.status != 200 && retry_count > 0
             s.synchronize do
-              Applitools::Selenium::VGResource.parse_response(url, response)
+              resource = Applitools::Selenium::VGResource.parse_response(url, response)
+              resource.on_css_fetched do |urls_to_fetch|
+                urls_to_fetch.each do |discovered_url|
+                  puts discovered_url
+                end
+              end
+              resource
             end
           end
         end
@@ -178,7 +186,7 @@ module Applitools
             dom: dom,
             resources: request_resources,
             render_info: r_info,
-            browser: {name: running_test.browser_info.browser_type, platform: running_test.browser_info.platform},
+            browser: {xname: running_test.browser_info.browser_type, platform: running_test.browser_info.platform},
             script_hooks: script_hooks,
             selectors_to_find_regions_for: region_selectors,
             send_dom: running_test.eyes.config.send_dom.nil? ? false.to_s : running_test.eyes.config.send_dom.to_s

@@ -106,6 +106,9 @@ module Applitools
             end
           end
 
+          require 'pry'
+          binding.pry
+
           mod = Digest::SHA2.hexdigest(script_result)
 
           region_x_paths = get_regions_x_paths(target)

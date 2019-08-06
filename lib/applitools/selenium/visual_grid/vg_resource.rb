@@ -5,7 +5,7 @@ module Applitools
     class VGResource
       include Applitools::Jsonable
       json_fields :contentType, :hash, :hashFormat
-      attr_accessor :url, :content
+      attr_accessor :url, :content, :handle_css_block
       alias :content_type :contentType
       alias :content_type= :contentType=
 
@@ -28,6 +28,13 @@ module Applitools
         self.content = content
         self.hash = Digest::SHA256.hexdigest(content)
         self.hashFormat = 'sha256'
+        if %r{^text/css} =~ content_type
+          handle_css_block.call(['JOPA']) if handle_css_block
+        end
+      end
+
+      def on_css_fetched(&block)
+        self.handle_css_block = block
       end
 
       def stringify

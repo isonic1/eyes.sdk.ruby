@@ -20,14 +20,12 @@ RSpec.shared_examples 'Test for url' do |url|
     # config.batch = @batch
     # emu = Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT)
 
-    config.add_browser(800, 600, BrowserTypes::CHROME)
-          .add_browser(700, 500, BrowserTypes::CHROME)
-          .add_browser(1600, 1200, BrowserTypes::CHROME)
+    config.add_browser(1600, 1200, BrowserTypes::CHROME)
           .add_browser(1280, 1024, BrowserTypes::CHROME)
           .add_browser(1280, 1024, BrowserTypes::EDGE)
-          .add_device_emulation(Devices::BlackBerryZ30, Orientations::PORTRAIT)
-          .add_device_emulation(Devices::MicrosoftLumia950)
-          .add_device_emulation(Devices::NokiaLumia520, Orientations::LANDSCAPE)
+          # .add_device_emulation(Devices::BlackBerryZ30, Orientations::PORTRAIT)
+          # .add_device_emulation(Devices::MicrosoftLumia950)
+          # .add_device_emulation(Devices::NokiaLumia520, Orientations::LANDSCAPE)
 
     # config.add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.galaxy_s5(Applitools::Selenium::ChromeEmulationInfo::ORIENTATIONS::PORTRAIT))
     #       .add_device_emulation(Applitools::Selenium::ChromeEmulationInfo.i_phone_4(:portrait))
@@ -40,7 +38,8 @@ RSpec.shared_examples 'Test for url' do |url|
     eyes.open(driver: web_driver)
   end
 
-  let(:target1) { Applitools::Selenium::Target.window.send_dom(true).ignore(:css, '#hlogo img').ignore_displacements }#.script_hook('document.getElementsByTagName("html")[0].appendChild(document.createTextNode("some text"));') }
+  let(:target1) { Applitools::Selenium::Target.window.send_dom(true) }
+  # let(:target1) { Applitools::Selenium::Target.window.send_dom(true).ignore(:css, '#hlogo img').ignore_displacements }#.script_hook('document.getElementsByTagName("html")[0].appendChild(document.createTextNode("some text"));') }
   let(:target2) { Applitools::Selenium::Target.window.fully(true).send_dom(true).floating(:css, '#hlogo img', 15, 15, 15, 15) }
   let(:target3) { Applitools::Selenium::Target.region(:css, '#ulogo img').send_dom(true) }
   let(:target4) { Applitools::Selenium::Target.region(Applitools::Region.new(80,80, 350, 100)) }
@@ -62,9 +61,9 @@ RSpec.shared_examples 'Test for url' do |url|
   it url do
     driver.get(url)
     eyes.check('Step1 ' + url, target1)
-    eyes.check('Step2 ' + url, target2)
-    eyes.check('Step3 ' + url, target3)
-    eyes.check('Step4 ' + url, target4)
+    # eyes.check('Step2 ' + url, target2)
+    # eyes.check('Step3 ' + url, target3)
+    # eyes.check('Step4 ' + url, target4)
   end
 end
 
@@ -96,7 +95,7 @@ RSpec.describe 'My first visual grid test' do
     https://instagram.com
     https://www.target.com/c/blankets-throws/-/N-d6wsb?lnk=ThrowsBlankets%E2%80%9C,tc
     http://applitools-vg-test.surge.sh/test.html
-  )[1..1].each do |url|
+  )[0..0].each do |url|
     it_behaves_like 'Test for url', url
   end
 end
