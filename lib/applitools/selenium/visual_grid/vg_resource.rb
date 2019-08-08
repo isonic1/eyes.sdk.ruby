@@ -10,31 +10,36 @@ module Applitools
       alias :content_type= :contentType=
 
       class << self
-        def parse_blob_from_script(blob)
-          content = Base64.decode64(blob["value"])
-          # puts "#{blob['url']} ===> #{blob['type']}"
-          self.new blob["url"], blob["type"], content
+        def parse_blob_from_script(blob, options = {})
+          content = Base64.decode64(blob['value'])
+          new(blob['url'], blob['type'], content, options)
         end
 
-        def parse_response(url, response)
-          return self.new(url, 'application/empty-response', '') unless response.status == 200
-          self.new(url, response.headers['Content-Type'], response.body)
+        def parse_response(url, response, options = {})
+          return new(url, 'application/empty-response', '') unless response.status == 200
+          new(url, response.headers['Content-Type'], response.body, options)
         end
       end
 
-      def initialize(url, content_type, content)
+      def initialize(url, content_type, content, options = {})
+        self.handle_css_block = options[:on_css_fetched] if options[:on_css_fetched].is_a? Proc
         self.url = URI(url)
         self.content_type = content_type
         self.content = content
         self.hash = Digest::SHA256.hexdigest(content)
         self.hashFormat = 'sha256'
-        if %r{^text/css} =~ content_type
-          handle_css_block.call(['JOPA']) if handle_css_block
-        end
+        lookup_for_resources
       end
 
-      def on_css_fetched(&block)
+      def on_css_fetched(block)
         self.handle_css_block = block
+      end
+
+      def lookup_for_resources
+        if %r{^text/css}i =~ content_type && handle_css_block
+          parser = Applitools::Selenium::CssParser::FindEmbeddedResources.new(content)
+          handle_css_block.call(parser.imported_css + parser.fonts + parser.images, url)
+        end
       end
 
       def stringify

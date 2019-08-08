@@ -131,38 +131,62 @@ module Applitools
 
       def prepare_data_for_rg(data)
         self.all_blobs = data["blobs"]
-        self.resource_urls = data["resourceUrls"]
+        self.resource_urls = data["resourceUrls"].map { |u| URI(u) }
         self.request_resources = Applitools::Selenium::RenderResources.new
-        self.discovered_resources = []
+        discovered_resources = []
 
-        all_blobs.map { |blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob) }.each do |blob|
-          request_resources[blob.url] = blob
-        end
+        @discovered_resources_lock = Mutex.new
 
-        resource_urls.each do |url|
-          puts "111111 #{url}"
-          resource_cache.fetch_and_store(URI(url)) do |s|
-            resp_proc = proc { |u| server_connector.download_resource(u) }
-            retry_count = 3
-            begin
-              retry_count -= 1
-              response = resp_proc.call(url)
-            end while response.status != 200 && retry_count > 0
-            s.synchronize do
-              resource = Applitools::Selenium::VGResource.parse_response(url, response)
-              resource.on_css_fetched do |urls_to_fetch|
-                urls_to_fetch.each do |discovered_url|
-                  puts discovered_url
-                end
-              end
-              resource
+        fetch_block = proc {}
+
+        handle_css_block = proc do |urls_to_fetch, url|
+          urls_to_fetch.each do |discovered_url|
+            target_url = URI.parse(discovered_url)
+            unless target_url.host
+              target_with_base = url.is_a?(URI) ? url.dup : URI.parse(url)
+              target_url = target_with_base.merge target_url
+              target_url.freeze
             end
+            next unless /^http/i =~ target_url.scheme
+            @discovered_resources_lock.synchronize do
+              discovered_resources.push target_url
+            end
+            resource_cache.fetch_and_store(target_url, &fetch_block)
           end
         end
 
+        fetch_block = proc do |_s, key|
+          resp_proc = proc { |u| server_connector.download_resource(u) }
+          retry_count = 3
+          begin
+            retry_count -= 1
+            response = resp_proc.call(key.dup)
+          end while response.status != 200 && retry_count > 0
+          Applitools::Selenium::VGResource.parse_response(key.dup, response, on_css_fetched: handle_css_block)
+        end
+
+        blobs = all_blobs.map { |blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob) }.each do |blob|
+          request_resources[blob.url] = resource_cache[blob.url] = blob
+        end
+
+        blobs.each do |blob|
+          blob.on_css_fetched(handle_css_block)
+          blob.lookup_for_resources
+        end
+
+        resource_urls.each do |url|
+          resource_cache.fetch_and_store(url, &fetch_block)
+        end
+
         resource_urls.each do |u|
-          key = URI(u)
-          request_resources[key] = resource_cache[key]
+          begin
+            request_resources[u] = resource_cache[u]
+          rescue Applitools::Selenium::RenderResources
+          end
+        end
+
+        discovered_resources.each do |u|
+          request_resources[u] = resource_cache[u]
         end
 
         requests = Applitools::Selenium::RenderRequests.new

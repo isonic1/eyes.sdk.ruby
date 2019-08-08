@@ -24,7 +24,7 @@ module Applitools
         end
 
         def images
-
+          fetch_urls(images_rules)
         end
 
         private
@@ -39,7 +39,7 @@ module Applitools
         end
 
         def fetch_urls(nodes)
-          nodes.map { |n| url(n) }
+          nodes.map { |n| url(n) }.compact
         end
 
         def import_rules
@@ -48,6 +48,12 @@ module Applitools
 
         def font_face_rules
           css_nodes.select { |n| n[:node] == :at_rule && n[:name] == 'font-face' }
+        end
+
+        def images_rules
+          css_nodes.select { |n| n[:node] == :style_rule }.map { |n| n[:children] }
+                   .flatten
+                   .select { |n| n[:node] == :property && (n[:name] == 'background' || n[:name] == 'background-image') }
         end
 
         def css_nodes

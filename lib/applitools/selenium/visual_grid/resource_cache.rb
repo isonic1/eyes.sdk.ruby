@@ -2,6 +2,7 @@ require 'thread'
 module Applitools
   module Selenium
     class ResourceCache
+      class ResourceMissing < ::Applitools::EyesError; end
       attr_accessor :cache_map, :semaphore
 
       def initialize
@@ -11,7 +12,7 @@ module Applitools
 
       def contains?(url)
         semaphore.synchronize do
-          cache_map.keys.include?(url) && !cache_map[url].nil?
+          check_key(url)
         end
       end
 
@@ -19,8 +20,9 @@ module Applitools
         current_value = semaphore.synchronize do
           cache_map[key]
         end
-        return current_value unless cache_map[key].is_a? Applitools::Future
-        update_cache_map(key, cache_map[key].get)
+        raise ResourceMissing, key if current_value.nil?
+        return current_value unless current_value.is_a? Applitools::Future
+        update_cache_map(key, current_value.get)
       end
 
       def []=(key, value)
@@ -30,16 +32,22 @@ module Applitools
       end
 
       def fetch_and_store(key, &block)
-        return self[key] if self.contains? key
-        return unless block_given?
-        self[key] = Applitools::Future.new(semaphore) do |semaphore|
-          block.call(semaphore)
+        semaphore.synchronize do
+          return cache_map[key] if check_key(key)
+          return unless block_given?
+          cache_map[key] = Applitools::Future.new(semaphore) do |semaphore|
+            block.call(semaphore, key)
+          end
+          return true if cache_map[key].is_a? Applitools::Future
+          false
         end
-        return true if cache_map[key].is_a? Applitools::Future
-        false
       end
 
       private
+
+      def check_key(url)
+        cache_map.keys.include?(url) && !cache_map[url].nil?
+      end
 
       def update_cache_map(key, value)
         semaphore.synchronize do
