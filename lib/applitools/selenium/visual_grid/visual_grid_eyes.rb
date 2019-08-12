@@ -1,4 +1,6 @@
 require 'applitools/selenium/configuration'
+require 'timeout'
+
 module Applitools
   module Selenium
     class VisualGridEyes
@@ -88,30 +90,37 @@ module Applitools
         END
         begin
           sleep wait_before_screenshots
+          Applitools::EyesLogger.info 'Trying to get DOM snapshot...'
 
-          # script_result = driver.execute_async_script(script).freeze
-
-          dom_snapshot_start_time = Time.now()
-          result = {}
-          script_result = nil
-          loop do
-            script_result = driver.execute_script(script)
-            begin
-              result = Oj.load(script_result)
-              break if result['status'] == 'SUCCESS'
-              dom_snapshot_time = Time.now - dom_snapshot_start_time
-              raise Applitools::EyesError, 'Timeout error while getting dom snapshot!' if dom_snapshot_time > DOM_EXTRACTION_TIMEOUT
-            rescue Oj::ParseError => e
-              Applitools::EyesLogger.warn e.message
+          script_thread = Thread.new do
+            result = {}
+            while result['status'] != 'SUCCESS'
+              Thread.current[:script_result] = driver.execute_script(script)
+              begin
+                Thread.current[:result] = result = Oj.load(Thread.current[:script_result])
+                sleep 0.5
+                puts "*"
+              rescue Oj::ParseError => e
+                Applitools::EyesLogger.warn e.message
+              end
             end
           end
+          sleep 0.5
+          script_thread_result = script_thread.join(DOM_EXTRACTION_TIMEOUT)
+          raise ::Applitools::EyesError.new 'Timeout error while getting dom snapshot!' unless script_thread_result
+          Applitools::EyesLogger.info 'Done!'
 
-          mod = Digest::SHA2.hexdigest(script_result)
+          # require 'pry'
+          # binding.pry
+          # puts script_thread_result[:result]['value']
+
+
+          mod = Digest::SHA2.hexdigest(script_thread_result[:script_result])
 
           region_x_paths = get_regions_x_paths(target)
           render_task = RenderTask.new(
             "Render #{config.short_description} - #{tag}",
-            result["value"],
+            script_thread_result[:result]['value'],
             visual_grid_manager,
             server_connector,
             region_x_paths,
@@ -124,10 +133,12 @@ module Applitools
             t.check(tag, target, render_task)
           end
           test_list.each { |t| t.becomes_not_rendered }
+          test_list.each { |t| t.becomes_not_rendered }
           visual_grid_manager.enqueue_render_task render_task
         rescue StandardError => e
-          Applitools::EyesLogger.error e.message
           test_list.each { |t| t.becomes_tested }
+          Applitools::EyesLogger.error e.class.to_s
+          Applitools::EyesLogger.error e.message
         end
       end
 
@@ -200,7 +211,7 @@ module Applitools
         return false if test_list.empty?
         test_list.each(&:close)
 
-        while (!((states = test_list.map(&:state_name).uniq).count == 1 && states.first == :completed)) do
+        until ((states = test_list.map(&:state_name).uniq).count == 1 && states.first == :completed) do
           sleep 0.5
         end
         self.opened = false

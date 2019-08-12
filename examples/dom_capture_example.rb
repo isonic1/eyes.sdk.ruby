@@ -11,16 +11,18 @@ eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 eyes.match_level = Applitools::MATCH_LEVEL[:layout]
 eyes.send_dom = true
+eyes.use_dom = true
+eyes.enable_patterns = true
 
 begin
   web_driver = Selenium::WebDriver.for :chrome
   eyes.test(
-    app_name: 'DOM Capture',
+    app_name: 'DOM Capture 777',
     test_name: 'Applitools DomCapture test BM 15',
-    viewport_size: { width: 800, height: 600 },
+    viewport_size: { width: 800, height: 601 },
     driver: web_driver
   ) do |driver|
-    driver.get 'http://applitools.github.io/demo/TestPages/DomTest/dom_capture.html'
+    driver.get 'http://localhost:3000'
     eyes.check_window('initial')
   end
 ensure

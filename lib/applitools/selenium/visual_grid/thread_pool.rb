@@ -39,9 +39,7 @@ module Applitools
         @semaphore.synchronize do
           @stopped = true
         end
-        @thread_group.list.each do |t|
-          t.join
-        end
+        @thread_group.list.each(&:join)
         stopped?
       end
 
@@ -81,6 +79,7 @@ module Applitools
                 end
               end
             end
+            Applitools::EyesLogger.logger.info 'Worker is stopped'
           rescue => e
             Applitools::EyesLogger.logger.error "Failed to execute task - #{task_to_run.name}"
             Applitools::EyesLogger.logger.error e.message

@@ -209,9 +209,10 @@ module Applitools::Connectivity
     end
 
     def post_dom_json(dom_data)
-      # Applitools::EyesLogger.debug 'About to send captured DOM...'
-      request_body = Oj.dump(dom_data)
-      # Applitools::EyesLogger.debug request_body
+      Applitools::EyesLogger.debug 'About to send captured DOM...'
+      # request_body = Oj.dump(dom_data)
+      request_body = dom_data
+      Applitools::EyesLogger.debug request_body
       processed_request_body = yield(request_body) if block_given?
       res = post(
         endpoint_url + 'data',
