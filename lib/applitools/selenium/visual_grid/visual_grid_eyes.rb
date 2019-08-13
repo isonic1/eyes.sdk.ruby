@@ -99,7 +99,6 @@ module Applitools
               begin
                 Thread.current[:result] = result = Oj.load(Thread.current[:script_result])
                 sleep 0.5
-                puts "*"
               rescue Oj::ParseError => e
                 Applitools::EyesLogger.warn e.message
               end
@@ -109,11 +108,6 @@ module Applitools
           script_thread_result = script_thread.join(DOM_EXTRACTION_TIMEOUT)
           raise ::Applitools::EyesError.new 'Timeout error while getting dom snapshot!' unless script_thread_result
           Applitools::EyesLogger.info 'Done!'
-
-          # require 'pry'
-          # binding.pry
-          # puts script_thread_result[:result]['value']
-
 
           mod = Digest::SHA2.hexdigest(script_thread_result[:script_result])
 

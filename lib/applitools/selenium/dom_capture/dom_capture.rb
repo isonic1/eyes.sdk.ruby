@@ -41,8 +41,6 @@ module Applitools
         missing_frame_list = []
         data = []
 
-        puts separators
-
         blocks = DomParts.new(missing_css_list, missing_frame_list, data)
         collector = blocks.collectors.next
         response_lines.each do |line|
