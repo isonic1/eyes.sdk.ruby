@@ -33,7 +33,7 @@ module Applitools::Utils
 
     # @!visibility private
     JS_GET_DEVICE_PIXEL_RATIO = <<-JS.freeze
-      return window.devicePixelRatio;
+      return window.devicePixelRatio || window.screen.deviceXDPI / window.screen.logicalXDPI;
     JS
 
     # @!visibility private
@@ -148,7 +148,7 @@ module Applitools::Utils
       %{element}.style['%{key}'] = '%{value}'
     JS
 
-    JS_TRANSFORM_KEYS = ['transform', '-webkit-transform'].freeze
+    JS_TRANSFORM_KEYS = ['transform', '-webkit-transform', '-ms-transform', '-moz-transform'].freeze
 
     # @!visibility private
     OVERFLOW_HIDDEN = 'hidden'.freeze
@@ -260,8 +260,13 @@ module Applitools::Utils
     end
 
     def set_transforms(executor, value)
+      root_element = executor.browser.running_browser_name == :internet_explorer ? 'document.body' : 'document.documentElement'
       script = value.keys.map do |k|
-        JS_SET_TRANSFORM_VALUE % { element: 'document.documentElement', key: k, value: value[k] }
+        JS_SET_TRANSFORM_VALUE % {
+          element: root_element,
+          key: k,
+          value: value[k]
+        }
       end.join('; ')
       executor.execute_script(script)
     end
