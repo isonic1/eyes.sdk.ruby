@@ -45,7 +45,7 @@ RSpec.shared_context "selenium workaround", :shared_context => :metadata do
   let(:app_name) { self.class.description } #self.class.description.metadata
   let(:test_name) { |example| example.description }
   let(:viewport_size) { {width: 800, height: 600} }
-  let(:chrome_options) { Selenium::WebDriver::Chrome::Options.new(options: { args: %w(headless disable-infobars) }) }
+  let(:chrome_options) { Selenium::WebDriver::Chrome::Options.new(options: { args: %w(headless disable-infobars no-sandbox disable-dev-shm-usage) }) }
 
   after(:all) do
 
