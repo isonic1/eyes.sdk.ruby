@@ -1,0 +1,26 @@
+dist: trusty
+addons:
+  chrome: stable
+
+language: ruby
+rvm:
+  - 2.4.1
+gemfile:
+  - GemfileTravis
+
+sudo: false
+branches:
+  only:
+    - master
+    - /^v.*$/
+before_install:
+  - gem install builder
+  - BUILD_ONLY=true rake clean build
+  - cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd ..
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+      ⋮
+before_script:
+  - export APPLITOOLS_BATCH_ID=$(java UUIDFromString $TRAVIS_COMMIT$TRAVIS_RUBY_VERSION)
+  - echo $APPLITOOLS_BATCH_ID
+script:
+  - bundle exec rake
