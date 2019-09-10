@@ -18,7 +18,6 @@ before_install:
   - BUILD_ONLY=true rake clean build
   - cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd ..
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
-      ⋮
 before_script:
   - export APPLITOOLS_BATCH_ID=$(java UUIDFromString $TRAVIS_COMMIT$TRAVIS_RUBY_VERSION)
   - echo $APPLITOOLS_BATCH_ID
