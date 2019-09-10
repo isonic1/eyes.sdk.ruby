@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'eyes_selenium'
-require 'pry'
 
 RSpec.describe 'Group0', selenium: true do
   context 'Group1' do
