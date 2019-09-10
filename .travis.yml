@@ -17,7 +17,7 @@ before_install:
   - gem install builder
   - BUILD_ONLY=true rake clean build
   - cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd ..
-#  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
+  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
 before_script:
   - wget http://chromedriver.storage.googleapis.com/76.0.3809.68/chromedriver_linux64.zip
   - unzip chromedriver_linux64.zip -d /home/travis/build
