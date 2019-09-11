@@ -1,5 +1,9 @@
 addons:
-  chrome: stable
+  apt:
+    sources:
+      - google-chrome
+    packages:
+      - google-chrome-stable
 
 
 language: ruby
@@ -9,6 +13,7 @@ gemfile:
   - GemfileTravis
 
 sudo: required
+env: DISPLAY=':99.0'
 #branches:
 #  only:
 #    - master
@@ -25,6 +30,7 @@ before_script:
   - sudo chmod +x /usr/local/share/chromedriver
   - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
   - sudo apt-get install -y libgdiplus
+  - sh -e /etc/init.d/xvfb start
   - export APPLITOOLS_BATCH_ID=$(java UUIDFromString $TRAVIS_COMMIT$TRAVIS_RUBY_VERSION)
   - echo $APPLITOOLS_BATCH_ID
 script:
