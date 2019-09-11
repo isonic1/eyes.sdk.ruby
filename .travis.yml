@@ -1,13 +1,14 @@
 addons:
   chrome: stable
 
+
 language: ruby
 rvm:
   - 2.4.1
 gemfile:
   - GemfileTravis
 
-sudo: false
+sudo: required
 #branches:
 #  only:
 #    - master
