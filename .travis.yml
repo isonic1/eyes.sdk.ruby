@@ -12,7 +12,6 @@ rvm:
 gemfile:
   - GemfileTravis
 
-sudo: required
 env: DISPLAY=':99.0' BROWSER=chrome
 services:
   - xvfb
@@ -31,7 +30,6 @@ before_script:
   - sudo mv -f /home/travis/build/chromedriver /usr/local/share/
   - sudo chmod +x /usr/local/share/chromedriver
   - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
-  - sudo apt-get install -y libgdiplus
   - export APPLITOOLS_BATCH_ID=$(java UUIDFromString $TRAVIS_COMMIT$TRAVIS_RUBY_VERSION)
   - echo $APPLITOOLS_BATCH_ID
 script:

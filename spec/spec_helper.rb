@@ -45,19 +45,15 @@ RSpec.shared_context "selenium workaround", :shared_context => :metadata do
   let(:app_name) { self.class.description } #self.class.description.metadata
   let(:test_name) { |example| example.description }
   let(:viewport_size) { {width: 800, height: 600} }
-  let(:chrome_options) { Selenium::WebDriver::Chrome::Options.new(options: { args: %w(headless disable-gpu no-sandbox disable-dev-shm-usage) }) }
+  let(:chrome_options) do
+    Selenium::WebDriver::Chrome::Options.new(
+      options: { args: %w(headless disable-gpu no-sandbox disable-dev-shm-usage) }
+    )
+  end
 
-  after(:all) do
-
-  end
-  before { @some_var = :some_value }
-  def shared_method
-    "it works"
-  end
-  let(:shared_let) { {'arbitrary' => 'object'} }
-  subject do
-    'this is the subject'
-  end
+  # after(:all) do
+  #
+  # end
 end
 
 RSpec.configure do |config|
