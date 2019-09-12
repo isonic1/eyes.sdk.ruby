@@ -14,8 +14,8 @@ module Applitools
       parent_branch_name: ENV['APPLITOOLS_PARENT_BRANCH'] || '',
       baseline_branch_name: ENV['APPLITOOLS_BASELINE_BRANCH'] || '',
       save_diffs: false,
-      server_url: 'https://eyessdk.applitools.com',
-      api_key: ENV['APPLITOOLS_API_KEY'] || '',
+      server_url: ENV['APPLITOOLS_SERVER_URL'] || ENV['bamboo_APPLITOOLS_SERVER_URL'] || 'https://eyessdk.applitools.com',
+      api_key: ENV['APPLITOOLS_API_KEY'] || ENV['bamboo_APPLITOOLS_API_KEY'] || '',
       match_level: Applitools::MatchLevel::STRICT,
       scale: 0,
       remainder: 0
