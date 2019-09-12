@@ -25,8 +25,8 @@ module Applitools
 
     def environment_attribute(attribute_name, environment_variable)
       class_eval do
-        Applitools::Helpers.environment_variables[environment_variable.to_sym] = ENV[environment_variable.to_s] if
-            ENV[environment_variable.to_s]
+        Applitools::Helpers.environment_variables[environment_variable.to_sym] = env_variable(environment_variable) if
+            env_variable(environment_variable)
         attr_accessor attribute_name
         define_method(attribute_name) do
           current_value = instance_variable_get "@#{attribute_name}".to_sym
@@ -37,6 +37,10 @@ module Applitools
           )
         end
       end
+    end
+
+    def env_variable(environment_variable)
+      ENV[environment_variable.to_s] || ENV["bamboo_#{environment_variable}"]
     end
   end
 end
