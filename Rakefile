@@ -13,10 +13,11 @@ Bundler::GemHelper.install_tasks name: 'eyes_capybara'
 
 unless ENV['BUILD_ONLY'] && !ENV['BUILD_ONLY'].empty?
   require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new(:spec) do |t|
-    t.pattern = 'spec/integration/updated_example_spec.rb'
+  RSpec::Core::RakeTask.new(:spec_selenium) do |t|
+    t.pattern = 'spec/integration/*_spec.rb'
+    t.rspec_opts = '--tag selenium'
   end
-  task :default => :spec
+  task :default => :spec_selenium
   # case ENV['END_TO_END_TESTS']
   # when 'false'
   #   require 'rspec/core/rake_task'

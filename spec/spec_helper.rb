@@ -13,6 +13,10 @@ RSpec.shared_context "selenium workaround", :shared_context => :metadata do
     @eyes.batch = Applitools::BatchInfo.new(self.class.description)
   end
 
+  before do
+    driver.get(url_for_test)
+  end
+
   after(:each) do
 
   end
@@ -44,7 +48,7 @@ RSpec.shared_context "selenium workaround", :shared_context => :metadata do
   let(:eyes) { @eyes }
   let(:app_name) { self.class.description } #self.class.description.metadata
   let(:test_name) { |example| example.description }
-  let(:viewport_size) { {width: 800, height: 600} }
+  let(:viewport_size) { {width: 700, height: 460} }
   let(:chrome_options) do
     Selenium::WebDriver::Chrome::Options.new(
       options: { args: %w(headless disable-gpu no-sandbox disable-dev-shm-usage) }
