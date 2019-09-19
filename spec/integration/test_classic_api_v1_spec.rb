@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe 'Eyes Selenium SDK - Classic API', selenium: true do
+RSpec.shared_examples 'Classic API' do
   let(:url_for_test) { 'https://applitools.github.io/demo/TestPages/FramesTestPage/' }
 
   it('TestCheckWindow') { eyes.check_window('Window') }
@@ -37,3 +37,23 @@ RSpec.describe 'Eyes Selenium SDK - Classic API', selenium: true do
     eyes.check_window('window after change background color of inner frame')
   end
 end
+
+RSpec.describe 'Eyes Selenium SDK - Classic API', selenium: true do
+  describe do
+    include_examples 'Classic API'
+  end
+
+  context 'Stitch mode Scroll', scroll: true do
+    include_examples 'Classic API'
+  end
+
+  # describe 'Force Full Page Screenshot', fps: true do
+  #   include_examples 'Classic API'
+  # end
+  #
+  # describe 'Force Full Page Screenshot, Stitch mode Scroll', fps: true, scroll: true do
+  #   include_examples 'Classic API'
+  # end
+end
+
+

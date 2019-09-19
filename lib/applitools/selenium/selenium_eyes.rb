@@ -178,7 +178,7 @@ module Applitools::Selenium
 
       self.device_pixel_ratio = UNKNOWN_DEVICE_PIXEL_RATIO
       self.position_provider = self.class.position_provider(
-          stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
+        stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
       )
 
       self.eyes_screenshot_factory = lambda do |image|
@@ -208,25 +208,25 @@ module Applitools::Selenium
     # @option value [Symbol] :css use Css to perform stitching.
     # @option value [Symbol] :scroll Scroll to perform stitching.
     # @return [Symbol] The type of stitching.
-    def stitch_mode=(value)
-      @stitch_mode = if value.to_s.upcase == Applitools::STITCH_MODE[:css].to_s
-                       Applitools::STITCH_MODE[:css]
-                     else
-                       Applitools::STITCH_MODE[:scroll]
-                     end
-      unless driver.nil?
-        self.position_provider = self.class.position_provider(
-            stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
-        )
-      end
-      if stitch_mode == Applitools::STITCH_MODE[:css]
-        @css_transition_original_hide_scrollbars = hide_scrollbars
-        self.hide_scrollbars = true
-      else
-        self.hide_scrollbars = @css_transition_original_hide_scrollbars || false
-      end
-      value
-    end
+    # def stitch_mode=(value)
+    #   @stitch_mode = if value.to_s.upcase == Applitools::STITCH_MODE[:css].to_s
+    #                    Applitools::STITCH_MODE[:css]
+    #                  else
+    #                    Applitools::STITCH_MODE[:scroll]
+    #                  end
+    #   unless driver.nil?
+    #     self.position_provider = self.class.position_provider(
+    #         stitch_mode, driver, disable_horizontal_scrolling, disable_vertical_scrolling, explicit_entire_size
+    #     )
+    #   end
+    #   if stitch_mode == Applitools::STITCH_MODE[:css]
+    #     @css_transition_original_hide_scrollbars = hide_scrollbars
+    #     self.hide_scrollbars = true
+    #   else
+    #     self.hide_scrollbars = @css_transition_original_hide_scrollbars || false
+    #   end
+    #   value
+    # end
 
     # Takes a snapshot of the application under test and matches it with the expected output.
     #
@@ -860,10 +860,10 @@ module Applitools::Selenium
           max_height = explicit_entire_size.height
         end
         case stitch_mode
-        when :SCROLL
+        when Applitools::Selenium::StitchModes::SCROLL
           Applitools::Selenium::ScrollPositionProvider.new(driver, disable_horizontal, disable_vertical,
                                                            max_width, max_height)
-        when :CSS
+        when Applitools::Selenium::StitchModes::CSS
           Applitools::Selenium::CssTranslatePositionProvider.new(driver, disable_horizontal, disable_vertical,
                                                                  max_width, max_height)
         end
