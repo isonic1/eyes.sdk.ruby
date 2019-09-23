@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'eyes_selenium'
 
-RSpec.describe 'Group0', selenium: true do
+RSpec.describe 'Group0', selenium: false do
   context 'Group1' do
     it "example1" do |example|
       driver.get('http://applitools.com')

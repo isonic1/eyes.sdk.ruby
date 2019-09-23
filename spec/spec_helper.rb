@@ -7,10 +7,19 @@ require 'eyes_capybara'
 
 Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 
-RSpec.shared_context "selenium workaround", :shared_context => :metadata do
-  before(:all) do |exaqmple|
+RSpec.shared_context "selenium workaround" do
+  before(:all) do
     @eyes = Applitools::Selenium::Eyes.new
-    @eyes.batch = Applitools::BatchInfo.new(self.class.description)
+  end
+
+  before do |example|
+    eyes.hide_scrollbars = true
+    eyes.save_new_tests = false
+    eyes.force_full_page_screenshot = false
+    eyes.stitch_mode = Applitools::Selenium::StitchModes::CSS
+    eyes.force_full_page_screenshot = true if example.metadata[:fps]
+    eyes.stitch_mode = Applitools::Selenium::StitchModes::SCROLL if example.metadata[:scroll]
+    driver.get(url_for_test)
   end
 
   after(:each) do
@@ -42,22 +51,30 @@ RSpec.shared_context "selenium workaround", :shared_context => :metadata do
     end
   end
   let(:eyes) { @eyes }
-  let(:app_name) { self.class.description } #self.class.description.metadata
-  let(:test_name) { |example| example.description }
-  let(:viewport_size) { {width: 800, height: 600} }
-  let(:chrome_options) { Selenium::WebDriver::Chrome::Options.new(options: { args: %w(headless disable-infobars --no-sandbox --disable-dev-shm-usage) }) }
+  let(:app_name) do |example|
+    root_example_group = proc do |group|
+      next group[:description] unless group[:parent_example_group] && group[:parent_example_group][:selenium]
+      root_example_group.call(group[:parent_example_group])
+    end
+    root_example_group.call(example.metadata[:example_group])
+  end
+  let(:test_name) do |example|
+    name_modifiers = [example.description]
+    name_modifiers << [:FPS] if eyes.force_full_page_screenshot
+    name_modifiers << [:Scroll] unless eyes.stitch_mode == Applitools::STITCH_MODE[:css]
+    # name_modifiers << [:VG] if eyes.is_a? Applitools::Selenium::VisualGridEyes
+    name_modifiers.join('_')
+  end
+  let(:viewport_size) { {width: 700, height: 460} }
+  let(:chrome_options) do
+    Selenium::WebDriver::Chrome::Options.new(
+      options: { args: %w(headless disable-gpu no-sandbox disable-dev-shm-usage) }
+    )
+  end
 
-  after(:all) do
-
-  end
-  before { @some_var = :some_value }
-  def shared_method
-    "it works"
-  end
-  let(:shared_let) { {'arbitrary' => 'object'} }
-  subject do
-    'this is the subject'
-  end
+  # after(:all) do
+  #
+  # end
 end
 
 RSpec.configure do |config|
