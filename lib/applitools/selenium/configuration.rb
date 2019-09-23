@@ -1,10 +1,12 @@
 require 'applitools/selenium/stitch_modes'
 require 'applitools/selenium/stitch_modes'
 require 'applitools/selenium/browsers_info'
+require 'applitools/selenium/accessibility_level'
 
 module Applitools
   module Selenium
     class Configuration < Applitools::EyesBaseConfiguration
+
       DEFAULT_CONFIG = proc do
         {
           force_full_page_screenshot: false,
@@ -12,7 +14,8 @@ module Applitools
           stitch_mode: Applitools::Selenium::StitchModes::CSS,
           hide_scrollbars: false,
           hide_caret: false,
-          browsers_info: Applitools::Selenium::BrowsersInfo.new
+          browsers_info: Applitools::Selenium::BrowsersInfo.new,
+          accessibility_validation: Applitools::Selenium::AccessibilityLevel::NONE
         }
       end
       class << self
@@ -30,6 +33,7 @@ module Applitools
 
       object_field :browsers_info, Applitools::Selenium::BrowsersInfo
       int_field :concurrent_sessions
+      enum_field :accessibility_validation, Applitools::Selenium::AccessibilityLevel.enum_values
 
       def add_browser(*args)
         case args.size

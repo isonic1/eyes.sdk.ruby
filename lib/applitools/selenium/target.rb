@@ -21,7 +21,7 @@ module Applitools
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
         :floating_regions, :frame_or_element, :regions, :match_level, :layout_regions, :content_regions,
-        :strict_regions
+        :strict_regions, :accessibility_regions
 
       private :frame_or_element, :frame_or_element=
 
@@ -306,6 +306,49 @@ module Applitools
         dup.region(region)
       end
 
+      def accessibility(*args)
+        options = Applitools::Utils.extract_options! args
+        unless options[:region_type]
+          raise Applitools::EyesError,
+            'You should call Target.accessibility(region, region_type: type). The region_type option is required'
+        end
+        unless Applitools::Selenium::AccessibilityRegionType.enum_values.include?(options[:region_type])
+          raise Applitools::EyesIllegalArgument,
+            "The region type should be one of [#{Applitools::Selenium::AccessibilityRegionType.enum_values.join(', ')}]"
+        end
+        handle_frames
+        accessibility_regions << case args.first
+                                 when ::Selenium::WebDriver::Element
+                                   proc do |driver, _return_element = false|
+                                     element = applitools_element_from_selenium_element(driver, args.first)
+                                     Applitools::Selenium::AccessibilityRegion.new(
+                                       element, options[:region_type]
+                                     )
+                                   end
+                                 when Applitools::Selenium::Element, Applitools::Region
+                                   proc do |_driver, _return_element = false|
+                                     Applitools::Selenium::AccessibilityRegion.new(
+                                       args.first, options[:region_type]
+                                     )
+                                   end
+                                 when String
+                                   proc do |driver, _return_element = false|
+                                     element = driver.find_element(name_or_id: args.first)
+                                     Applitools::Selenium::AccessibilityRegion.new(
+                                       element, options[:region_type]
+                                     )
+                                   end
+                                 else
+                                   proc do |driver, _return_element = false|
+                                     element = driver.find_element(*args)
+                                     Applitools::Selenium::Element.new(
+                                       element, options[:region_type]
+                                     )
+                                   end
+                                 end
+        self
+      end
+
       private
 
       def reset_for_fullscreen
@@ -316,9 +359,14 @@ module Applitools
         reset_content_regions
         reset_layout_regions
         reset_strict_regions
+        reset_accessibility_regions
         options[:stitch_content] = false
         options[:timeout] = nil
         options[:trim] = false
+      end
+
+      def reset_accessibility_regions
+        self.accessibility_regions = []
       end
 
       def reset_ignore

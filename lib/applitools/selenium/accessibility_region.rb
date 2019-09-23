@@ -1,0 +1,11 @@
+module Applitools
+  module Selenium
+    class AccessibilityRegion < ::Applitools::Region
+      attr_accessor :region_type
+      def initialize(element, region_type)
+        super(element.location.x, element.location.y, element.size.width, element.size.height)
+        self.region_type = region_type
+      end
+    end
+  end
+end
