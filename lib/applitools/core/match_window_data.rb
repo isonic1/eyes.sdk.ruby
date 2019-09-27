@@ -4,6 +4,7 @@ module Applitools
   class MatchWindowData
     class << self
       def convert_coordinates(region, screenshot)
+        puts region.class
         screenshot.convert_region_location(
           region.with_padding,
           Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
@@ -19,11 +20,13 @@ module Applitools
             'Name' => nil,
             'UserInputs' => [],
             'ImageMatchSettings' => {
+              'accessibilityLevel' => 'None',
               'MatchLevel' => 'Strict',
               'SplitTopHeight' => 0,
               'SplitBottomHeight' => 0,
               'IgnoreCaret' => true,
               'IgnoreDisplacements' => false,
+              'Accessibility' => [],
               'Ignore' => [],
               'Floating' => [],
               'Layout' => [],
@@ -86,6 +89,7 @@ module Applitools
       @need_convert_strict_regions_coordinates = false
       @need_convert_content_regions_coordinates = false
       @need_convert_layout_regions_coordinates = false
+      @need_convert_accessibility_regions_coordinates = false
     end
 
     def screenshot
@@ -142,6 +146,14 @@ module Applitools
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
         current_data['Options']['ImageMatchSettings']['Content'] << r.to_hash if self.class.valid_region(r)
+      end
+    end
+
+    def accessibility_regions=(value)
+      Applitools::ArgumentGuard.is_a? value, 'value', Array
+      value.each do |r|
+        puts r
+        current_data['Options']['ImageMatchSettings']['Accessibility'] << r.to_hash if self.class.valid_region(r)
       end
     end
 
@@ -267,7 +279,25 @@ module Applitools
         @content_regions = obtain_regions_coordinates(target.content_regions, driver)
         @need_convert_content_regions_coordinates = true unless @content_regions.empty?
       end
+
+      if target.respond_to? :accessibility_regions
+        @accessibility_regions = obtain_accessibility_regions_coordinates(target.accessibility_regions, driver)
+        @need_convert_accessibility_regions_coordinates = true unless @accessibility_regions.empty?
+      end
       target
+    end
+
+    def obtain_accessibility_regions_coordinates(regions, driver)
+      result = []
+      regions.each do |r|
+        case r
+        when Proc
+          result << r.call(driver)
+        else
+          raise Applitools::EyesError, 'Error getting accessibility_regions coordinates'
+        end
+      end
+      result
     end
 
     def obtain_regions_coordinates(regions, driver)
@@ -306,6 +336,14 @@ module Applitools
       current_data['Options']['ImageMatchSettings']['IgnoreCaret'] = value
     end
 
+    def accessibility_validation
+      current_data['Options']['ImageMatchSettings']['AccessibilityLevel']
+    end
+
+    def accessibility_validation=(value)
+      current_data['Options']['ImageMatchSettings']['AccessibilityLevel'] = value
+    end
+
     def convert_ignored_regions_coordinates
       return unless @need_convert_ignored_regions_coordinates
       self.ignored_regions = convert_regions_coordinates(@ignored_regions)
@@ -331,6 +369,12 @@ module Applitools
       return unless @need_convert_content_regions_coordinates
       self.content_regions = convert_regions_coordinates(@content_regions)
       @need_convert_content_regions_coordinates = false
+    end
+
+    def convert_accessibility_regions_coordinates
+      return unless @need_convert_accessibility_regions_coordinates
+      self.accessibility_regions = convert_regions_coordinates(@accessibility_regions)
+      @need_convert_accessibility_regions_coordinates = false
     end
 
     def convert_regions_coordinates(regions)
@@ -363,6 +407,12 @@ module Applitools
     end
 
     def to_hash
+      if @need_convert_accessibility_regions_coordinates
+        raise Applitools::EyesError.new(
+            'You should convert coordinates for content_regions!'
+        )
+      end
+
       if @need_convert_content_regions_coordinates
         raise Applitools::EyesError.new(
             'You should convert coordinates for content_regions!'

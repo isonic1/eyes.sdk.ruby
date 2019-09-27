@@ -35,6 +35,14 @@ module Applitools
       int_field :concurrent_sessions
       enum_field :accessibility_validation, Applitools::Selenium::AccessibilityLevel.enum_values
 
+      def match_level_keys
+        super << :accessibility_validation
+      end
+
+      def default_match_settings
+        super.merge(accessibility_validation: accessibility_validation)
+      end
+
       def add_browser(*args)
         case args.size
         when 0, 1

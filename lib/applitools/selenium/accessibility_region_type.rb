@@ -6,27 +6,20 @@ module Applitools
       extend self
 
       NONE = 'None'
+      IGNORE_CONTRAST = 'IgnoreContrast'
       REGULAR_TEXT = 'RegularText'
       LARGE_TEXT = 'LargeText'
       BOLD_TEXT = 'BoldText'
-      ESSENTIAL_IMAGE = 'EssentialImage'
-      DISABLED_OR_INACTIVE = 'DisabledOrInactive'
-      NON_ESSENTIAL_IMAGE = 'NonEssentialImage'
-      LOGO = 'Logo'
-      BACKGROUND = 'Background'
-      IGNORE = 'Ignore'
+      GRAPHICAL_OBJECT = 'GraphicalObject'
 
       def enum_values
         [
           NONE,
+          IGNORE_CONTRAST,
           REGULAR_TEXT,
           LARGE_TEXT,
           BOLD_TEXT,
-          ESSENTIAL_IMAGE,
-          DISABLED_OR_INACTIVE,
-          NON_ESSENTIAL_IMAGE,
-          LOGO,
-          IGNORE
+          GRAPHICAL_OBJECT
         ]
       end
     end

@@ -4,6 +4,8 @@ require 'eyes_selenium'
 require 'eyes_images'
 require 'eyes_calabash'
 require 'eyes_capybara'
+require 'uri'
+require 'net/http'
 
 Dir['./spec/support/**/*.rb'].sort.each { |f| require f }
 
@@ -14,11 +16,12 @@ RSpec.shared_context "selenium workaround" do
 
   before do |example|
     eyes.hide_scrollbars = true
-    eyes.save_new_tests = false
+    # eyes.save_new_tests = false
     eyes.force_full_page_screenshot = false
     eyes.stitch_mode = Applitools::Selenium::StitchModes::CSS
     eyes.force_full_page_screenshot = true if example.metadata[:fps]
     eyes.stitch_mode = Applitools::Selenium::StitchModes::SCROLL if example.metadata[:scroll]
+    eyes.server_url = 'https://eyesfabric4eyes.applitools.com/'
     driver.get(url_for_test)
   end
 
@@ -28,12 +31,35 @@ RSpec.shared_context "selenium workaround" do
 
   around(:example) do |example|
     begin
+      @expected_properties = {}
+      @eyes_test_result = nil
       example.run
-      eyes.close if eyes.open?
+      @eyes_test_result = eyes.close if eyes.open?
+      check_expected_properties
     ensure
       driver.quit
       eyes.abort_if_not_closed
     end
+  end
+
+  let(:eyes_test_result) { @eyes_test_result }
+
+  let(:actual_app_output) { session_results['actualAppOutput'] }
+
+  let(:app_output_image_match_settings) { actual_app_output[0]['imageMatchSettings'] }
+
+  let(:session_results) do
+    Oj.load(Net::HTTP.get(session_results_url))
+  end
+
+  let(:session_query_params) do
+    URI.encode_www_form('AccessToken' => eyes_test_result.secret_token, 'apiKey' => eyes.api_key, 'format' => 'json')
+  end
+
+  let(:session_results_url) do
+    url = URI.parse(eyes_test_result.api_session_url)
+    url.query = session_query_params
+    url
   end
 
   let(:driver) do
@@ -72,9 +98,26 @@ RSpec.shared_context "selenium workaround" do
     )
   end
 
+  let(:test_results) { @eyes_test_result }
+
+
   # after(:all) do
   #
   # end
+  def add_expected_property(key, value)
+    @expected_properties[key] = value
+  end
+
+  def check_expected_properties
+    @expected_properties.each do |k,v|
+      path = k.split /\./
+      current_hash = app_output_image_match_settings
+      path.each do |prop|
+        current_hash = current_hash[prop.to_s]
+      end
+      expect(current_hash).to eq(v)
+    end
+  end
 end
 
 RSpec.configure do |config|

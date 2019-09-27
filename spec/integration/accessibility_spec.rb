@@ -1,22 +1,17 @@
 require 'spec_helper'
 
 RSpec.describe 'Accessibility', selenium: true do
-  let(:url_to_test) { 'https://applitools.github.io/demo/TestPages/FramesTestPage/' }
+  let(:url_for_test) { 'https://applitools.github.io/demo/TestPages/FramesTestPage/' }
   before(:each) { eyes.accessibility_validation = Applitools::Selenium::AccessibilityLevel::AAA }
   let(:target) do
     Applitools::Selenium::Target.window.accessibility(
       :css, '.ignore',
-      region_type: Applitools::Selenium::AccessibilityRegionType::DISABLED_OR_INACTIVE
+      type: Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT
     )
   end
 
-  # after(:each) do
-  #   require 'pry'
-  #   binding.pry
-  # end
-
   it 'TestAccessibilityRegions' do
-    driver.get(url_to_test)
     eyes.check('step1', target)
+    add_expected_property('accessibilityLevel', Applitools::Selenium::AccessibilityLevel::AAA)
   end
 end

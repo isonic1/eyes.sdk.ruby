@@ -6,6 +6,14 @@ module Applitools
         super(element.location.x, element.location.y, element.size.width, element.size.height)
         self.region_type = region_type
       end
+
+      def to_hash
+        super.merge(type: region_type)
+      end
+
+      def with_padding
+        self
+      end
     end
   end
 end

@@ -308,11 +308,11 @@ module Applitools
 
       def accessibility(*args)
         options = Applitools::Utils.extract_options! args
-        unless options[:region_type]
+        unless options[:type]
           raise Applitools::EyesError,
             'You should call Target.accessibility(region, region_type: type). The region_type option is required'
         end
-        unless Applitools::Selenium::AccessibilityRegionType.enum_values.include?(options[:region_type])
+        unless Applitools::Selenium::AccessibilityRegionType.enum_values.include?(options[:type])
           raise Applitools::EyesIllegalArgument,
             "The region type should be one of [#{Applitools::Selenium::AccessibilityRegionType.enum_values.join(', ')}]"
         end
@@ -322,27 +322,27 @@ module Applitools
                                    proc do |driver, _return_element = false|
                                      element = applitools_element_from_selenium_element(driver, args.first)
                                      Applitools::Selenium::AccessibilityRegion.new(
-                                       element, options[:region_type]
+                                       element, options[:type]
                                      )
                                    end
                                  when Applitools::Selenium::Element, Applitools::Region
                                    proc do |_driver, _return_element = false|
                                      Applitools::Selenium::AccessibilityRegion.new(
-                                       args.first, options[:region_type]
+                                       args.first, options[:type]
                                      )
                                    end
                                  when String
                                    proc do |driver, _return_element = false|
                                      element = driver.find_element(name_or_id: args.first)
                                      Applitools::Selenium::AccessibilityRegion.new(
-                                       element, options[:region_type]
+                                       element, options[:type]
                                      )
                                    end
                                  else
                                    proc do |driver, _return_element = false|
                                      element = driver.find_element(*args)
-                                     Applitools::Selenium::Element.new(
-                                       element, options[:region_type]
+                                     Applitools::Selenium::AccessibilityRegion.new(
+                                       element, options[:type]
                                      )
                                    end
                                  end
