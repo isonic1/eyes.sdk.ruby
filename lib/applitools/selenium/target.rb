@@ -221,6 +221,8 @@ module Applitools
           replace_element(original_region, new_region, floating_regions)
         when :ignore
           replace_element(original_region, new_region, ignored_regions)
+        when :accessibility_regions
+          replace_element(original_region, new_region, accessibility_regions)
         end
       end
 
@@ -317,33 +319,39 @@ module Applitools
             "The region type should be one of [#{Applitools::Selenium::AccessibilityRegionType.enum_values.join(', ')}]"
         end
         handle_frames
+        padding_proc = proc do |region|
+          Applitools::Selenium::AccessibilityRegion.new(
+            region, options[:type]
+          )
+        end
+
         accessibility_regions << case args.first
                                  when ::Selenium::WebDriver::Element
-                                   proc do |driver, _return_element = false|
+                                   proc do |driver, return_element = false|
                                      element = applitools_element_from_selenium_element(driver, args.first)
-                                     Applitools::Selenium::AccessibilityRegion.new(
-                                       element, options[:type]
-                                     )
+                                     next element, padding_proc if return_element
+                                     padding_proc.call(element)
                                    end
-                                 when Applitools::Selenium::Element, Applitools::Region
-                                   proc do |_driver, _return_element = false|
-                                     Applitools::Selenium::AccessibilityRegion.new(
+                                 when Applitools::Selenium::Element
+                                   proc do |_driver, return_element = false|
+                                     next args.first, padding_proc if return_element
+                                     padding_proc.call(args.first)
+                                   end
+                                 when Applitools::Region
+                                   Applitools::Selenium::AccessibilityRegion.new(
                                        args.first, options[:type]
-                                     )
-                                   end
+                                   )
                                  when String
-                                   proc do |driver, _return_element = false|
+                                   proc do |driver, return_element = false|
                                      element = driver.find_element(name_or_id: args.first)
-                                     Applitools::Selenium::AccessibilityRegion.new(
-                                       element, options[:type]
-                                     )
+                                     next element, padding_proc if return_element
+                                     padding_proc.call(element)
                                    end
                                  else
-                                   proc do |driver, _return_element = false|
+                                   proc do |driver, return_element = false|
                                      element = driver.find_element(*args)
-                                     Applitools::Selenium::AccessibilityRegion.new(
-                                       element, options[:type]
-                                     )
+                                     next element, padding_proc if return_element
+                                     padding_proc.call(element)
                                    end
                                  end
         self

@@ -48,6 +48,7 @@ module Applitools
 
         config.app_name = options[:app_name] if config.app_name.nil? || config.app_name && config.app_name.empty?
         config.test_name = options[:test_name] if config.test_name.nil? || config.test_name && config.test_name.empty?
+        config.viewport_size = Applitools::RectangleSize.from_any_argument(options[:viewport_size]) if config.viewport_size.nil? || config.viewport_size && config.viewport_size.empty?
 
         self.driver = options.delete(:driver)
         self.current_url = driver.current_url
@@ -168,6 +169,9 @@ module Applitools
         end
         target.content_regions.each do |r|
           selenium_regions[element_or_region(r, target, :content_regions)] = :content
+        end
+        target.accessibility_regions.each do |r|
+          selenium_regions[element_or_region(r, target, :accessibility_regions)] = :accessibility
         end
         selenium_regions[region_to_check] = :target if size_mod == 'selector'
 

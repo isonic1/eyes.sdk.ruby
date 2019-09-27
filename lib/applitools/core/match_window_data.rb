@@ -4,7 +4,6 @@ module Applitools
   class MatchWindowData
     class << self
       def convert_coordinates(region, screenshot)
-        puts region.class
         screenshot.convert_region_location(
           region.with_padding,
           Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative],
@@ -152,7 +151,6 @@ module Applitools
     def accessibility_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        puts r
         current_data['Options']['ImageMatchSettings']['Accessibility'] << r.to_hash if self.class.valid_region(r)
       end
     end
