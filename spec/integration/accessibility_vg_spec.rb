@@ -15,7 +15,7 @@ RSpec.describe 'VG' do
 
     it 'TestAccessibilityRegions' do
       eyes.check('step1', target)
-      add_expected_property('accessibilityLevel', Applitools::Selenium::AccessibilityLevel::AAA)
+      expected_property('accessibilityLevel', Applitools::Selenium::AccessibilityLevel::AAA)
     end
   end
 end

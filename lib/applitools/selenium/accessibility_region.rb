@@ -14,6 +14,10 @@ module Applitools
       def with_padding
         self
       end
+
+      def ==(other)
+        super && region_type == other.region_type
+      end
     end
   end
 end

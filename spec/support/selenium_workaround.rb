@@ -31,10 +31,12 @@ RSpec.shared_context "selenium workaround" do
   around(:example) do |example|
     begin
       @expected_properties = {}
+      @expected_accessibility_regions = []
       @eyes_test_result = nil
       example.run
       @eyes_test_result = eyes.close if eyes.open?
       check_expected_properties
+      check_expected_accessibility_regions
     ensure
       driver.quit
       eyes.abort_if_not_closed
@@ -46,6 +48,7 @@ RSpec.shared_context "selenium workaround" do
   let(:actual_app_output) { session_results['actualAppOutput'] }
 
   let(:app_output_image_match_settings) { actual_app_output[0]['imageMatchSettings'] }
+  let(:app_output_accessibility) { app_output_image_match_settings['accessibility'] }
 
   let(:session_results) do
     Oj.load(Net::HTTP.get(session_results_url))
@@ -103,7 +106,12 @@ RSpec.shared_context "selenium workaround" do
   # after(:all) do
   #
   # end
-  def add_expected_property(key, value)
+  def expected_accessibility_regions(*args)
+    return @expected_accessibility_regions += args.first if args.length == 1 && args.first.is_a?(Array)
+    @expected_accessibility_regions += args
+  end
+
+  def expected_property(key, value)
     @expected_properties[key] = value
   end
 
@@ -115,6 +123,18 @@ RSpec.shared_context "selenium workaround" do
         current_hash = current_hash[prop.to_s]
       end
       expect(current_hash).to eq(v)
+    end
+  end
+
+  def check_expected_accessibility_regions
+    received_accessibility_regions = app_output_accessibility.map do |r|
+      Applitools::Selenium::AccessibilityRegion.new(
+        Applitools::Region.new(r['left'], r['top'], r['width'], r['height']),
+        r['type']
+      )
+    end
+    @expected_accessibility_regions.each do |ar|
+      expect(received_accessibility_regions).to include(ar)
     end
   end
 end

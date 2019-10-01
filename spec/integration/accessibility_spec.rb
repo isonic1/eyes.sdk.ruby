@@ -14,7 +14,18 @@ RSpec.describe 'Selenium' do
 
     it 'TestAccessibilityRegions' do
       eyes.check('step1', target)
-      add_expected_property('accessibilityLevel', Applitools::Selenium::AccessibilityLevel::AAA)
+      expected_property('accessibilityLevel', Applitools::Selenium::AccessibilityLevel::AAA)
+      expected_accessibility_regions(
+        Applitools::Selenium::AccessibilityRegion.new(
+          Applitools::Region.new(10, 284, 800, 500),
+          Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT),
+        Applitools::Selenium::AccessibilityRegion.new(
+          Applitools::Region.new(8, 1270, 690, 206),
+          Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT),
+        Applitools::Selenium::AccessibilityRegion.new(
+          Applitools::Region.new(127, 928, 456, 306),
+          Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT)
+      )
     end
   end
 end
