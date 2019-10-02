@@ -24,7 +24,6 @@ unless ENV['BUILD_ONLY'] && !ENV['BUILD_ONLY'].empty?
     next if ENV['APPLITOOLS_BATCH_ID'] && !ENV['APPLITOOLS_BATCH_ID'].empty?
     ENV['APPLITOOLS_BATCH_ID'] = batch_id
     ENV['APPLITOOLS_BATCH_NAME'] = "Eyes Ruby SDK(#{RUBY_VERSION})"
-    puts
   end
   task :check do
     puts ENV['APPLITOOLS_BATCH_ID']

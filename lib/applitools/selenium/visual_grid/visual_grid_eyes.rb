@@ -171,7 +171,14 @@ module Applitools
           selenium_regions[element_or_region(r, target, :content_regions)] = :content
         end
         target.accessibility_regions.each do |r|
-          selenium_regions[element_or_region(r, target, :accessibility_regions)] = :accessibility
+          case (r = element_or_region(r, target, :accessibility_regions))
+          when Array
+            r.each do |rr|
+              selenium_regions[rr] = :accessibility
+            end
+          else
+            selenium_regions[r] = :accessibility
+          end
         end
         selenium_regions[region_to_check] = :target if size_mod == 'selector'
 
@@ -198,7 +205,13 @@ module Applitools
       def element_or_region(target_element, target, options_key)
         if target_element.respond_to?(:call)
           region, padding_proc = target_element.call(driver, true)
-          target.replace_region(target_element, Applitools::Selenium::VGRegion.new(region, padding_proc), options_key)
+          case region
+          when Array
+            regions_to_replace = region.map { |r| Applitools::Selenium::VGRegion.new(r, padding_proc) }
+            target.replace_region(target_element, regions_to_replace, options_key)
+          else
+            target.replace_region(target_element, Applitools::Selenium::VGRegion.new(region, padding_proc), options_key)
+          end
           region
         else
           target_element

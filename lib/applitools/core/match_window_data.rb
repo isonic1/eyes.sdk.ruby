@@ -290,7 +290,13 @@ module Applitools
       regions.each do |r|
         case r
         when Proc
-          result << r.call(driver)
+          region_or_regions = r.call(driver)
+          case region_or_regions
+          when Array
+            result.concat(region_or_regions)
+          when Applitools::Selenium::AccessibilityRegion
+            result << region_or_regions
+          end
         else
           raise Applitools::EyesError, 'Error getting accessibility_regions coordinates'
         end

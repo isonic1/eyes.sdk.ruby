@@ -227,7 +227,14 @@ module Applitools
       end
 
       def replace_element(original, new, array)
-        array[array.index(original)] = new
+        case new
+        when Array
+          index = array.index(original)
+          array.delete_at(index)
+          array.insert(index, *new)
+        when Applitools::Selenium::VGRegion
+          array[array.index(original)] = new
+        end
       end
 
       def match_level(*args)
@@ -349,9 +356,9 @@ module Applitools
                                    end
                                  else
                                    proc do |driver, return_element = false|
-                                     element = driver.find_element(*args)
-                                     next element, padding_proc if return_element
-                                     padding_proc.call(element)
+                                     elements = driver.find_elements(*args)
+                                     next elements, padding_proc if return_element
+                                     elements.map { |e| padding_proc.call(e) }
                                    end
                                  end
         self

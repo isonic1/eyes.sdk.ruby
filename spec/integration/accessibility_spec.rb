@@ -20,10 +20,10 @@ RSpec.describe 'Selenium' do
           Applitools::Region.new(10, 284, 800, 500),
           Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT),
         Applitools::Selenium::AccessibilityRegion.new(
-          Applitools::Region.new(8, 1270, 690, 206),
+          Applitools::Region.new(8, 1270, 675, 206),
           Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT),
         Applitools::Selenium::AccessibilityRegion.new(
-          Applitools::Region.new(127, 928, 456, 306),
+          Applitools::Region.new(115, 928, 456, 306),
           Applitools::Selenium::AccessibilityRegionType::GRAPHICAL_OBJECT)
       )
     end
