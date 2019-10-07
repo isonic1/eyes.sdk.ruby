@@ -35,12 +35,22 @@ module Applitools
     def convert_region_location(region, from, to)
       Applitools::ArgumentGuard.not_nil region, 'region'
       Applitools::ArgumentGuard.is_a? region, 'region', Applitools::Region
-      return Region.new(0, 0, 0, 0) if region.empty?
+      if region.empty?
+        return region.dup.tap do |r|
+          r.left = 0
+          r.top = 0
+          r.width = 0
+          r.height = 0
+        end
+      end
       Applitools::ArgumentGuard.not_nil from, 'from'
       Applitools::ArgumentGuard.not_nil to, 'to'
 
       updated_location = convert_location(region.location, from, to)
-      Region.new updated_location.x, updated_location.y, region.width, region.height
+      region.dup.tap do |r|
+        r.left = updated_location.x
+        r.top = updated_location.y
+      end
     end
 
     private

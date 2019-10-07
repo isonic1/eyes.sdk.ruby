@@ -45,7 +45,7 @@ module Applitools::Images
       end
     end
 
-    attr_accessor :image, :options, :ignored_regions, :region_to_check, :floating_regions
+    attr_accessor :image, :options, :ignored_regions, :region_to_check, :floating_regions, :accessibility_regions
 
     def initialize(image)
       Applitools::ArgumentGuard.not_nil(image, 'image')
@@ -104,6 +104,19 @@ module Applitools::Images
         self.region_to_check = nil
       end
       self
+    end
+
+    def accesibility(*args)
+      accessibility_regions << case args.first
+                               when Applitools::AccessibilityRegion
+                                 args.first
+                               when Applitools::Region
+                                 Applitools::AccessibilityRegion.new(args.first, args.last)
+                               else
+                                 accessibility_region_type = args.pop
+                                 region = Applitools::Region.new(*args)
+                                 Applitools::AccessibilityRegion.new(region, accessibility_region_type)
+                               end
     end
   end
 end

@@ -2,6 +2,7 @@
 # frozen_string_literal: true
 
 require 'rake/clean'
+require 'securerandom'
 CLOBBER.include 'pkg'
 
 require 'bundler/gem_helper'
@@ -13,10 +14,23 @@ Bundler::GemHelper.install_tasks name: 'eyes_capybara'
 
 unless ENV['BUILD_ONLY'] && !ENV['BUILD_ONLY'].empty?
   require 'rspec/core/rake_task'
-  RSpec::Core::RakeTask.new(:spec) do |t|
-    t.pattern = 'spec/integration/updated_example_spec.rb'
+  RSpec::Core::RakeTask.new(:spec_selenium) do |t|
+    t.pattern = 'spec/integration/*_spec.rb'
+    t.rspec_opts = '--tag selenium'
   end
-  task :default => :spec
+  task :set_batch_info do
+    string = ENV['TRAVIS_COMMIT'] ? ENV['TRAVIS_COMMIT'] + ENV['TRAVIS_RUBY_VERSION'] : SecureRandom.hex
+    batch_id = `(java UUIDFromString #{string})`
+    next if ENV['APPLITOOLS_BATCH_ID'] && !ENV['APPLITOOLS_BATCH_ID'].empty?
+    ENV['APPLITOOLS_BATCH_ID'] = batch_id
+    ENV['APPLITOOLS_BATCH_NAME'] = "Eyes Ruby SDK(#{RUBY_VERSION})"
+  end
+  task :check do
+    puts ENV['APPLITOOLS_BATCH_ID']
+    puts ENV['APPLITOOLS_BATCH_NAME']
+  end
+  task :visual_tests => [:set_batch_info, :check, :spec_selenium]
+  task :default => :visual_tests
   # case ENV['END_TO_END_TESTS']
   # when 'false'
   #   require 'rspec/core/rake_task'

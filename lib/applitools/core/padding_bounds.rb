@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'argument_guard'
 module Applitools
   class PaddingBounds
     attr_accessor :padding_left, :padding_top, :padding_right, :padding_bottom

@@ -21,7 +21,7 @@ module Applitools
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
         :floating_regions, :frame_or_element, :regions, :match_level, :layout_regions, :content_regions,
-        :strict_regions
+        :strict_regions, :accessibility_regions
 
       private :frame_or_element, :frame_or_element=
 
@@ -221,11 +221,20 @@ module Applitools
           replace_element(original_region, new_region, floating_regions)
         when :ignore
           replace_element(original_region, new_region, ignored_regions)
+        when :accessibility_regions
+          replace_element(original_region, new_region, accessibility_regions)
         end
       end
 
       def replace_element(original, new, array)
-        array[array.index(original)] = new
+        case new
+        when Array
+          index = array.index(original)
+          array.delete_at(index)
+          array.insert(index, *new)
+        when Applitools::Selenium::VGRegion
+          array[array.index(original)] = new
+        end
       end
 
       def match_level(*args)
@@ -306,6 +315,55 @@ module Applitools
         dup.region(region)
       end
 
+      def accessibility(*args)
+        options = Applitools::Utils.extract_options! args
+        unless options[:type]
+          raise Applitools::EyesError,
+            'You should call Target.accessibility(region, region_type: type). The region_type option is required'
+        end
+        unless Applitools::AccessibilityRegionType.enum_values.include?(options[:type])
+          raise Applitools::EyesIllegalArgument,
+            "The region type should be one of [#{Applitools::AccessibilityRegionType.enum_values.join(', ')}]"
+        end
+        handle_frames
+        padding_proc = proc do |region|
+          Applitools::AccessibilityRegion.new(
+            region, options[:type]
+          )
+        end
+
+        accessibility_regions << case args.first
+                                 when ::Selenium::WebDriver::Element
+                                   proc do |driver, return_element = false|
+                                     element = applitools_element_from_selenium_element(driver, args.first)
+                                     next element, padding_proc if return_element
+                                     padding_proc.call(element)
+                                   end
+                                 when Applitools::Selenium::Element
+                                   proc do |_driver, return_element = false|
+                                     next args.first, padding_proc if return_element
+                                     padding_proc.call(args.first)
+                                   end
+                                 when Applitools::Region
+                                   Applitools::AccessibilityRegion.new(
+                                       args.first, options[:type]
+                                   )
+                                 when String
+                                   proc do |driver, return_element = false|
+                                     element = driver.find_element(name_or_id: args.first)
+                                     next element, padding_proc if return_element
+                                     padding_proc.call(element)
+                                   end
+                                 else
+                                   proc do |driver, return_element = false|
+                                     elements = driver.find_elements(*args)
+                                     next elements, padding_proc if return_element
+                                     elements.map { |e| padding_proc.call(e) }
+                                   end
+                                 end
+        self
+      end
+
       private
 
       def reset_for_fullscreen
@@ -316,9 +374,14 @@ module Applitools
         reset_content_regions
         reset_layout_regions
         reset_strict_regions
+        reset_accessibility_regions
         options[:stitch_content] = false
         options[:timeout] = nil
         options[:trim] = false
+      end
+
+      def reset_accessibility_regions
+        self.accessibility_regions = []
       end
 
       def reset_ignore

@@ -53,6 +53,11 @@ module Applitools
           @need_convert_strict_regions_coordinates = true unless @strict_regions.empty?
         end
 
+        if target.respond_to? :accessibility_regions
+          @accessibility_regions = obtain_regions_coordinates(target.accessibility_regions, driver)
+          @need_convert_accessibility_regions_coordinates = true unless @accessibility_regions.empty?
+        end
+
         # # floating regions
         return unless target.respond_to? :floating_regions
         target.floating_regions.each do |r|
@@ -97,7 +102,9 @@ module Applitools
             region = r.region
             region = selector_regions[target.regions[region]]
             raise RegionCoordinatesError.new(r, region['error']) if region['error']
-            result << Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
+            retrieved_region = Applitools::Region.new(region['x'], region['y'], region['width'], region['height'])
+            result_region = r.padding_proc.call(retrieved_region) if r.padding_proc.is_a? Proc
+            result << result_region
           end
         end
         result
@@ -131,6 +138,12 @@ module Applitools
         return unless @need_convert_content_regions_coordinates
         self.content_regions = @content_regions
         @need_convert_content_regions_coordinates = false
+      end
+
+      def convert_accessibility_regions_coordinates
+        return unless @need_convert_accessibility_regions_coordinates
+        self.accessibility_regions = @accessibility_regions
+        @need_convert_accessibility_regions_coordinates = false
       end
     end
   end

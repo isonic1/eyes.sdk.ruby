@@ -94,12 +94,12 @@ module Applitools
         render_status['selectorRegions']
       end
 
-      def match_level_keys
-        %w(match_level exact scale remainder).map(&:to_sym)
-      end
+      # def match_level_keys
+      #   %w(match_level exact scale remainder ).map(&:to_sym)
+      # end
 
       def update_default_settings(match_data)
-        match_level_keys.each do |k|
+        config.match_level_keys.each do |k|
           match_data.send("#{k}=", default_match_settings[k])
         end
       end
@@ -108,14 +108,14 @@ module Applitools
         "useragent: #{render_status['userAgent']}"
       end
 
-      def default_match_settings
-        {
-            match_level: match_level,
-            exact: exact,
-            scale: server_scale,
-            remainder: server_remainder
-        }
-      end
+      # def default_match_settings
+      #   {
+      #       match_level: match_level,
+      #       exact: exact,
+      #       scale: server_scale,
+      #       remainder: server_remainder
+      #   }
+      # end
 
       def set_viewport_size(*_args); end
 

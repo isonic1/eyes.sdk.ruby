@@ -47,6 +47,7 @@ module Applitools
         match_window_data.convert_layout_regions_coordinates
         match_window_data.convert_strict_regions_coordinates
         match_window_data.convert_content_regions_coordinates
+        match_window_data.convert_accessibility_regions_coordinates
         match_result = perform_match(match_window_data)
       else
         passed_ignore_mismatch = match_window_data.ignore_mismatch
@@ -57,6 +58,7 @@ module Applitools
         match_window_data.convert_layout_regions_coordinates
         match_window_data.convert_strict_regions_coordinates
         match_window_data.convert_content_regions_coordinates
+        match_window_data.convert_accessibility_regions_coordinates
         match_window_data.ignore_mismatch = true
         start = Time.now
         match_result = perform_match(match_window_data)
@@ -77,6 +79,7 @@ module Applitools
           match_window_data.convert_layout_regions_coordinates
           match_window_data.convert_strict_regions_coordinates
           match_window_data.convert_content_regions_coordinates
+          match_window_data.convert_accessibility_regions_coordinates
           match_window_data.ignore_mismatch = true
           match_result = perform_match(match_window_data)
           retry_time = Time.now - start
@@ -90,6 +93,7 @@ module Applitools
           match_window_data.convert_layout_regions_coordinates
           match_window_data.convert_strict_regions_coordinates
           match_window_data.convert_content_regions_coordinates
+          match_window_data.convert_accessibility_regions_coordinates
           match_window_data.ignore_mismatch = passed_ignore_mismatch
           match_result = perform_match(match_window_data)
         end

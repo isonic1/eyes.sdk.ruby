@@ -48,6 +48,7 @@ module Applitools
 
         config.app_name = options[:app_name] if config.app_name.nil? || config.app_name && config.app_name.empty?
         config.test_name = options[:test_name] if config.test_name.nil? || config.test_name && config.test_name.empty?
+        config.viewport_size = Applitools::RectangleSize.from_any_argument(options[:viewport_size]) if config.viewport_size.nil? || config.viewport_size && config.viewport_size.empty?
 
         self.driver = options.delete(:driver)
         self.current_url = driver.current_url
@@ -169,6 +170,16 @@ module Applitools
         target.content_regions.each do |r|
           selenium_regions[element_or_region(r, target, :content_regions)] = :content
         end
+        target.accessibility_regions.each do |r|
+          case (r = element_or_region(r, target, :accessibility_regions))
+          when Array
+            r.each do |rr|
+              selenium_regions[rr] = :accessibility
+            end
+          else
+            selenium_regions[r] = :accessibility
+          end
+        end
         selenium_regions[region_to_check] = :target if size_mod == 'selector'
 
         selenium_regions
@@ -194,7 +205,13 @@ module Applitools
       def element_or_region(target_element, target, options_key)
         if target_element.respond_to?(:call)
           region, padding_proc = target_element.call(driver, true)
-          target.replace_region(target_element, Applitools::Selenium::VGRegion.new(region, padding_proc), options_key)
+          case region
+          when Array
+            regions_to_replace = region.map { |r| Applitools::Selenium::VGRegion.new(r, padding_proc) }
+            target.replace_region(target_element, regions_to_replace, options_key)
+          else
+            target.replace_region(target_element, Applitools::Selenium::VGRegion.new(region, padding_proc), options_key)
+          end
           region
         else
           target_element

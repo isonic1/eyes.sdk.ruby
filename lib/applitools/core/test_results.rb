@@ -42,6 +42,14 @@ module Applitools
       original_results['isAborted']
     end
 
+    def api_session_url
+      original_results['apiUrls']['session']
+    end
+
+    def secret_token
+      original_results['secretToken']
+    end
+
     def ==(other)
       if other.is_a? self.class
         result = true
