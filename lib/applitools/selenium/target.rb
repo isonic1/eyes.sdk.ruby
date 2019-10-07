@@ -321,13 +321,13 @@ module Applitools
           raise Applitools::EyesError,
             'You should call Target.accessibility(region, region_type: type). The region_type option is required'
         end
-        unless Applitools::Selenium::AccessibilityRegionType.enum_values.include?(options[:type])
+        unless Applitools::AccessibilityRegionType.enum_values.include?(options[:type])
           raise Applitools::EyesIllegalArgument,
-            "The region type should be one of [#{Applitools::Selenium::AccessibilityRegionType.enum_values.join(', ')}]"
+            "The region type should be one of [#{Applitools::AccessibilityRegionType.enum_values.join(', ')}]"
         end
         handle_frames
         padding_proc = proc do |region|
-          Applitools::Selenium::AccessibilityRegion.new(
+          Applitools::AccessibilityRegion.new(
             region, options[:type]
           )
         end
@@ -345,7 +345,7 @@ module Applitools
                                      padding_proc.call(args.first)
                                    end
                                  when Applitools::Region
-                                   Applitools::Selenium::AccessibilityRegion.new(
+                                   Applitools::AccessibilityRegion.new(
                                        args.first, options[:type]
                                    )
                                  when String

@@ -128,7 +128,7 @@ RSpec.shared_context "selenium workaround" do
 
   def check_expected_accessibility_regions
     received_accessibility_regions = app_output_accessibility.map do |r|
-      Applitools::Selenium::AccessibilityRegion.new(
+      Applitools::AccessibilityRegion.new(
         Applitools::Region.new(r['left'], r['top'], r['width'], r['height']),
         r['type']
       )

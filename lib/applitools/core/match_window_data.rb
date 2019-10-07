@@ -294,7 +294,7 @@ module Applitools
           case region_or_regions
           when Array
             result.concat(region_or_regions)
-          when Applitools::Selenium::AccessibilityRegion
+          when Applitools::AccessibilityRegion
             result << region_or_regions
           end
         else

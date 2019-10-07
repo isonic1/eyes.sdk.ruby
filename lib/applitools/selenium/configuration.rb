@@ -1,7 +1,5 @@
 require 'applitools/selenium/stitch_modes'
-require 'applitools/selenium/stitch_modes'
 require 'applitools/selenium/browsers_info'
-require 'applitools/selenium/accessibility_level'
 
 module Applitools
   module Selenium
@@ -15,7 +13,7 @@ module Applitools
           hide_scrollbars: false,
           hide_caret: false,
           browsers_info: Applitools::Selenium::BrowsersInfo.new,
-          accessibility_validation: Applitools::Selenium::AccessibilityLevel::NONE
+          accessibility_validation: Applitools::AccessibilityLevel::NONE
         }
       end
       class << self
@@ -33,7 +31,7 @@ module Applitools
 
       object_field :browsers_info, Applitools::Selenium::BrowsersInfo
       int_field :concurrent_sessions
-      enum_field :accessibility_validation, Applitools::Selenium::AccessibilityLevel.enum_values
+      enum_field :accessibility_validation, Applitools::AccessibilityLevel.enum_values
 
       def match_level_keys
         super << :accessibility_validation
