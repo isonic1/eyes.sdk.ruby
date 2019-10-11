@@ -22,6 +22,7 @@ module Applitools::Connectivity
 
     RESOURCES_SHA_256 = '/resources/sha256/'.freeze
     RENDER_STATUS = '/render-status'.freeze
+    CLOSE_BATCH = '/api/sessions/batches/%s/close/bypointerid'.freeze
 
     HTTP_STATUS_CODES = {
       created: 201,
@@ -114,6 +115,19 @@ module Applitools::Connectivity
       end
       Applitools::EyesLogger.debug 'Done!'
       response
+    end
+
+    def close_batch(batch_id)
+      if 'true'.casecmp(ENV['APPLITOOLS_DONT_CLOSE_BATCHES'] || '') == 0
+        return Applitools::EyesLogger.info(
+          'APPLITOOLS_DONT_CLOSE_BATCHES environment variable set to true. Doing nothing.'
+        ) && false
+      end
+      Applitools::ArgumentGuard.not_nil(batch_id, 'batch_id')
+      Applitools::EyesLogger.info("Called with #{batch_id}")
+      url = CLOSE_BATCH % batch_id
+      response = delete(URI.join(endpoint_url,url))
+      Applitools::EyesLogger.info "delete batch is done with #{response.status} status"
     end
 
     def server_url=(url)

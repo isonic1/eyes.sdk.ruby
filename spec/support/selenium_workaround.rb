@@ -7,7 +7,8 @@ RSpec.shared_context "selenium workaround" do
       @runner = Applitools::Selenium::VisualGridRunner.new(10)
       @eyes = Applitools::Selenium::Eyes.new(visual_grid_runner: @runner)
     else
-      @eyes = Applitools::Selenium::Eyes.new
+      @runner = Applitools::ClassicRunner.new
+      @eyes = Applitools::Selenium::Eyes.new(runner: @runner)
     end
   end
 
@@ -40,8 +41,12 @@ RSpec.shared_context "selenium workaround" do
     ensure
       driver.quit
       eyes.abort_if_not_closed
+      @runner.get_all_test_results
+
     end
   end
+
+  let(:runner) { @runner }
 
   let(:eyes_test_result) { @eyes_test_result }
 

@@ -11,6 +11,7 @@ module Applitools
     environment_attribute :name, 'APPLITOOLS_BATCH_NAME'
     environment_attribute :id, 'APPLITOOLS_BATCH_ID'
     environment_attribute :sequence_name, 'APPLITOOLS_BATCH_SEQUENCE'
+    environment_attribute :notify_on_completion, 'APPLITOOLS_BATCH_NOTIFY'
 
     def initialize(name = nil, started_at = Time.now)
       self.name = name if name
@@ -23,7 +24,8 @@ module Applitools
         'id' => id,
         'name' => name,
         'startedAt' => @started_at.iso8601,
-        'batchSequenceName' => sequence_name
+        'batchSequenceName' => sequence_name,
+        'notifyOnCompletion' => 'true'.casecmp(notify_on_completion || '') == 0 ? true : false
       }
     end
 

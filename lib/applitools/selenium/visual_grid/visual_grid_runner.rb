@@ -1,12 +1,13 @@
 module Applitools
   module Selenium
-    class VisualGridRunner
+    class VisualGridRunner < ::Applitools::EyesRunner
       EMPTY_QUEUE = []
       attr_accessor :all_eyes, :resource_cache, :put_cache, :rendering_info, :render_queue
 
       alias queue render_queue
 
       def initialize(concurrent_open_sessions = 10)
+        super()
         self.all_eyes = []
         self.render_queue = []
         @thread_pool = Applitools::Selenium::VGThreadPool.new(concurrent_open_sessions)
@@ -41,12 +42,15 @@ module Applitools
         @rendering_info ||= connector.rendering_info
       end
 
-      def get_all_test_results
+      def get_all_test_results(throw_exception = false)
         while !(all_eyes.select {|e| e.open?}.empty?)
           sleep 0.5
         end
+        delete_all_batches
         all_eyes.map { |e| e.test_list.map(&:test_result) }.flatten
       end
+
+      def aggregate_results(*_args); end
 
       private
 
