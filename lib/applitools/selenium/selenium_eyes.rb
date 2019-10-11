@@ -109,7 +109,7 @@ module Applitools::Selenium
     # Eyes Server at the specified url.
     #
     # @param server_url The Eyes Server URL.
-    def initialize(server_url = nil)
+    def initialize(*args)
       ensure_config
       super
       self.base_agent_id = "eyes.selenium.ruby/#{Applitools::VERSION}".freeze
@@ -190,6 +190,11 @@ module Applitools::Selenium
       open_base(options) do
         self.viewport_size = nil if force_driver_resolution_as_viewport_size
         ensure_running_session
+      end
+      if runner
+        runner.add_batch(batch.id) do
+          server_connector.close_batch(batch.id)
+        end
       end
       @driver
     end

@@ -60,6 +60,9 @@ module Applitools
         end
 
         visual_grid_manager.open(self)
+        visual_grid_manager.add_batch(batch.id) do
+          server_connector.close_batch(batch.id)
+        end
 
         logger.info("getting all browsers info...")
         browsers_info_list = config.browsers_info

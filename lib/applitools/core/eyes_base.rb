@@ -48,7 +48,7 @@ module Applitools
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :exact,
-      :compare_with_parent_branch, :results
+      :compare_with_parent_branch, :results, :runner
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -62,7 +62,10 @@ module Applitools
 
     def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
 
-    def initialize(server_url = nil)
+    def initialize(*args)
+      options = Applitools::Utils.extract_options!(args)
+      self.runner = options[:runner]
+      server_url = args.first
       @server_connector = Applitools::Connectivity::ServerConnector.new(server_url)
       ensure_config
       self.server_url = server_url if server_url
@@ -406,6 +409,7 @@ module Applitools
       logger.info "Automatically save test? #{save}"
 
       results = server_connector.stop_session running_session, false, save
+      runner.aggregate_result(results) if runner
 
       results.is_new = is_new_session
       results.url = session_results_url
