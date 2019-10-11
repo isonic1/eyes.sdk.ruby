@@ -5,11 +5,11 @@ require 'logger'
 require 'openssl'
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
-eyes = Applitools::Selenium::Eyes.new
+eyes = Applitools::Selenium::Eyes.new(runner: Applitools::ClassicRunner.new)
 eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 eyes.match_level = Applitools::MATCH_LEVEL[:layout]
-eyes.server_url = 'https://testeyes.applitools.com'
+eyes.server_url = 'https://eyesfabric4eyes.applitools.com'
 
 begin
   web_driver = Selenium::WebDriver.for :chrome
