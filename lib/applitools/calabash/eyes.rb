@@ -18,7 +18,6 @@ module Applitools
 
       def open(options = {})
         Applitools::ArgumentGuard.hash options, 'open(options)', [:app_name, :test_name]
-        # options[:viewport_size] = Applitools::RectangleSize.from_any_argument options[:viewport_size]
         open_base options
       end
 
@@ -176,8 +175,8 @@ module Applitools
       end
 
       def get_tag_for_debug(name)
-        return "#{current_app_name} #{test_name}" if name.empty?
-        "#{current_app_name} #{test_name} - #{name}"
+        return "#{app_name} #{test_name}" if name.empty?
+        "#{app_name} #{test_name} - #{name}"
       end
     end
   end
