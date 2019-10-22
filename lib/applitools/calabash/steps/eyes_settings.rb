@@ -9,7 +9,7 @@ Given(/^eyes test name is "([^"]*)"$/) do |name|
 end
 
 Given(/^eyes viewport size is "([^"]*)"$/) do |size|
-  Applitools::Calabash::EyesSettings.instance.viewport_size = Applitools::RectangleSize.from_any_argument(size).to_h
+  Applitools::Calabash::EyesSettings.instance.viewport_size = Applitools::RectangleSize.from_any_argument(size)
 end
 
 Given(/^eyes API key "([^"]*)"$/) do |key|
