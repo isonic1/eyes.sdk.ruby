@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 require 'applitools/selenium/configuration'
 require 'timeout'
 
 module Applitools
   module Selenium
     class VisualGridEyes
-      DOM_EXTRACTION_TIMEOUT = 300 #seconds or 5 minutes
+      include Applitools::Selenium::Concerns::SeleniumEyes
+      DOM_EXTRACTION_TIMEOUT = 300 # seconds or 5 minutes
       USE_DEFAULT_MATCH_TIMEOUT = -1
       extend Forwardable
 
@@ -29,6 +32,7 @@ module Applitools
         self.visual_grid_manager = visual_grid_manager
         self.test_list = Applitools::Selenium::TestList.new
         self.opened = false
+        self.test_list ||= Applitools::Selenium::TestList.new
         self.driver_lock = Mutex.new
       end
 
@@ -42,15 +46,17 @@ module Applitools
       end
 
       def open(*args)
-        self.test_list = Applitools::Selenium::TestList.new
         options = Applitools::Utils.extract_options!(args)
         Applitools::ArgumentGuard.hash(options, 'options', [:driver])
 
         config.app_name = options[:app_name] if config.app_name.nil? || config.app_name && config.app_name.empty?
         config.test_name = options[:test_name] if config.test_name.nil? || config.test_name && config.test_name.empty?
-        config.viewport_size = Applitools::RectangleSize.from_any_argument(options[:viewport_size]) if config.viewport_size.nil? || config.viewport_size && config.viewport_size.empty?
 
-        self.driver = options.delete(:driver)
+        if config.viewport_size.nil? || config.viewport_size && config.viewport_size.empty?
+          config.viewport_size = Applitools::RectangleSize.from_any_argument(options[:viewport_size])
+        end
+
+        self.driver = Applitools::Selenium::SeleniumEyes.eyes_driver(options.delete(:driver), self)
         self.current_url = driver.current_url
 
         if viewport_size
@@ -64,14 +70,18 @@ module Applitools
           server_connector.close_batch(batch.id)
         end
 
-        logger.info("getting all browsers info...")
+        logger.info('Getting all browsers info...')
         browsers_info_list = config.browsers_info
-        logger.info("creating test descriptors for each browser info...")
+        logger.info('Creating test descriptors for each browser info...')
         browsers_info_list.each(viewport_size) do |bi|
-          test_list.push Applitools::Selenium::RunningTest.new(eyes_connector, bi, driver)
+          test = Applitools::Selenium::RunningTest.new(eyes_connector, bi, driver).tap do |t|
+            t.on_results_received do |results|
+              visual_grid_manager.aggregate_result(results)
+            end
+          end
+          test_list.push test
         end
         self.opened = true
-
         driver
       end
 
@@ -81,7 +91,7 @@ module Applitools
       end
 
       def eyes_connector
-        logger.info("creating VisualGridEyes server connector")
+        logger.info('Creating VisualGridEyes server connector')
         ::Applitools::Selenium::EyesConnector.new(server_url, driver_lock: driver_lock).tap do |connector|
           connector.batch = batch
           connector.config = config.deep_clone
@@ -90,51 +100,57 @@ module Applitools
 
       def check(tag, target)
         script = <<-END
-          #{Applitools::Selenium::Scripts::PROCESS_PAGE_AND_POLL} return __processPageAndPoll();
+          #{Applitools::Selenium::Scripts::PROCESS_PAGE_AND_POLL} return __processPageAndSerializePoll();
         END
-        begin
-          sleep wait_before_screenshots
-          Applitools::EyesLogger.info 'Trying to get DOM snapshot...'
+        render_task = nil
+        target.default_full_page_for_vg
 
-          script_thread = Thread.new do
-            result = {}
-            while result['status'] != 'SUCCESS'
-              Thread.current[:script_result] = driver.execute_script(script)
-              begin
-                Thread.current[:result] = result = Oj.load(Thread.current[:script_result])
-                sleep 0.5
-              rescue Oj::ParseError => e
-                Applitools::EyesLogger.warn e.message
+        target_to_check = target.finalize
+        begin
+          check_in_frame(target_frames: target_to_check.frames) do
+            sleep wait_before_screenshots
+            Applitools::EyesLogger.info 'Trying to get DOM snapshot...'
+
+            script_thread = Thread.new do
+              result = {}
+              while result['status'] != 'SUCCESS'
+                Thread.current[:script_result] = driver.execute_script(script)
+                begin
+                  Thread.current[:result] = result = Oj.load(Thread.current[:script_result])
+                  sleep 0.5
+                rescue Oj::ParseError => e
+                  Applitools::EyesLogger.warn e.message
+                end
               end
             end
+            sleep 0.5
+            script_thread_result = script_thread.join(DOM_EXTRACTION_TIMEOUT)
+
+            raise ::Applitools::EyesError.new 'Timeout error while getting dom snapshot!' unless script_thread_result
+            Applitools::EyesLogger.info 'Done!'
+
+            mod = Digest::SHA2.hexdigest(script_thread_result[:script_result])
+
+            region_x_paths = get_regions_x_paths(target_to_check)
+            render_task = RenderTask.new(
+              "Render #{config.short_description} - #{tag}",
+              script_thread_result[:result]['value'],
+              visual_grid_manager,
+              server_connector,
+              region_x_paths,
+              size_mod,
+              region_to_check,
+              target_to_check.options[:script_hooks],
+              mod
+            )
           end
-          sleep 0.5
-          script_thread_result = script_thread.join(DOM_EXTRACTION_TIMEOUT)
-          raise ::Applitools::EyesError.new 'Timeout error while getting dom snapshot!' unless script_thread_result
-          Applitools::EyesLogger.info 'Done!'
-
-          mod = Digest::SHA2.hexdigest(script_thread_result[:script_result])
-
-          region_x_paths = get_regions_x_paths(target)
-          render_task = RenderTask.new(
-            "Render #{config.short_description} - #{tag}",
-            script_thread_result[:result]['value'],
-            visual_grid_manager,
-            server_connector,
-            region_x_paths,
-            size_mod,
-            region_to_check,
-            target.options[:script_hooks],
-            mod
-          )
           test_list.each do |t|
-            t.check(tag, target, render_task)
+            t.check(tag, target_to_check, render_task)
           end
-          test_list.each { |t| t.becomes_not_rendered }
-          test_list.each { |t| t.becomes_not_rendered }
+          test_list.each(&:becomes_not_rendered)
           visual_grid_manager.enqueue_render_task render_task
         rescue StandardError => e
-          test_list.each { |t| t.becomes_tested }
+          test_list.each(&:becomes_tested)
           Applitools::EyesLogger.error e.class.to_s
           Applitools::EyesLogger.error e.message
         end
@@ -143,13 +159,13 @@ module Applitools
       def get_regions_x_paths(target)
         result = []
         collect_selenium_regions(target).each do |el, v|
-          if [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
-            xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
-            web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, v)
-            self.region_to_check = web_element_region if v == :target && size_mod == 'selector'
-            result << web_element_region
-            target.regions[el] = result.size - 1
-          end
+          next unless [::Selenium::WebDriver::Element, Applitools::Selenium::Element].include?(el.class)
+
+          xpath = driver.execute_script(Applitools::Selenium::Scripts::GET_ELEMENT_XPATH_JS, el)
+          web_element_region = Applitools::Selenium::WebElementRegion.new(xpath, v)
+          self.region_to_check = web_element_region.dup if v == :target && size_mod == 'selector'
+          result << web_element_region
+          target.regions[el] = result.size - 1
         end
         result
       end
@@ -193,14 +209,25 @@ module Applitools
 
         element_or_region = element_or_region(target_element, target, key)
 
-        case element_or_region
-        when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
-          self.size_mod = 'selector'
-        when Applitools::Region
-          self.size_mod = 'region' unless element_or_region == Applitools::Region::EMPTY
-        else
-          self.size_mod = 'full-page'
-        end
+        self.size_mod = case element_or_region
+                        when ::Selenium::WebDriver::Element, Applitools::Selenium::Element
+                          'selector'
+                        when Applitools::Region
+                          if element_or_region == Applitools::Region::EMPTY
+                            if target.options[:stitch_content]
+                              'full-page'
+                            else
+                              element_or_region = Applitools::Region.from_location_size(
+                                Applitools::Location::TOP_LEFT, viewport_size
+                              )
+                              'region'
+                            end
+                          else
+                            'region'
+                          end
+                        else
+                          'full-page'
+                        end
 
         self.region_to_check = element_or_region
       end
@@ -221,11 +248,15 @@ module Applitools
         end
       end
 
+      def close_async
+        test_list.each(&:close)
+      end
+
       def close(throw_exception = true)
         return false if test_list.empty?
-        test_list.each(&:close)
+        close_async
 
-        until ((states = test_list.map(&:state_name).uniq).count == 1 && states.first == :completed) do
+        until (states = test_list.map(&:state_name).uniq).count == 1 && states.first == :completed
           sleep 0.5
         end
         self.opened = false
@@ -236,18 +267,22 @@ module Applitools
           end
         end
 
+        all_results = test_list.map(&:test_result).compact
+        failed_results = all_results.select { |r| !r.as_expected? }
+
         if throw_exception
-          test_list.map(&:test_result).compact.each do |r|
+          all_results.each do |r|
             raise Applitools::NewTestError.new new_test_error_message(r), r if r.new?
             raise Applitools::DiffsFoundError.new diffs_found_error_message(r), r if r.unresolved? && !r.new?
             raise Applitools::TestFailedError.new test_failed_error_message(r), r if r.failed?
           end
         end
-        failed_results = test_list.map(&:test_result).compact.select { |r| !r.as_expected? }
-        failed_results.empty? ? test_list.map(&:test_result).compact.first : failed_results
+
+        failed_results.empty? ? all_results.first : failed_results
       end
 
       def abort_if_not_closed
+        self.opened = false
         test_list.each(&:abort_if_not_closed)
       end
 
@@ -255,19 +290,21 @@ module Applitools
         opened
       end
 
+      # rubocop:disable Style/AccessorMethodName
       def get_all_test_results
         test_list.map(&:test_result)
       end
+      # rubocop:enable Style/AccessorMethodName
 
+      # rubocop:disable Style/AccessorMethodName
       def set_viewport_size(value)
-        begin
-          Applitools::Utils::EyesSeleniumUtils.set_viewport_size driver, value
-        rescue => e
-          logger.error e.class.to_s
-          logger.error e.message
-          raise Applitools::TestFailedError.new "#{e.class} - #{e.message}"
-        end
+        Applitools::Utils::EyesSeleniumUtils.set_viewport_size driver, value
+      rescue => e
+        logger.error e.class.to_s
+        logger.error e.message
+        raise Applitools::TestFailedError.new "#{e.class} - #{e.message}"
       end
+      # rubocop:enable Style/AccessorMethodName
 
       def new_test_error_message(result)
         original_results = result.original_results
@@ -298,106 +335,15 @@ module Applitools
 
       private :new_test_error_message, :diffs_found_error_message, :test_failed_error_message
 
-      # Takes a snapshot of the application under test and matches it with the expected output.
-      #
-      # @param [String] tag An optional tag to be assosiated with the snapshot.
-      # @param [Fixnum] match_timeout The amount of time to retry matching (seconds)
-      def check_window(tag = nil, match_timeout = USE_DEFAULT_MATCH_TIMEOUT)
-        target = Applitools::Selenium::Target.window.tap do |t|
-          t.timeout(match_timeout)
-          t.fully if force_full_page_screenshot
-        end
-        check(tag, target)
-      end
+      private
 
-      # Takes a snapshot of the application under test and matches a region of
-      # a specific element with the expected region output.
-      #
-      # @param [Applitools::Selenium::Element] element Represents a region to check.
-      # @param [Symbol] how a finder, such :css or :id. Selects a finder will be used to find an element
-      #   See Selenium::Webdriver::Element#find_element documentation for full list of possible finders.
-      # @param [String] what The value will be passed to a specified finder. If finder is :css it must be a css selector.
-      # @param [Hash] options
-      # @option options [String] :tag An optional tag to be associated with the snapshot.
-      # @option options [Fixnum] :match_timeout The amount of time to retry matching. (Seconds)
-      # @option options [Boolean] :stitch_content If set to true, will try to get full content of the element
-      #   (including hidden content due overflow settings) by scrolling the element,
-      #   taking and stitching partial screenshots.
-      # @example Check region by element
-      #   check_region(element, tag: 'Check a region by element', match_timeout: 3, stitch_content: false)
-      # @example Check region by css selector
-      #   check_region(:css, '.form-row .input#e_mail', tag: 'Check a region by element', match_timeout: 3,
-      #   stitch_content: false)
-      # @!parse def check_region(element, how=nil, what=nil, options = {}); end
-      def check_region(*args)
-        options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge! Applitools::Utils.extract_options!(args)
-        target = Applitools::Selenium::Target.new.region(*args).timeout(options[:match_timeout])
-        target.fully if options[:stitch_content]
-        check(options[:tag], target)
-      end
+      def add_mouse_trigger(_mouse_action, _element); end
 
-      # Validates the contents of an iframe and matches it with the expected output.
-      #
-      # @param [Hash] options The specific parameters of the desired screenshot.
-      # @option options [Fixnum] :timeout The amount of time to retry matching. (Seconds)
-      # @option options [String] :tag An optional tag to be associated with the snapshot.
-      # @option options [String] :frame Frame element or frame name or frame id.
-      # @option options [String] :name_or_id The name or id of the target frame (deprecated. use :frame instead).
-      # @option options [String] :frame_element The frame element (deprecated. use :frame instead).
-      # @return [Applitools::MatchResult] The match results.
+      def add_text_trigger(_control, _text); end
 
-      def check_frame(options = {})
-        options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil }.merge!(options)
-        frame = options[:frame] || options[:frame_element] || options[:name_or_id]
-        target = Applitools::Selenium::Target.frame(frame).timeout(options[:timeout]).fully
-        check(options[:tag], target)
-      end
+      def ensure_frame_visible(*_args); end
 
-      # Validates the contents of a region in an iframe and matches it with the expected output.
-      #
-      # @param [Hash] options The specific parameters of the desired screenshot.
-      # @option options [String] :name_or_id The name or id of the target frame (deprecated. use :frame instead).
-      # @option options [String] :frame_element The frame element (deprecated. use :frame instead).
-      # @option options [String] :frame Frame element or frame name or frame id.
-      # @option options [String] :tag An optional tag to be associated with the snapshot.
-      # @option options [Symbol] :by By which identifier to find the region (e.g :css, :id).
-      # @option options [Fixnum] :timeout The amount of time to retry matching. (Seconds)
-      # @option options [Boolean] :stitch_content Whether to stitch the content or not.
-      # @return [Applitools::MatchResult] The match results.
-      def check_region_in_frame(options = {})
-        options = { timeout: USE_DEFAULT_MATCH_TIMEOUT, tag: nil, stitch_content: false }.merge!(options)
-        Applitools::ArgumentGuard.not_nil options[:by], 'options[:by]'
-        Applitools::ArgumentGuard.is_a? options[:by], 'options[:by]', Array
-
-        how_what = options.delete(:by)
-        frame = options[:frame] || options[:frame_element] || options[:name_or_id]
-
-        target = Applitools::Selenium::Target.new.timeout(options[:timeout])
-        target.frame(frame) if frame
-        target.fully if options[:stitch_content]
-        target.region(*how_what)
-
-        check(options[:tag], target)
-      end
-
-      # Use this method to perform seamless testing with selenium through eyes driver.
-      # It yields a block and passes to it an Applitools::Selenium::Driver instance, which wraps standard driver.
-      # Using Selenium methods inside the 'test' block will send the messages to Selenium
-      # after creating the Eyes triggers for them. Options are similar to {open}
-      # @yieldparam driver [Applitools::Selenium::Driver] Gives a driver to a block, which translates calls to a native
-      #   Selemium::Driver instance
-      # @example
-      #   eyes.test(app_name: 'my app', test_name: 'my test') do |driver|
-      #      driver.get "http://www.google.com"
-      #      driver.check_window("initial")
-      #   end
-      def test(options = {}, &_block)
-        open(options)
-        yield(driver)
-        close
-      ensure
-        abort_if_not_closed
-      end
+      def reset_frames_scroll_position(*_args); end
     end
   end
 end

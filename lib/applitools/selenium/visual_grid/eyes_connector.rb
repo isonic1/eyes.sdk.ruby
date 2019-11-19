@@ -1,10 +1,11 @@
+# frozen_string_literal: true
 module Applitools
   module Selenium
     class EyesConnector < ::Applitools::EyesBase
       USE_DEFAULT_MATCH_TIMEOUT = -1
 
       attr_accessor :browser_info, :test_result, :driver, :dummy_region_provider, :dont_get_title,
-                    :current_uuid, :render_statuses, :device_name, :driver_lock
+        :current_uuid, :render_statuses, :device_name, :driver_lock
       public :server_connector
 
       class RegionProvider
@@ -26,7 +27,6 @@ module Applitools
         self.config = Applitools::Selenium::Configuration.new
       end
 
-
       def open(driver, browser_info)
         self.driver = driver
         self.browser_info = browser_info
@@ -44,16 +44,19 @@ module Applitools
 
         match_data = Applitools::Selenium::VgMatchWindowData.new
         match_data.tag = name
+        match_data.render_id = render_status['renderId']
         update_default_settings(match_data)
         begin
-          match_data.read_target(target_to_check, driver, selector_regions)
+          driver_lock.synchronize do
+            match_data.read_target(target_to_check, driver, selector_regions)
+          end
         rescue Applitools::Selenium::VgMatchWindowData::RegionCoordinatesError => e
           logger.error "Error retrieving coordinates for region #{e.region}"
           logger.error e.message
         end
 
         check_result = check_window_base(
-            dummy_region_provider, timeout, match_data
+          dummy_region_provider, timeout, match_data
         )
         self.current_uuid = nil
         check_result
@@ -78,7 +81,8 @@ module Applitools
 
       def render_status
         status = render_statuses[current_uuid]
-        raise Applitools::EyesError, 'Got empty render status!' if status.nil? || !status.is_a?(Hash) || status.keys.empty?
+        raise Applitools::EyesError, 'Got empty render status!' if
+            status.nil? || !status.is_a?(Hash) || status.keys.empty?
         status
       end
 
@@ -117,7 +121,9 @@ module Applitools
       #   }
       # end
 
+      # rubocop:disable Style/AccessorMethodName
       def set_viewport_size(*_args); end
+      # rubocop:enable Style/AccessorMethodName
 
       def app_environment
         super.tap do |env|
@@ -139,7 +145,7 @@ module Applitools
         ''
       end
 
-      def get_app_output_with_screenshot(region_provider, last_screenshot)
+      def get_app_output_with_screenshot(region_provider, _last_screenshot)
         region = region_provider.region
         a_title = title
         Applitools::AppOutputWithScreenshot.new(
