@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'base64'
 require 'applitools/selenium/visual_grid/vg_task'
 
@@ -8,7 +9,17 @@ module Applitools
       MAX_FAILS_COUNT = 5
       MAX_ITERATIONS = 100
 
-      attr_accessor :script, :running_tests, :all_blobs, :resource_urls, :resource_cache, :put_cache, :server_connector,
+      class << self
+        def apply_base_url(discovered_url, base_url)
+          target_url = discovered_url.is_a?(URI) ? discovered_url : URI.parse(discovered_url)
+          return target_url.freeze if target_url.host
+          target_with_base = base_url.is_a?(URI) ? base_url.dup : URI.parse(base_url)
+          target_url = target_with_base.merge target_url
+          target_url.freeze
+        end
+      end
+
+      attr_accessor :script, :running_tests, :resource_cache, :put_cache, :server_connector,
         :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode,
         :region_to_check, :script_hooks, :visual_grid_manager, :discovered_resources
 
@@ -29,6 +40,7 @@ module Applitools
 
         self.dom_url_mod = mod
         self.running_tests = []
+        @discovered_resources_lock = Mutex.new
         super(name) do
           perform
         end
@@ -37,7 +49,7 @@ module Applitools
       def perform
         rq = prepare_data_for_rg(script_data)
         fetch_fails = 0
-        begin
+        loop do
           response = nil
           begin
             response = server_connector.render(rendering_info['serviceUrl'], rendering_info['accessToken'], rq)
@@ -73,21 +85,21 @@ module Applitools
               end
             end
 
-            if need_more_dom
-              put_cache.fetch_and_store(cache_key) do |_s|
-                server_connector.render_put_resource(
-                  rendering_info['serviceUrl'],
-                  rendering_info['accessToken'],
-                  dom_resource,
-                  running_render
-                )
-              end
-              put_cache[cache_key]
+            next unless need_more_dom
+            put_cache.fetch_and_store(cache_key) do |_s|
+              server_connector.render_put_resource(
+                rendering_info['serviceUrl'],
+                rendering_info['accessToken'],
+                dom_resource,
+                running_render
+              )
             end
+            put_cache[cache_key]
           end
 
           still_running = need_more_resources || need_more_dom || fetch_fails > MAX_FAILS_COUNT
-        end while still_running
+          break unless still_running
+        end
         statuses = poll_render_status(rq)
         if statuses.first['status'] == 'error'
           raise Applitools::EyesError, "Render failed for #{statuses.first['renderId']} with the message: " \
@@ -100,7 +112,7 @@ module Applitools
       def poll_render_status(rq)
         iterations = 0
         statuses = []
-        begin
+        loop do
           fails_count = 0
           proc = proc do
             server_connector.render_status_by_id(
@@ -109,18 +121,22 @@ module Applitools
               Oj.dump(json_value(rq.map(&:render_id)))
             )
           end
-          begin
-            statuses = proc.call
-            fails_count = 0
-          rescue StandardError => _e
-            sleep 1
-            fails_count += 1
-          ensure
-            iterations += 1
-            sleep 0.5
-          end while(fails_count > 0 and fails_count < 3)
+          loop do
+            begin
+              statuses = proc.call
+              fails_count = 0
+            rescue StandardError => _e
+              sleep 1
+              fails_count += 1
+            ensure
+              iterations += 1
+              sleep 0.5
+            end
+            break unless fails_count > 0 && fails_count < 3
+          end
           finished = !statuses.map { |s| s['status'] }.uniq.include?('rendering') || iterations > MAX_ITERATIONS
-        end while(!finished)
+          break if finished
+        end
         statuses
       end
 
@@ -130,23 +146,22 @@ module Applitools
       end
 
       def prepare_data_for_rg(data)
-        self.all_blobs = data["blobs"]
-        self.resource_urls = data["resourceUrls"].map { |u| URI(u) }
         self.request_resources = Applitools::Selenium::RenderResources.new
-        discovered_resources = []
+        dom = parse_frame_dom_resources(data)
 
-        @discovered_resources_lock = Mutex.new
+        prepare_rg_requests(running_tests, dom)
+      end
+
+      def parse_frame_dom_resources(data)
+        all_blobs = data['blobs']
+        resource_urls = data['resourceUrls'].map { |u| URI(u) }
+        discovered_resources = []
 
         fetch_block = proc {}
 
         handle_css_block = proc do |urls_to_fetch, url|
           urls_to_fetch.each do |discovered_url|
-            target_url = URI.parse(discovered_url)
-            unless target_url.host
-              target_with_base = url.is_a?(URI) ? url.dup : URI.parse(url)
-              target_url = target_with_base.merge target_url
-              target_url.freeze
-            end
+            target_url = self.class.apply_base_url(URI.parse(discovered_url), url)
             next unless /^http/i =~ target_url.scheme
             @discovered_resources_lock.synchronize do
               discovered_resources.push target_url
@@ -158,11 +173,18 @@ module Applitools
         fetch_block = proc do |_s, key|
           resp_proc = proc { |u| server_connector.download_resource(u) }
           retry_count = 3
-          begin
+          response = nil
+          loop do
             retry_count -= 1
             response = resp_proc.call(key.dup)
-          end while response.status != 200 && retry_count > 0
+            break unless response.status != 200 && retry_count > 0
+          end
           Applitools::Selenium::VGResource.parse_response(key.dup, response, on_css_fetched: handle_css_block)
+        end
+
+        data['frames'].each do |f|
+          f['url'] = self.class.apply_base_url(f['url'], data['url'])
+          request_resources[f['url']] = parse_frame_dom_resources(f).resource
         end
 
         blobs = all_blobs.map { |blob| Applitools::Selenium::VGResource.parse_blob_from_script(blob) }.each do |blob|
@@ -181,7 +203,8 @@ module Applitools
         resource_urls.each do |u|
           begin
             request_resources[u] = resource_cache[u]
-          rescue Applitools::Selenium::RenderResources
+          rescue Applitools::Selenium::RenderResources => e
+            Applitools::EyesLogger.error(e.message)
           end
         end
 
@@ -189,6 +212,12 @@ module Applitools
           request_resources[u] = resource_cache[u]
         end
 
+        Applitools::Selenium::RGridDom.new(
+          url: data['url'], dom_nodes: data['cdt'], resources: request_resources
+        )
+      end
+
+      def prepare_rg_requests(running_tests, dom)
         requests = Applitools::Selenium::RenderRequests.new
 
         running_tests.each do |running_test|
@@ -200,17 +229,13 @@ module Applitools
             r.emulation_info = running_test.browser_info.emulation_info if running_test.browser_info.emulation_info
           end
 
-          dom = Applitools::Selenium::RGridDom.new(
-            url: script_data["url"], dom_nodes: script_data['cdt'], resources: request_resources
-          )
-
           requests << Applitools::Selenium::RenderRequest.new(
-            webhook: rendering_info["resultsUrl"],
-            url: script_data["url"],
+            webhook: rendering_info['resultsUrl'],
+            url: script_data['url'],
             dom: dom,
             resources: request_resources,
             render_info: r_info,
-            browser: {xname: running_test.browser_info.browser_type, platform: running_test.browser_info.platform},
+            browser: { name: running_test.browser_info.browser_type, platform: running_test.browser_info.platform },
             script_hooks: script_hooks,
             selectors_to_find_regions_for: region_selectors,
             send_dom: running_test.eyes.config.send_dom.nil? ? false.to_s : running_test.eyes.config.send_dom.to_s
