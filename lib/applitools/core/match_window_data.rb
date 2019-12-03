@@ -49,7 +49,8 @@ module Applitools
             'IgnoreMismatch' => false,
             'Trim' => {
               'Enabled' => false
-            }
+            },
+            'RenderId' => ''
           },
           'Id' => nil,
           'UserInputs' => [],
@@ -64,7 +65,8 @@ module Applitools
               'Y' => 0
             }
           },
-          'Tag' => nil
+          'Tag' => nil,
+          'RenderId' => ''
         }
       end
 
@@ -220,6 +222,15 @@ module Applitools
 
     def ignore_displacements=(value)
       current_data['Options']['ImageMatchSettings']['IgnoreDisplacements'] = value
+    end
+
+    def render_id
+      current_data['Options']['RenderId']
+    end
+
+    def render_id=(value)
+      current_data['Options']['RenderId'] = value
+      current_data['RenderId'] = value
     end
 
     def exact=(value)
@@ -413,25 +424,25 @@ module Applitools
     def to_hash
       if @need_convert_accessibility_regions_coordinates
         raise Applitools::EyesError.new(
-            'You should convert coordinates for content_regions!'
+          'You should convert coordinates for content_regions!'
         )
       end
 
       if @need_convert_content_regions_coordinates
         raise Applitools::EyesError.new(
-            'You should convert coordinates for content_regions!'
+          'You should convert coordinates for content_regions!'
         )
       end
 
       if @need_convert_strict_regions_coordinates
         raise Applitools::EyesError.new(
-            'You should convert coordinates for strict_regions!'
+          'You should convert coordinates for strict_regions!'
         )
       end
 
       if @need_convert_layout_regions_coordinates
         raise Applitools::EyesError.new(
-            'You should convert coordinates for layout_regions!'
+          'You should convert coordinates for layout_regions!'
         )
       end
 
