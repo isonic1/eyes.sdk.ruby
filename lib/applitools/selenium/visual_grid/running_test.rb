@@ -133,7 +133,7 @@ module Applitools
       attr_accessor :open_queue, :task_queue, :render_queue, :close_queue, :watch_open, :watch_task,
         :watch_render, :watch_close
 
-      attr_accessor :eyes, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock
+      attr_accessor :eyes, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock, :test_uuid
 
       def initialize(eyes, browser_info, driver)
         Applitools::ArgumentGuard.is_a? eyes, 'eyes', Applitools::Selenium::EyesConnector

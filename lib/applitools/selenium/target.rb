@@ -303,10 +303,12 @@ module Applitools
         self
       end
 
-      def script_hook(hook)
+      def before_render_screenshot_hook(hook)
         options[:script_hooks][:beforeCaptureScreenshot] = hook
         self
       end
+
+      alias script_hook before_render_screenshot_hook
 
       def finalize
         return self unless frame_or_element
