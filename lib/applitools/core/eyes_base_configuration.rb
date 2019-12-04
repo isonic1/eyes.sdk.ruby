@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'applitools/core/rectangle_size'
 require 'applitools/core/session_types'
 require 'applitools/core/batch_info'
@@ -14,11 +16,13 @@ module Applitools
       parent_branch_name: ENV['APPLITOOLS_PARENT_BRANCH'] || '',
       baseline_branch_name: ENV['APPLITOOLS_BASELINE_BRANCH'] || '',
       save_diffs: false,
-      server_url: ENV['APPLITOOLS_SERVER_URL'] || ENV['bamboo_APPLITOOLS_SERVER_URL'] || 'https://eyessdk.applitools.com',
+      server_url: ENV['APPLITOOLS_SERVER_URL'] ||
+        ENV['bamboo_APPLITOOLS_SERVER_URL'] || 'https://eyessdk.applitools.com',
       api_key: ENV['APPLITOOLS_API_KEY'] || ENV['bamboo_APPLITOOLS_API_KEY'] || '',
       match_level: Applitools::MatchLevel::STRICT,
       scale: 0,
-      remainder: 0
+      remainder: 0,
+      save_new_tests: false
     }.freeze
 
     class << self
@@ -33,7 +37,7 @@ module Applitools
     end
 
     def merge(other_config)
-      return if self.object_id == other_config.object_id
+      return if object_id == other_config.object_id
       (config_keys + other_config. config_keys).uniq do |k|
         merge_key(other_config, k)
       end
@@ -41,8 +45,8 @@ module Applitools
 
     def merge_key(other_config, key)
       return unless other_config.send("defined_#{key}?")
-      return unless self.respond_to? "#{key}="
-      self.send("#{key}=", other_config.send(key))
+      return unless respond_to?("#{key}=")
+      send("#{key}=", other_config.send(key))
     end
 
     def config_keys
@@ -89,6 +93,7 @@ module Applitools
     string_field :agent_id
     string_field :environment_name
     boolean_field :save_diffs
+    boolean_field :save_new_tests
     enum_field :session_type, Applitools::SessionTypes.enum_values
     object_field :batch_info, Applitools::BatchInfo
     string_field :baseline_env_name
@@ -105,7 +110,6 @@ module Applitools
     int_field :scale
     int_field :remainder
 
-
     methods_to_delegate.delete(:batch_info)
     methods_to_delegate.delete(:batch_info=)
 
@@ -119,7 +123,8 @@ module Applitools
 
     def match_level=(value)
       return config_hash[:match_level] = value if Applitools::MatchLevel.enum_values.include?(value)
-      return config_hash[:match_level] = Applitools::MATCH_LEVEL[value.to_sym] if Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
+      return config_hash[:match_level] = Applitools::MATCH_LEVEL[value.to_sym] if
+          Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
       raise Applitools::EyesError, "Unknown match level #{value}"
     end
 
@@ -132,7 +137,7 @@ module Applitools
       extra_keys = value.keys - match_level_keys
       unless extra_keys.empty?
         raise Applitools::EyesIllegalArgument.new(
-            "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
+          "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
         )
       end
       result = default_match_settings.merge!(value)

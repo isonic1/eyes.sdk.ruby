@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 # rubocop:disable Style/SignalException
-
+# rubocop:disable Metrics/BlockLength
 $batch_info ||= Applitools::BatchInfo.new "Ruby tests (#{RUBY_VERSION})"
 
-require_relative 'eyes_test_result'
+require_relative 'old_tests/result'
 
 PLATFORMS = if ENV['TEST_PLATFORM'] && ENV['TEST_PLATFORM'].casecmp('linux').zero?
               ['Linux'].freeze
@@ -257,3 +257,4 @@ RSpec.shared_examples 'test special cases' do
     # end
   end
 end
+# rubocop:enable Metrics/BlockLength

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'state_machine'
 require 'digest'
 require 'applitools/selenium/visual_grid/render_task'
@@ -8,7 +9,8 @@ module Applitools
       extend Forwardable
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
       def_delegators 'eyes', :abort_if_not_closed
-
+      attr_accessor  :on_results
+      # rubocop:disable Metrics/BlockLength
       state_machine :initial => :new do
         state :new do
           def close
@@ -74,9 +76,18 @@ module Applitools
           def queue
             Applitools::Selenium::VisualGridRunner::EMPTY_QUEUE
           end
+
+          def close; end
         end
 
-        state :new, :not_rendered, :opened, :rendered, :tested do
+        state :new do
+          def close
+            self.test_result = nil
+            becomes_completed
+          end
+        end
+
+        state :not_rendered, :opened, :rendered, :tested do
           def close
             self.test_result = nil
             close_task = Applitools::Selenium::VGTask.new("close #{browser_info}") do
@@ -84,6 +95,7 @@ module Applitools
             end
             close_task.on_task_succeeded do |task_result|
               self.test_result = task_result
+              on_results.call(task_result) if on_results.respond_to? :call
             end
             close_task.on_task_error do |e|
               pending_exceptions << e
@@ -114,7 +126,7 @@ module Applitools
         end
 
         event :becomes_completed do
-          transition [:not_rendered, :rendered, :opened, :tested] => :completed
+          transition [:new, :not_rendered, :rendered, :opened, :tested] => :completed
         end
       end
 
@@ -145,6 +157,15 @@ module Applitools
         self.pending_exceptions = []
         super()
         init
+      end
+
+      def on_results_received(&block)
+        self.on_results = block if block_given?
+      end
+
+      def abort_if_not_closed
+        eyes.abort_if_not_closed
+        becomes_completed
       end
 
       def init
@@ -201,6 +222,7 @@ module Applitools
         uniq_values = watch.values.uniq
         uniq_values.count == 1 && uniq_values.first == true
       end
+      # rubocop:enable Metrics/BlockLength
     end
   end
 end
