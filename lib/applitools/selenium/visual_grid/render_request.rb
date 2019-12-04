@@ -6,12 +6,13 @@ module Applitools
     class RenderRequest
       include Applitools::Jsonable
       json_fields :renderId, :webhook, :url, :dom, :resources, :scriptHooks,
-        :selectorsToFindRegionsFor, :sendDom
+        :selectorsToFindRegionsFor, :sendDom, :agentId
 
       json_fields :renderInfo, :browser
 
       def initialize(*args)
         options = Applitools::Utils.extract_options! args
+        self.agent_id = "Ruby SDK #{Applitools::VERSION}"
         self.script_hooks = {}
         self.selectors_to_find_regions_for = []
         options.keys.each do |k|
