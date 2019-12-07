@@ -14,7 +14,8 @@ module Applitools
           hide_scrollbars: false,
           hide_caret: false,
           browsers_info: Applitools::Selenium::BrowsersInfo.new,
-          accessibility_validation: Applitools::AccessibilityLevel::NONE
+          accessibility_validation: Applitools::AccessibilityLevel::NONE,
+          rendering_grid_force_put: (ENV['APPLITOOLS_RENDERING_GRID_FORCE_PUT'] || 'false').casecmp('true') == 0
         }
       end
       class << self
@@ -33,6 +34,7 @@ module Applitools
       object_field :browsers_info, Applitools::Selenium::BrowsersInfo
       int_field :concurrent_sessions
       enum_field :accessibility_validation, Applitools::AccessibilityLevel.enum_values
+      boolean_field :rendering_grid_force_put
 
       def match_level_keys
         super << :accessibility_validation

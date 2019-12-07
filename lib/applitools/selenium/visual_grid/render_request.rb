@@ -12,7 +12,7 @@ module Applitools
 
       def initialize(*args)
         options = Applitools::Utils.extract_options! args
-        self.agent_id = "Ruby SDK #{Applitools::VERSION}"
+        self.agent_id = "eyes.selenium.visualgrid.ruby/#{Applitools::VERSION}"
         self.script_hooks = {}
         self.selectors_to_find_regions_for = []
         options.keys.each do |k|

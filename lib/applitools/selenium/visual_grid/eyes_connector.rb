@@ -5,7 +5,7 @@ module Applitools
       USE_DEFAULT_MATCH_TIMEOUT = -1
 
       attr_accessor :browser_info, :test_result, :driver, :dummy_region_provider, :dont_get_title,
-        :current_uuid, :render_statuses, :device_name, :driver_lock
+        :current_uuid, :render_statuses, :device_name, :driver_lock, :title
       public :server_connector
 
       class RegionProvider
@@ -33,6 +33,7 @@ module Applitools
         self.device_name = browser_info && browser_info.emulation_info && browser_info.emulation_info.device_name
         logger.info "opening EyesConnector for #{config.short_description} with viewport size: #{browser_info}"
         config.viewport_size = browser_info.viewport_size
+        title
         open_base
         # ensure_running_session
       end
@@ -138,7 +139,7 @@ module Applitools
       end
 
       def title
-        return driver.title unless dont_get_title
+        @title ||= driver.title unless dont_get_title
       rescue StandardError => e
         logger.warn "failed (#{e.message})"
         self.dont_get_title = false

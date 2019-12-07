@@ -186,6 +186,12 @@ module Applitools::Utils
     end
 
     # @param [Applitools::Selenium::Driver] executor
+    # @return [String] User agent string
+    def user_agent(executor)
+      executor.execute_script(JS_GET_USER_AGENT)
+    end
+
+    # @param [Applitools::Selenium::Driver] executor
     # @return [Applitools::Location] {Applitools::Location} instance which indicates current scroll
     #   position
     def current_scroll_position(executor)
