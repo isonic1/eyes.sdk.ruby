@@ -30,4 +30,9 @@ RSpec.configure do |config|
 
   config.include_context 'selenium workaround', selenium: true
   config.include_context 'selenium workaround', visual_grid: true
+
+  config.after(:suite) do
+    puts $vg_runner.get_all_test_results if $vg_runner
+    puts $classic_runner.get_all_test_results if $classic_runner
+  end
 end

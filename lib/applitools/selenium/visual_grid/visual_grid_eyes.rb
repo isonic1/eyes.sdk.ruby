@@ -15,7 +15,7 @@ module Applitools
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
       attr_accessor :visual_grid_manager, :driver, :current_url, :current_config, :fetched_cache_map,
-        :config, :driver_lock, :test_uuid
+        :config, :driver_lock, :test_uuid, :dont_get_title
       attr_accessor :test_list
 
       attr_accessor :api_key, :server_url, :proxy, :opened
@@ -128,7 +128,6 @@ module Applitools
             end
             sleep 0.5
             script_thread_result = script_thread.join(DOM_EXTRACTION_TIMEOUT)
-
             raise ::Applitools::EyesError.new 'Timeout error while getting dom snapshot!' unless script_thread_result
             Applitools::EyesLogger.info 'Done!'
 
@@ -144,11 +143,22 @@ module Applitools
               size_mod,
               region_to_check,
               target_to_check.options[:script_hooks],
+              config.rendering_grid_force_put,
+              Applitools::Utils::EyesSeleniumUtils.user_agent(driver),
               mod
             )
           end
+
+          title = begin
+            driver.title
+          rescue StandardError => e
+            logger.warn "failed (#{e.message})"
+            ''
+          end
+
+
           test_list.select { |t| t.test_uuid == test_uuid }.each do |t|
-            t.check(tag, target_to_check, render_task)
+            t.check(tag, target_to_check, render_task, title)
           end
           test_list.each(&:becomes_not_rendered)
           visual_grid_manager.enqueue_render_task render_task

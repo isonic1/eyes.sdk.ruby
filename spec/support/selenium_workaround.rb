@@ -10,7 +10,6 @@ RSpec.shared_context 'selenium workaround' do
               else
                 $classic_runner ||= Applitools::ClassicRunner.new
               end
-    @eyes = Applitools::Selenium::Eyes.new(runner: @runner)
   end
 
   before do |example|
@@ -21,7 +20,7 @@ RSpec.shared_context 'selenium workaround' do
     eyes.force_full_page_screenshot = true if example.metadata[:fps]
     eyes.stitch_mode = Applitools::Selenium::StitchModes::SCROLL if example.metadata[:scroll]
     eyes.branch_name = 'master'
-    eyes.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
+    # eyes.proxy = Applitools::Connectivity::Proxy.new('http://localhost:8000')
     driver.get(url_for_test)
   end
 
@@ -40,14 +39,20 @@ RSpec.shared_context 'selenium workaround' do
         end
       end
       example.run
-      @eyes_test_result = eyes.close if eyes.open?
-      check_expected_properties
-      check_expected_accessibility_regions
-      check_expected_ignore_regions
-      check_expected_floating_regions
+      if eyes.open?
+        if @expected_properties.empty? && @expected_accessibility_regions.empty? &&
+            @expected_ignore_regions.empty? && @expected_floating_regions.empty?
+          eyes.close_async
+        else
+          @eyes_test_result = eyes.close
+          check_expected_properties
+          check_expected_accessibility_regions
+          check_expected_ignore_regions
+          check_expected_floating_regions
+        end
+      end
     ensure
       driver.quit
-      eyes.abort_if_not_closed
     end
   end
 
@@ -91,7 +96,7 @@ RSpec.shared_context 'selenium workaround' do
     end
   end
 
-  let(:eyes) { @eyes }
+  let(:eyes) { Applitools::Selenium::Eyes.new(runner: runner) }
 
   let(:app_name) do |example|
     root_example_group = proc do |group|

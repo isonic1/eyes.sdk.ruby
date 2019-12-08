@@ -104,7 +104,7 @@ module Applitools::Connectivity
       Oj.load(response.body)
     end
 
-    def download_resource(url)
+    def download_resource(url, ua_string = nil)
       Applitools::EyesLogger.debug "Fetching #{url}..."
       resp_proc = proc do |u|
         Faraday::Connection.new(
@@ -114,6 +114,7 @@ module Applitools::Connectivity
         ).send(:get) do |req|
           req.options.timeout = DEFAULT_TIMEOUT
           req.headers['Accept-Encoding'] = 'identity'
+          req.headers['User-Agent'] = ua_string if ua_string
         end
       end
       response = resp_proc.call(url)

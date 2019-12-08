@@ -2,12 +2,14 @@
 
 require 'base64'
 require 'digest'
+require 'nokogiri'
+
 module Applitools
   module Selenium
     class VGResource
       include Applitools::Jsonable
       json_fields :contentType, :hash, :hashFormat
-      attr_accessor :url, :content, :handle_css_block
+      attr_accessor :url, :content, :handle_discovered_resources_block
       alias content_type contentType
       alias content_type= contentType=
 
@@ -24,7 +26,8 @@ module Applitools
       end
 
       def initialize(url, content_type, content, options = {})
-        self.handle_css_block = options[:on_css_fetched] if options[:on_css_fetched].is_a? Proc
+        self.handle_discovered_resources_block = options[:on_resources_fetched] if
+            options[:on_resources_fetched].is_a? Proc
         self.url = URI(url)
         self.content_type = content_type
         self.content = content
@@ -33,19 +36,35 @@ module Applitools
         lookup_for_resources
       end
 
-      def on_css_fetched(block)
-        self.handle_css_block = block
+      def on_resources_fetched(block)
+        self.handle_discovered_resources_block = block
       end
 
       def lookup_for_resources
-        return unless %r{^text/css}i =~ content_type && handle_css_block
+        lookup_for_css_resources
+        lookup_for_svg_resources
+      end
+
+      def lookup_for_css_resources
+        return unless %r{^text/css}i =~ content_type && handle_discovered_resources_block
         parser = Applitools::Selenium::CssParser::FindEmbeddedResources.new(content)
-        handle_css_block.call(parser.imported_css + parser.fonts + parser.images, url)
+        handle_discovered_resources_block.call(parser.imported_css + parser.fonts + parser.images, url)
+      end
+
+      def lookup_for_svg_resources
+        return unless %r{^image/svg\+xml} =~ content_type && handle_discovered_resources_block
+        attrs = Nokogiri::XML(content)
+                        .xpath("//@*[namespace-uri(.) = 'http://www.w3.org/1999/xlink'] | //@href")
+                        .select { |a| a.name == 'href' }
+                        .map(&:value)
+        handle_discovered_resources_block.call(attrs, url)
       end
 
       def stringify
         url.to_s + content_type.to_s + hash
       end
+
+      private :lookup_for_svg_resources, :lookup_for_css_resources
     end
   end
 end

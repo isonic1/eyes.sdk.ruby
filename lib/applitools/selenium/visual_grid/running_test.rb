@@ -185,7 +185,8 @@ module Applitools
         watch_open[open_task] = false
       end
 
-      def check(tag, target, render_task)
+      def check(tag, target, render_task, title)
+        eyes.title = title
         result_index = render_task.add_running_test(self)
 
         check_task = VGTask.new("perform check #{tag} #{target}") do
