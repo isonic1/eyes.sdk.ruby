@@ -133,7 +133,7 @@ module Applitools
       attr_accessor :open_queue, :task_queue, :render_queue, :close_queue, :watch_open, :watch_task,
         :watch_render, :watch_close
 
-      attr_accessor :eyes, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock
+      attr_accessor :eyes, :browser_info, :test_result, :pending_exceptions, :driver, :task_lock, :test_uuid
 
       def initialize(eyes, browser_info, driver)
         Applitools::ArgumentGuard.is_a? eyes, 'eyes', Applitools::Selenium::EyesConnector
@@ -185,7 +185,8 @@ module Applitools
         watch_open[open_task] = false
       end
 
-      def check(tag, target, render_task)
+      def check(tag, target, render_task, title)
+        eyes.title = title
         result_index = render_task.add_running_test(self)
 
         check_task = VGTask.new("perform check #{tag} #{target}") do

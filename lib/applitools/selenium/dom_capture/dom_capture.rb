@@ -72,7 +72,10 @@ module Applitools
           next if /^blob:/ =~ url
 
           begin
-            missing_css_response = server_connector.download_resource(url)
+            missing_css_response = server_connector.download_resource(
+              url,
+              Applitools::Utils::EyesSeleniumUtils.user_agent(driver)
+            )
             response_headers = missing_css_response.headers
             raise Applitools::EyesError, "Wrong response header: #{response_headers['content-type']}" unless
                 %r{^text/css.*}i =~ response_headers['content-type']

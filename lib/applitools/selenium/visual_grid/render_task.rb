@@ -21,10 +21,10 @@ module Applitools
 
       attr_accessor :script, :running_tests, :resource_cache, :put_cache, :server_connector,
         :rendering_info, :request_resources, :dom_url_mod, :result, :region_selectors, :size_mode,
-        :region_to_check, :script_hooks, :visual_grid_manager, :discovered_resources
+        :region_to_check, :script_hooks, :visual_grid_manager, :discovered_resources, :ua_string, :force_put
 
       def initialize(name, script_result, visual_grid_manager, server_connector, region_selectors, size_mode,
-        region, script_hooks, mod = nil)
+        region, script_hooks, force_put, ua_string, mod = nil)
 
         self.result = nil
         self.script = script_result
@@ -37,9 +37,10 @@ module Applitools
         self.size_mode = size_mode
         self.region_to_check = region
         self.script_hooks = script_hooks if script_hooks.is_a?(Hash)
-
+        self.ua_string = ua_string
         self.dom_url_mod = mod
         self.running_tests = []
+        self.force_put = force_put
         @discovered_resources_lock = Mutex.new
         super(name) do
           perform
@@ -71,6 +72,22 @@ module Applitools
 
             cache_key = URI(dom_resource.url)
             cache_key.query = "modifier=#{dom_url_mod}" if dom_url_mod
+
+            if force_put
+              request_resources.each do |r, _v|
+                put_cache.fetch_and_store(URI(r)) do |_s|
+                  server_connector.render_put_resource(
+                    rendering_info['serviceUrl'],
+                    rendering_info['accessToken'],
+                    request_resources[r],
+                    running_render
+                  )
+                end
+              end
+              request_resources.each do |r, _v|
+                put_cache[r]
+              end
+            end
 
             if need_more_resources
               running_render['needMoreResources'].each do |resource_url|
@@ -148,7 +165,6 @@ module Applitools
       def prepare_data_for_rg(data)
         self.request_resources = Applitools::Selenium::RenderResources.new
         dom = parse_frame_dom_resources(data)
-
         prepare_rg_requests(running_tests, dom)
       end
 
@@ -159,7 +175,7 @@ module Applitools
 
         fetch_block = proc {}
 
-        handle_css_block = proc do |urls_to_fetch, url|
+        handle_resources_block = proc do |urls_to_fetch, url|
           urls_to_fetch.each do |discovered_url|
             target_url = self.class.apply_base_url(URI.parse(discovered_url), url)
             next unless /^http/i =~ target_url.scheme
@@ -171,7 +187,7 @@ module Applitools
         end
 
         fetch_block = proc do |_s, key|
-          resp_proc = proc { |u| server_connector.download_resource(u) }
+          resp_proc = proc { |u| server_connector.download_resource(u, ua_string) }
           retry_count = 3
           response = nil
           loop do
@@ -179,7 +195,11 @@ module Applitools
             response = resp_proc.call(key.dup)
             break unless response.status != 200 && retry_count > 0
           end
-          Applitools::Selenium::VGResource.parse_response(key.dup, response, on_css_fetched: handle_css_block)
+          Applitools::Selenium::VGResource.parse_response(
+            key.dup,
+            response,
+            on_resources_fetched: handle_resources_block
+          )
         end
 
         data['frames'].each do |f|
@@ -192,7 +212,7 @@ module Applitools
         end
 
         blobs.each do |blob|
-          blob.on_css_fetched(handle_css_block)
+          blob.on_resources_fetched(handle_resources_block)
           blob.lookup_for_resources
         end
 

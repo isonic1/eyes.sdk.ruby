@@ -3,6 +3,10 @@
 require 'spec_helper'
 
 RSpec.describe Applitools::Selenium::Target do
+  it_should_behave_like 'responds to method', [
+    :script_hook,
+    :before_render_screenshot_hook
+  ]
   context 'send_dom' do
     it 'Responds to \'send_dom\'' do
       expect(subject).to respond_to :use_dom

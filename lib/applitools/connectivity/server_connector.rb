@@ -104,7 +104,7 @@ module Applitools::Connectivity
       Oj.load(response.body)
     end
 
-    def download_resource(url)
+    def download_resource(url, ua_string = nil)
       Applitools::EyesLogger.debug "Fetching #{url}..."
       resp_proc = proc do |u|
         Faraday::Connection.new(
@@ -114,6 +114,7 @@ module Applitools::Connectivity
         ).send(:get) do |req|
           req.options.timeout = DEFAULT_TIMEOUT
           req.headers['Accept-Encoding'] = 'identity'
+          req.headers['User-Agent'] = ua_string if ua_string
         end
       end
       response = resp_proc.call(url)
@@ -163,7 +164,6 @@ module Applitools::Connectivity
 
     def match_window(session, data)
       # Notice that this does not include the screenshot.
-      puts data.to_hash
       json_data = Oj.dump(Applitools::Utils.camelcase_hash_keys(data.to_hash)).force_encoding('BINARY')
       body = [json_data.length].pack('L>') + json_data + data.screenshot
       Applitools::EyesLogger.debug 'Sending match data...'

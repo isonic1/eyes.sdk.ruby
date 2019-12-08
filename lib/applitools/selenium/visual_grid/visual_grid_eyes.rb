@@ -2,6 +2,7 @@
 
 require 'applitools/selenium/configuration'
 require 'timeout'
+require 'securerandom'
 
 module Applitools
   module Selenium
@@ -14,13 +15,13 @@ module Applitools
       def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
 
       attr_accessor :visual_grid_manager, :driver, :current_url, :current_config, :fetched_cache_map,
-        :config, :driver_lock
+        :config, :driver_lock, :test_uuid, :dont_get_title
       attr_accessor :test_list
 
       attr_accessor :api_key, :server_url, :proxy, :opened
 
       attr_accessor :size_mod, :region_to_check
-      private :size_mod, :size_mod=, :region_to_check, :region_to_check=
+      private :size_mod, :size_mod=, :region_to_check, :region_to_check=, :test_uuid, :test_uuid=
 
       def_delegators 'config', *Applitools::Selenium::Configuration.methods_to_delegate
       def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
@@ -46,6 +47,7 @@ module Applitools
       end
 
       def open(*args)
+        self.test_uuid = SecureRandom.uuid
         options = Applitools::Utils.extract_options!(args)
         Applitools::ArgumentGuard.hash(options, 'options', [:driver])
 
@@ -78,6 +80,7 @@ module Applitools
             t.on_results_received do |results|
               visual_grid_manager.aggregate_result(results)
             end
+            t.test_uuid = test_uuid
           end
           test_list.push test
         end
@@ -125,7 +128,6 @@ module Applitools
             end
             sleep 0.5
             script_thread_result = script_thread.join(DOM_EXTRACTION_TIMEOUT)
-
             raise ::Applitools::EyesError.new 'Timeout error while getting dom snapshot!' unless script_thread_result
             Applitools::EyesLogger.info 'Done!'
 
@@ -141,11 +143,22 @@ module Applitools
               size_mod,
               region_to_check,
               target_to_check.options[:script_hooks],
+              config.rendering_grid_force_put,
+              Applitools::Utils::EyesSeleniumUtils.user_agent(driver),
               mod
             )
           end
-          test_list.each do |t|
-            t.check(tag, target_to_check, render_task)
+
+          title = begin
+            driver.title
+          rescue StandardError => e
+            logger.warn "failed (#{e.message})"
+            ''
+          end
+
+
+          test_list.select { |t| t.test_uuid == test_uuid }.each do |t|
+            t.check(tag, target_to_check, render_task, title)
           end
           test_list.each(&:becomes_not_rendered)
           visual_grid_manager.enqueue_render_task render_task
