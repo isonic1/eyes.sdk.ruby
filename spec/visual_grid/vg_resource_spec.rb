@@ -3,6 +3,7 @@ require 'spec_helper'
 
 RSpec.describe 'vg_resource' do
   let(:content) { |example| File.read(example.description) }
+
   it 'spec/fixtures/applitools_logo_combined.svg' do
     block = proc do |list, url|
       expect(url).to be_a(URI)
@@ -46,6 +47,25 @@ RSpec.describe 'vg_resource' do
       Applitools::Selenium::VGResource.new(
         'https://applitools.com',
         'image/svg+xml',
+        content,
+        on_resources_fetched: block
+      )
+    end.to_not raise_error
+  end
+
+  it 'spec/fixtures/font-awesome.min.css' do
+    block = proc do |l, u|
+      expect(l).to be_a(Array)
+      expect(l).to include('../fonts/fontawesome-webfont.woff2?v=4.7.0')
+      expect(l).to include('../fonts/fontawesome-webfont.woff?v=4.7.0')
+      expect(l).to include('../fonts/fontawesome-webfont.ttf?v=4.7.0')
+      expect(u).to be_a(URI)
+      expect(u.to_s).to eq('https://applitools.com')
+    end
+    expect do
+      Applitools::Selenium::VGResource.new(
+        'https://applitools.com',
+        'text/css',
         content,
         on_resources_fetched: block
       )

@@ -44,6 +44,7 @@ module Applitools
       def configure
         return unless block_given?
         yield(config)
+        nil
       end
 
       def open(*args)

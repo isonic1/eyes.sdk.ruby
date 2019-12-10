@@ -37,11 +37,13 @@ module Applitools
           node[:tokens].select { |t| t[:node] == :url }.uniq.each do |nd|
             result << nd[:value] if nd && !nd.empty?
           end
-          node[:tokens].select { |t| t[:node] == :function && t[:value] == 'url' }.uniq do |nd|
+          node[:tokens].select { |t| t[:node] == :function && t[:value] == 'url' }.uniq.each do |nd|
             url_index = node[:tokens].index(nd)
             url_string_node = url_index && node[:tokens][url_index + 1]
-            result << url_string_node &&
-              url_string_node[:node] == :string && !url_string_node[:value].empty? && url_string_node[:value]
+            result << (
+              url_string_node && url_string_node[:node] == :string &&
+                  !url_string_node[:value].empty? && url_string_node[:value]
+            )
           end
           result.compact
         end
