@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'test_simple_cases_v1'
 
 RSpec.describe 'Simple test cases' do

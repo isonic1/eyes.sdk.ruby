@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe 'vg_resource' do
@@ -27,10 +28,10 @@ RSpec.describe 'vg_resource' do
     end
     expect do
       Applitools::Selenium::VGResource.new(
-          'https://applitools.com',
-          'image/svg+xml',
-          content,
-          on_resources_fetched: block
+        'https://applitools.com',
+        'image/svg+xml',
+        content,
+        on_resources_fetched: block
       )
     end.to_not raise_error
   end
@@ -43,10 +44,10 @@ RSpec.describe 'vg_resource' do
     end
     expect do
       Applitools::Selenium::VGResource.new(
-          'https://applitools.com',
-          'image/svg+xml',
-          content,
-          on_resources_fetched: block
+        'https://applitools.com',
+        'image/svg+xml',
+        content,
+        on_resources_fetched: block
       )
     end.to_not raise_error
   end

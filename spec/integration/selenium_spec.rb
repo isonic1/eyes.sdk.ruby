@@ -1,4 +1,4 @@
-# # frozen_string_literal: true
+# frozen_string_literal: true
 # require 'spec_helper'
 # require_relative 'test_classic_api_v1'
 # require_relative 'test_fluent_api_v1'
