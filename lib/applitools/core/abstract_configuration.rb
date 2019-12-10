@@ -16,5 +16,22 @@ module Applitools
         send "#{k}=", default_config[k]
       end
     end
+
+    def deep_clone
+      new_config = self.class.new
+      config_keys.each do |k|
+        new_config.send(
+          "#{k}=", case value = send(k)
+                   when Symbol, FalseClass, TrueClass, Integer, Float
+                     value
+                   else
+                     value.clone
+                   end
+        )
+      end
+      new_config
+    end
+
+    alias deep_dup deep_clone
   end
 end

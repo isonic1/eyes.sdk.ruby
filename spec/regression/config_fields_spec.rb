@@ -3,13 +3,22 @@ require 'rspec'
 require 'spec_helper'
 
 RSpec.describe 'Config Object fields' do
-  let(:eyes) { Applitools::Selenium::Eyes.new }
+  let(:eyes) do
+    Applitools::Selenium::Eyes.new.tap do |e|
+      e.configuration = new_config
+    end
+  end
   let(:session_start_info) { eyes.send(:session_start_info) }
   let(:match_level) { session_start_info['start_info']['defaultMatchSettings']['matchLevel'] }
   let(:session_info) { Applitools::Session.new('id', 'url', true) }
   let(:driver) { Applitools::Selenium::Driver.new(eyes, {}) }
   let(:selenium_driver) { double }
-  let(:new_config) { Applitools::Selenium::Configuration.new }
+  let(:new_config) do
+    Applitools::Selenium::Configuration.new.tap do |c|
+      c.api_key = 'MY_API_KEY'
+    end
+  end
+
   before do
     allow(selenium_driver).to receive(:driver_for_eyes).and_return(driver)
     allow(Applitools::Utils::EyesSeleniumUtils).to receive(:extract_viewport_size).and_return(

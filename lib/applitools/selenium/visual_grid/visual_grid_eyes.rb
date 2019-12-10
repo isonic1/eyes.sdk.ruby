@@ -21,7 +21,7 @@ module Applitools
       attr_accessor :api_key, :server_url, :proxy, :opened
 
       attr_accessor :size_mod, :region_to_check
-      private :size_mod, :size_mod=, :region_to_check, :region_to_check=, :test_uuid, :test_uuid=
+      private :size_mod, :size_mod=, :region_to_check, :region_to_check=, :test_uuid, :test_uuid=, :config, :config=
 
       def_delegators 'config', *Applitools::Selenium::Configuration.methods_to_delegate
       def_delegators 'config', *Applitools::EyesBaseConfiguration.methods_to_delegate
@@ -44,6 +44,7 @@ module Applitools
       def configure
         return unless block_given?
         yield(config)
+        nil
       end
 
       def open(*args)
@@ -155,7 +156,6 @@ module Applitools
             logger.warn "failed (#{e.message})"
             ''
           end
-
 
           test_list.select { |t| t.test_uuid == test_uuid }.each do |t|
             t.check(tag, target_to_check, render_task, title)
@@ -345,6 +345,18 @@ module Applitools
         @server_connector.proxy = config.proxy if config.proxy
         @server_connector
       end
+
+      def configuration
+        config.deep_dup
+      end
+
+      def configuration=(value)
+        Applitools::ArgumentGuard.is_a?(value, :configuration, Applitools::Selenium::Configuration)
+        self.config = value.deep_dup
+      end
+
+      alias get_configuration configuration
+      alias set_configuration configuration=
 
       private :new_test_error_message, :diffs_found_error_message, :test_failed_error_message
 

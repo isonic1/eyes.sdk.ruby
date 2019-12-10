@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'test_duplicates_v1'
 RSpec.describe 'duplicates' do
   context 'Eyes Selenium SDK - Duplicates', selenium: true do

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'test_page_with_header'
 RSpec.describe 'page with header' do
   context 'Eyes Selenium SDK - Page With Header', selenium: true do

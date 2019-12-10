@@ -30,6 +30,7 @@ module Applitools
     CONTEXT_RELATIVE = Applitools::EyesScreenshot::COORDINATE_TYPES[:context_relative].freeze
 
     attr_accessor :config
+    private :config, :config=
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
     # def_delegators 'server_connector', :api_key, :api_key=, :server_url, :server_url=,
@@ -451,10 +452,24 @@ module Applitools
       @compare_with_parent_branch = value ? true : false
     end
 
+    def configuration
+      config.deep_dup
+    end
+
+    alias get_configuration configuration
+
+    def configuration=(value)
+      Applitools::ArgumentGuard.is_a?(value, :configuration, Applitools::EyesBaseConfiguration)
+      self.config = value.deep_dup
+    end
+
+    alias set_configuration configuration=
+
     # def rendering_info
     #   server_connector.rendering_info
     # end
     #
+
     private
 
     attr_accessor :running_session, :last_screenshot, :scale_provider, :session_start_info,

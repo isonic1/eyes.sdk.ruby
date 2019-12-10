@@ -68,21 +68,6 @@ module Applitools
         add_browser { |b| b.emulation_info(emu) }
       end
 
-      def deep_clone
-        new_config = self.class.new
-        config_keys.each do |k|
-          new_config.send(
-            "#{k}=", case value = send(k)
-                     when Symbol, FalseClass, TrueClass, Integer, Float
-                       value
-                     else
-                       value.clone
-                     end
-          )
-        end
-        new_config
-      end
-
       def viewport_size
         user_defined_vp = super
         user_defined_vp = nil if user_defined_vp.respond_to?(:square) && user_defined_vp.square == 0
