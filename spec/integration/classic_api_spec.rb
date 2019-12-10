@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'test_classic_api_v1'
 RSpec.describe 'Classic API' do
   context 'Eyes Selenium SDK - Classic API', selenium: true do

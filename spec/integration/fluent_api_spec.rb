@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require_relative 'test_fluent_api_v1'
 RSpec.describe 'Fluent API' do
   context 'Eyes Selenium SDK - Fluent API', selenium: true do

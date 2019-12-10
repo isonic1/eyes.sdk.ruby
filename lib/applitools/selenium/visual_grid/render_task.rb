@@ -50,6 +50,7 @@ module Applitools
       def perform
         rq = prepare_data_for_rg(script_data)
         fetch_fails = 0
+        # rubocop:disable Metrics/BlockLength
         loop do
           response = nil
           begin
@@ -117,6 +118,7 @@ module Applitools
           still_running = need_more_resources || need_more_dom || fetch_fails > MAX_FAILS_COUNT
           break unless still_running
         end
+        # rubocop:enable Metrics/BlockLength
         statuses = poll_render_status(rq)
         if statuses.first['status'] == 'error'
           raise Applitools::EyesError, "Render failed for #{statuses.first['renderId']} with the message: " \
@@ -258,7 +260,11 @@ module Applitools
             browser: { name: running_test.browser_info.browser_type, platform: running_test.browser_info.platform },
             script_hooks: script_hooks,
             selectors_to_find_regions_for: region_selectors,
-            send_dom: running_test.eyes.config.send_dom.nil? ? false.to_s : running_test.eyes.config.send_dom.to_s
+            send_dom: if running_test.eyes.configuration.send_dom.nil?
+                        false.to_s
+                      else
+                        running_test.eyes.configuration.send_dom.to_s
+                      end
           )
         end
         requests
