@@ -177,6 +177,8 @@ module Applitools
       self.running_session = nil
     end
 
+    alias abort abort_if_not_closed
+
     def open_base(options = {})
       self.results = []
       if disabled?

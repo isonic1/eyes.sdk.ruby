@@ -163,8 +163,8 @@ module Applitools
         self.on_results = block if block_given?
       end
 
-      def abort_if_not_closed
-        eyes.abort_if_not_closed
+      def abort
+        eyes.abort
         becomes_completed
       end
 
@@ -206,6 +206,29 @@ module Applitools
           if r[result_index] && r[result_index]['status'] == 'rendered'
             eyes.render_status_for_task(render_task.uuid, r[result_index])
             watch_render[render_task] = true
+            becomes_rendered if all_tasks_completed?(watch_render)
+          elsif r[result_index] && r[result_index]['status'] == 'error'
+            watch_render[render_task] = true
+            old_check_task = task_queue.shift # remove the old check task
+            watch_task[old_check_task] = true
+
+            check_task = VGTask.new("perform check #{tag} #{target}") do
+              logger.error('Running empty test due to render error...')
+              eyes.ensure_running_session
+            end
+
+            check_task.on_task_completed do
+              watch_task[check_task] = true
+              self.task_lock = nil if task_lock.uuid == check_task.uuid
+              becomes_tested if all_tasks_completed?(watch_task)
+            end
+            eyes.render_status_for_task(
+              render_task.uuid,
+              r[result_index].merge('deviceSize' => browser_info.viewport_size)
+            )
+            eyes.current_uuid = render_task.uuid
+            task_queue.insert(0, check_task)
+            watch_task[check_task] = false
             becomes_rendered if all_tasks_completed?(watch_render)
           else
             logger.error "Wrong render status! Render returned status #{r[result_index]['status']}"
