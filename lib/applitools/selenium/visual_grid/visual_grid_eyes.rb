@@ -296,8 +296,10 @@ module Applitools
 
       def abort_if_not_closed
         self.opened = false
-        test_list.each(&:abort_if_not_closed)
+        test_list.each(&:abort)
       end
+
+      alias abort abort_if_not_closed
 
       def open?
         opened
@@ -358,13 +360,13 @@ module Applitools
       alias get_configuration configuration
       alias set_configuration configuration=
 
-      private :new_test_error_message, :diffs_found_error_message, :test_failed_error_message
-
-      private
-
       def add_mouse_trigger(_mouse_action, _element); end
 
       def add_text_trigger(_control, _text); end
+
+      private :new_test_error_message, :diffs_found_error_message, :test_failed_error_message
+
+      private
 
       def ensure_frame_visible(*_args); end
 

@@ -1,3 +1,7 @@
+## [Eyes.sdk.ruby 3.15.43] - 2019-12-12
+### Added
+- Return empty test if the render fails
+- eyes.abort method
 ## [Eyes.sdk.ruby 3.15.42] - 2019-12-10
 ### Fixed
 - CSS paring & fetching font urls
