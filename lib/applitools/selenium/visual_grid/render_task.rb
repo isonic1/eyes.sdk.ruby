@@ -120,10 +120,6 @@ module Applitools
         end
         # rubocop:enable Metrics/BlockLength
         statuses = poll_render_status(rq)
-        if statuses.first['status'] == 'error'
-          raise Applitools::EyesError, "Render failed for #{statuses.first['renderId']} with the message: " \
-          "#{statuses.first['error']}"
-        end
         self.result = statuses.first
         statuses
       end
