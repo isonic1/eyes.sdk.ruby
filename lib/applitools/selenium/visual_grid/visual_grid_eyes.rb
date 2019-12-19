@@ -294,6 +294,10 @@ module Applitools
         failed_results.empty? ? all_results.first : failed_results
       end
 
+      def abort_async
+        test_list.each(&:abort)
+      end
+
       def abort_if_not_closed
         self.opened = false
         test_list.each(&:abort)
