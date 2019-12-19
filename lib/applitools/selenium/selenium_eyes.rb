@@ -376,6 +376,10 @@ module Applitools::Selenium
       close(false)
     end
 
+    def abort_async
+      abort
+    end
+
     private
 
     attr_accessor :check_frame_or_element, :region_to_check, :dont_get_title,

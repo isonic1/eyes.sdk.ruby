@@ -44,9 +44,13 @@ module Applitools
       end
 
       def get_all_test_results(throw_exception = false)
-        until (states = all_running_tests.map(&:state_name).uniq).count == 1 && states.first == :completed
-          sleep 0.5
+        all_tasks_completed = proc do
+          all_running_tests.count == 0 ||
+            (states = all_running_tests.map(&:state_name).uniq).count == 1 && states.first == :completed
         end
+
+        sleep 0.5 until all_tasks_completed.call
+
         failed_results = all_test_results.select { |r| !r.as_expected? }
         failed_results.each do |r|
           exception = Applitools::NewTestError.new new_test_error_message(r), r if r.new?

@@ -164,8 +164,20 @@ module Applitools
       end
 
       def abort
-        eyes.abort
-        becomes_completed
+        return unless close_queue.empty?
+        self.test_result = nil
+        close_task = Applitools::Selenium::VGTask.new("abort #{browser_info}") do
+          eyes.abort
+        end
+        close_task.on_task_error do |e|
+          pending_exceptions << e
+        end
+        close_task.on_task_completed do
+          watch_close[close_task] = true
+          becomes_completed if all_tasks_completed?(watch_close)
+        end
+        close_queue << close_task
+        watch_close[close_task] = false
       end
 
       def init
@@ -209,8 +221,12 @@ module Applitools
             becomes_rendered if all_tasks_completed?(watch_render)
           elsif r[result_index] && r[result_index]['status'] == 'error'
             watch_render[render_task] = true
-            old_check_task = task_queue.shift # remove the old check task
-            watch_task[old_check_task] = true
+
+            task_queue.clear
+            watch_task.clear
+
+            close_queue.clear
+            watch_close.clear
 
             check_task = VGTask.new("perform check #{tag} #{target}") do
               logger.error('Running empty test due to render error...')
@@ -222,13 +238,16 @@ module Applitools
               self.task_lock = nil if task_lock.uuid == check_task.uuid
               becomes_tested if all_tasks_completed?(watch_task)
             end
+
             eyes.render_status_for_task(
               render_task.uuid,
               r[result_index].merge('deviceSize' => browser_info.viewport_size)
             )
+
             eyes.current_uuid = render_task.uuid
             task_queue.insert(0, check_task)
             watch_task[check_task] = false
+            abort
             becomes_rendered if all_tasks_completed?(watch_render)
           else
             logger.error "Wrong render status! Render returned status #{r[result_index]['status']}"

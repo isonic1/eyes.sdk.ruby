@@ -1,3 +1,9 @@
+## [Eyes.sdk.ruby 3.15.43] - 2019-12-19
+### Added
+- eyes.abort_async method implementation
+### Fixed
+- save_new_tests is true by default
+- tests are aborted instead of being closed on render fail
 ## [Eyes.sdk.ruby 3.15.43] - 2019-12-12
 ### Added
 - Return empty test if the render fails

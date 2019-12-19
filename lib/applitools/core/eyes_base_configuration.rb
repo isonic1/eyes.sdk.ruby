@@ -22,7 +22,7 @@ module Applitools
       match_level: Applitools::MatchLevel::STRICT,
       scale: 0,
       remainder: 0,
-      save_new_tests: false
+      save_new_tests: true
     }.freeze
 
     class << self
