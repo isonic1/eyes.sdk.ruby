@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Provides Images SDK for Applitools tests.'
   spec.summary       = 'Applitools Ruby Images SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache-2.0'
+  spec.license       = 'Applitools'
 
   spec.metadata['yard.run'] = 'yri' # use "yard" to build full HTML docs.
 

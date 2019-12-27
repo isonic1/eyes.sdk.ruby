@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Provides SDK for writing Applitools Selenium-based tests'
   spec.summary       = 'Applitools Ruby Selenium SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache-2.0'
+  spec.license       = 'Applitools'
 
   spec.files         = `git ls-files lib/applitools/selenium`.split($RS) +
     ['lib/eyes_selenium.rb', 'lib/applitools/version.rb']
