@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Provides SDK for writing Applitools Calabash tests.'
   spec.summary       = 'Applitools Ruby Calabash SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache-2.0'
+  spec.license       = 'Applitools'
 
   spec.metadata['yard.run'] = 'yri' # use "yard" to build full HTML docs.
 

@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Appium support for Applitools Ruby SDK'
   spec.summary       = 'Applitools Ruby Appium SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache-2.0'
+  spec.license       = 'Applitools'
 
   spec.files         = `git ls-files lib/applitools/appium`.split($RS) +
     ['lib/eyes_appium.rb', 'lib/applitools/version.rb']

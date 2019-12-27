@@ -13,7 +13,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Provides Capybara support for Applitools Selenium SDK'
   spec.summary       = 'Applitools Ruby Capybara SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache-2.0'
+  spec.license       = 'Applitools'
 
   spec.files         = `git ls-files lib/applitools/capybara`.split($RS) +
     ['lib/eyes_capybara.rb', 'lib/applitools/version.rb']

@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Don't use it directly, take a look at eyes_selenium, eyes_images or eyes_calabash gems instead."
   spec.summary       = 'Core of the Applitools Ruby SDK'
   spec.homepage      = 'https://www.applitools.com'
-  spec.license       = 'Apache-2.0'
+  spec.license       = 'Applitools'
 
   spec.files         = `git ls-files lib/applitools`.split($RS) + `git ls-files ext/eyes_core`.split($RS) +
     ['lib/require_utils.rb', 'lib/eyes_core.rb', 'lib/eyes_rspec.rb'] - module_files
