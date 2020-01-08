@@ -11,6 +11,17 @@ RSpec.shared_examples 'returns itself' do |methods|
 end
 
 RSpec.describe Applitools::Images::Target do
+  describe 'Miscellaneous' do
+    subject { Applitools::Images::Target.image(ChunkyPNG::Image.new(5, 5)) }
+    it 'responds to :accessibility_regions' do
+      expect(subject).to respond_to(:accessibility_regions)
+    end
+
+    it 'Initializes accessibility regions' do
+      expect(subject.accessibility_regions).to be_a(Array)
+      expect(subject.accessibility_regions).to be_empty
+    end
+  end
   describe 'class' do
     it_should_behave_like 'responds to class method',
       [
