@@ -53,6 +53,7 @@ module Applitools::Images
       self.image = image
       self.ignored_regions = []
       self.floating_regions = []
+      self.accessibility_regions = []
       self.options = {
         trim: false
       }
