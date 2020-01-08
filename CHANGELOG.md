@@ -1,3 +1,6 @@
+## [Eyes.sdk.ruby 3.15.47] - 2020-01-08
+### Fixed
+- eyes_images throws "undefined method `each' for nil:NilClass (NoMethodError)"
 ## [Eyes.sdk.ruby 3.15.43] - 2019-12-20
 ### Removed
 - delta compression for screenshots
