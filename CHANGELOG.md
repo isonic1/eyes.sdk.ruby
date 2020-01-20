@@ -1,3 +1,6 @@
+## [Eyes.sdk.ruby 3.15.48] - 2020-01-20
+### Added
+- New browser types for the VisualGrid (CHROME, CHROME_ONE_VERSION_BACK, CHROME_TWO_VERSIONS_BACK, FIREFOX, FIREFOX_ONE_VERSION_BACK, FIREFOX_TWO_VERSIONS_BACK, SAFARI, SAFARI_ONE_VERSION_BACK, SAFARI_TWO_VERSIONS_BACK, IE_10, IE_11, EDGE)
 ## [Eyes.sdk.ruby 3.15.47] - 2020-01-08
 ### Fixed
 - eyes_images throws "undefined method `each' for nil:NilClass (NoMethodError)"
