@@ -82,7 +82,7 @@ module Applitools
       self.verbose_results = false
       self.failed = false
       self.results = []
-      self.allow_empty_screenshot = false
+      self.allow_empty_screenshot = true
       @inferred_environment = nil
       @properties = []
       @server_scale = 0
@@ -669,7 +669,7 @@ module Applitools
           o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
         end,
         screenshot,
-        true
+        allow_empty_screenshot
       )
     end
 
