@@ -27,6 +27,7 @@ module Applitools::Images
     def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
       super
       self.base_agent_id = "eyes.images.ruby/#{Applitools::VERSION}".freeze
+      self.runner = Applitools::ClassicRunner.new
     end
 
     # Starts a test.
@@ -197,6 +198,12 @@ module Applitools::Images
     # @param text The trigger's text.
     def add_text_trigger(control, text)
       add_text_trigger_base control, text
+    end
+
+    def get_app_output_with_screenshot(*_args)
+      result = super
+      self.screenshot_url = nil
+      result
     end
 
     private

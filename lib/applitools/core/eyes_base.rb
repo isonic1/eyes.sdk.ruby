@@ -47,7 +47,7 @@ module Applitools
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :exact,
-      :compare_with_parent_branch, :results, :runner, :allow_empty_screenshot
+      :compare_with_parent_branch, :results, :runner, :allow_empty_screenshot, :screenshot_url
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true

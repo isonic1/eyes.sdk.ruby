@@ -12,7 +12,7 @@ module Applitools::Connectivity
   class ServerConnector
     class ScreenshotUploadError < Applitools::EyesError; end
     extend Applitools::Helpers
-    DEFAULT_SERVER_URL = 'https://eyesapi.applitools.com/'.freeze
+    DEFAULT_SERVER_URL = 'https://eyesapi.applitools.com'.freeze
 
     SSL_CERT = File.join(File.dirname(File.expand_path(__FILE__)), '../../../certs/cacert.pem').to_s.freeze
     DEFAULT_TIMEOUT = 300

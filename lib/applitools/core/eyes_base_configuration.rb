@@ -6,6 +6,7 @@ require 'applitools/core/batch_info'
 require 'applitools/connectivity/proxy'
 require 'applitools/core/match_level'
 require 'applitools/core/match_level_setter'
+require 'applitools/connectivity/server_connector'
 
 module Applitools
   class EyesBaseConfiguration < AbstractConfiguration
@@ -17,7 +18,7 @@ module Applitools
       baseline_branch_name: ENV['APPLITOOLS_BASELINE_BRANCH'] || '',
       save_diffs: false,
       server_url: ENV['APPLITOOLS_SERVER_URL'] ||
-        ENV['bamboo_APPLITOOLS_SERVER_URL'] || 'https://eyessdk.applitools.com',
+        ENV['bamboo_APPLITOOLS_SERVER_URL'] || Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL,
       api_key: ENV['APPLITOOLS_API_KEY'] || ENV['bamboo_APPLITOOLS_API_KEY'] || '',
       match_level: Applitools::MatchLevel::STRICT,
       scale: 0,

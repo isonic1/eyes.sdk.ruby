@@ -98,7 +98,7 @@ module Applitools::Selenium
       :wait_before_screenshots, :debug_screenshots, :stitch_mode, :disable_horizontal_scrolling,
       :disable_vertical_scrolling, :explicit_entire_size, :debug_screenshot_provider, :stitching_overlap,
       :full_page_capture_algorithm_left_top_offset, :screenshot_type, :send_dom, :use_dom, :enable_patterns,
-      :config, :screenshot_url
+      :config
     attr_reader :driver
 
     def_delegators 'Applitools::EyesLogger', :logger, :log_handler, :log_handler=
@@ -634,14 +634,11 @@ module Applitools::Selenium
       add_mouse_trigger_base(mouse_action, control, cursor)
     end
 
-    # def get_app_output_with_screenshot(region_provider, _last_screenshot)
-    #   self.screenshot_url = nil
-    #   super do |screenshot|
-    #     self.screenshot_url = server_connector.put_screenshot(runner.rendering_info(server_connector), screenshot)
-    #     self.allow_empty_screenshot = true
-    #     nil
-    #   end
-    # end
+    def get_app_output_with_screenshot(*_args)
+      result = super
+      self.screenshot_url = nil
+      result
+    end
 
     public :add_text_trigger, :add_mouse_trigger, :add_mouse_trigger_by_region_and_location
 
