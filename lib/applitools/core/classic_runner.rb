@@ -31,5 +31,9 @@ module Applitools
       end
       all_test_results
     end
+
+    def rendering_info(connector)
+      @rendering_info ||= RenderingInfo.new(connector.rendering_info)
+    end
   end
 end

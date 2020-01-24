@@ -9,6 +9,7 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
   def initialize(*args)
     super
     self.dont_get_title = true
+    self.runner = Applitools::ClassicRunner.new
   end
 
   private :perform_driver_settings_for_appium_driver
@@ -59,7 +60,7 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
   end
 
   def get_app_output_with_screenshot(*args)
-    super do |screenshot|
+    result = super do |screenshot|
       if scale_provider
         scaled_image = scale_provider.scale_image(screenshot.image)
         self.screenshot = Applitools::Appium::Screenshot.new(
@@ -76,6 +77,8 @@ class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
         )
       end
     end
+    self.screenshot_url = nil
+    result
   end
 
   def dom_data

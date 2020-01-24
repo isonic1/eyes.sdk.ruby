@@ -2,14 +2,17 @@
 
 require 'faraday'
 require 'oj'
+require 'securerandom'
+
 Oj.default_options = { :mode => :compat }
 
 require 'uri'
 
 module Applitools::Connectivity
   class ServerConnector
+    class ScreenshotUploadError < Applitools::EyesError; end
     extend Applitools::Helpers
-    DEFAULT_SERVER_URL = 'https://eyesapi.applitools.com/'.freeze
+    DEFAULT_SERVER_URL = 'https://eyesapi.applitools.com'.freeze
 
     SSL_CERT = File.join(File.dirname(File.expand_path(__FILE__)), '../../../certs/cacert.pem').to_s.freeze
     DEFAULT_TIMEOUT = 300
@@ -63,6 +66,42 @@ module Applitools::Connectivity
         raise Applitools::EyesError, "Error render processing (#{response.status}, #{response.body})"
       end
       Oj.load response.body
+    end
+
+    def put_screenshot(rendering_info, screenshot)
+      uuid = SecureRandom.uuid
+      upload_path = URI.parse(rendering_info.results_url.gsub(/__random__/, uuid))
+      retry_count = 3
+      wait = 0.5
+      loop do
+        raise ScreenshotUploadError, "Error uploading screenshot (#{upload_path})" if retry_count <= 0
+        Applitools::EyesLogger.info("Trying to upload screenshot (#{upload_path})...")
+        begin
+          response = dummy_put(
+            upload_path,
+            body: screenshot.image.to_blob,
+            headers: {
+              'x-ms-blob-type': 'BlockBlob',
+              'X-Auth-Token': rendering_info.access_token
+            },
+            query: URI.decode_www_form(upload_path.query).to_h,
+            content_type: 'image/png'
+          )
+          break if response.status == HTTP_STATUS_CODES[:created]
+          Applitools::EyesLogger.info("Failed. Retrying in #{wait} seconds")
+          sleep(wait)
+        rescue StandardError => e
+          Applitools::EyesLogger.error(e.class.to_s)
+          Applitools::EyesLogger.error(e.message)
+          Applitools::EyesLogger.info("Failed. Retrying in #{wait} seconds")
+          sleep(wait)
+        ensure
+          retry_count -= 1
+          wait *= 2
+        end
+      end
+      Applitools::EyesLogger.info('Done.')
+      upload_path.to_s
     end
 
     def render_put_resource(service_url, access_key, resource, render)
@@ -165,10 +204,17 @@ module Applitools::Connectivity
     def match_window(session, data)
       # Notice that this does not include the screenshot.
       json_data = Oj.dump(Applitools::Utils.camelcase_hash_keys(data.to_hash)).force_encoding('BINARY')
-      body = [json_data.length].pack('L>') + json_data + data.screenshot
+      body = if data.screenshot.empty?
+               content_type = 'application/json'
+               json_data
+             else
+               content_type = 'application/octet-stream'
+               [json_data.length].pack('L>') + json_data + data.screenshot
+             end
+
       Applitools::EyesLogger.debug 'Sending match data...'
       Applitools::EyesLogger.debug json_data
-      res = long_post(URI.join(endpoint_url, session.id.to_s), content_type: 'application/octet-stream', body: body)
+      res = long_post(URI.join(endpoint_url, session.id.to_s), content_type: content_type, body: body)
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.headers}") unless res.success?
       # puts Oj.load(res.body)
       Applitools::MatchResult.new Oj.load(res.body)

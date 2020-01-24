@@ -47,7 +47,7 @@ module Applitools
       :match_timeout, :save_new_tests, :save_failed_tests, :failure_reports, :default_match_settings, :cut_provider,
       :scale_ratio, :position_provider, :viewport_size, :verbose_results,
       :inferred_environment, :remove_session_if_matching, :server_scale, :server_remainder, :exact,
-      :compare_with_parent_branch, :results, :runner
+      :compare_with_parent_branch, :results, :runner, :allow_empty_screenshot, :screenshot_url
 
     abstract_attr_accessor :base_agent_id
     abstract_method :capture_screenshot, true
@@ -82,6 +82,7 @@ module Applitools
       self.verbose_results = false
       self.failed = false
       self.results = []
+      self.allow_empty_screenshot = true
       @inferred_environment = nil
       @properties = []
       @server_scale = 0
@@ -650,6 +651,14 @@ module Applitools
 
       screenshot = yield(screenshot) if block_given?
 
+      if screenshot
+        self.screenshot_url = server_connector.put_screenshot(
+          runner.rendering_info(server_connector),
+          screenshot
+        )
+        screenshot = nil
+      end
+
       logger.info 'Getting title...'
       a_title = title
       logger.info 'Done!'
@@ -659,7 +668,8 @@ module Applitools
           o.dom_url = dom_url unless dom_url && dom_url.empty?
           o.screenshot_url = screenshot_url if respond_to?(:screenshot_url) && !screenshot_url.nil?
         end,
-        screenshot
+        screenshot,
+        allow_empty_screenshot
       )
     end
 
