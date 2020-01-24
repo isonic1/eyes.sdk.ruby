@@ -111,6 +111,7 @@ module Applitools::Selenium
     def initialize(*args)
       ensure_config
       super
+      self.runner = Applitools::ClassicRunner.new unless runner
       self.base_agent_id = "eyes.selenium.ruby/#{Applitools::VERSION}".freeze
       self.check_frame_or_element = false
       self.region_to_check = nil
@@ -631,6 +632,12 @@ module Applitools::Selenium
       end
 
       add_mouse_trigger_base(mouse_action, control, cursor)
+    end
+
+    def get_app_output_with_screenshot(*_args)
+      result = super
+      self.screenshot_url = nil
+      result
     end
 
     public :add_text_trigger, :add_mouse_trigger, :add_mouse_trigger_by_region_and_location

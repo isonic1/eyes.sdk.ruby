@@ -1,3 +1,6 @@
+## [Eyes.sdk.ruby 3.16.0] - 2020-01-24
+### Added
+- Screenshot uploading direct to cloud store
 ## [Eyes.sdk.ruby 3.15.48] - 2020-01-20
 ### Added
 - New browser types for the VisualGrid (CHROME, CHROME_ONE_VERSION_BACK, CHROME_TWO_VERSIONS_BACK, FIREFOX, FIREFOX_ONE_VERSION_BACK, FIREFOX_TWO_VERSIONS_BACK, SAFARI, SAFARI_ONE_VERSION_BACK, SAFARI_TWO_VERSIONS_BACK, IE_10, IE_11, EDGE)

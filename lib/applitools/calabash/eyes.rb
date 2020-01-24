@@ -9,6 +9,7 @@ module Applitools
 
       def initialize(server_url = Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL)
         super
+        self.runner = Applitools::ClassicRunner.new
         self.base_agent_id = "eyes.calabash.ruby/#{Applitools::VERSION}".freeze
         self.debug_screenshots = false
         self.debug_screenshot_provider = Applitools::DebugScreenshotProvider.new
@@ -103,10 +104,9 @@ module Applitools
       end
 
       def get_app_output_with_screenshot(*args)
-        # super do |screenshot|
-        #   screenshot.scale_it!
-        # end
-        super(*args, &:scale_it!)
+        result = super(*args, &:scale_it!)
+        self.screenshot_url = nil
+        result
       end
 
       def entire_screenshot_region
