@@ -1,6 +1,6 @@
 # frozen_string_literal: false
 
-class Applitools::Appium::Eyes < Applitools::Selenium::Eyes
+class Applitools::Appium::Eyes < Applitools::Selenium::SeleniumEyes
   def perform_driver_settings_for_appium_driver
     self.region_visibility_strategy = Applitools::Selenium::NopRegionVisibilityStrategy.new
     self.force_driver_resolution_as_viewport_size = true
