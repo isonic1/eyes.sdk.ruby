@@ -44,7 +44,7 @@ module Applitools::Connectivity
     end
 
     def rendering_info
-      response = get(server_url + RENDER_INFO_PATH, content_type: 'application/json')
+      response = long_get(server_url + RENDER_INFO_PATH, content_type: 'application/json')
       unless response.status == HTTP_STATUS_CODES[:ok]
         raise Applitools::EyesError, "Error getting render info (#{response.status}})"
       end
@@ -261,7 +261,7 @@ module Applitools::Connectivity
       request_body = Oj.dump(
         startInfo: Applitools::Utils.camelcase_hash_keys(session_start_info.to_hash)
       )
-      res = post(
+      res = long_post(
         endpoint_url, body: request_body
       )
       raise Applitools::EyesError.new("Request failed: #{res.status} #{res.body} #{request_body}") unless res.success?
@@ -395,7 +395,7 @@ module Applitools::Connectivity
         check_status(res, delay)
       when HTTP_STATUS_CODES[:created]
         last_step_url = res.headers[:location]
-        request(last_step_url, :delete, headers: eyes_date_header)
+        last_step_url.nil? ? res : request(last_step_url, :delete, headers: eyes_date_header)
       when HTTP_STATUS_CODES[:gone]
         raise Applitools::EyesError.new('The server task has gone.')
       else

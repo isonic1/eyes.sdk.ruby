@@ -211,21 +211,22 @@ module Applitools::Utils
     def extract_viewport_size(executor)
       Applitools::EyesLogger.debug 'extract_viewport_size()'
 
-      begin
-        width, height = executor.execute_script(JS_GET_VIEWPORT_SIZE)
-        result = Applitools::RectangleSize.from_any_argument width: width, height: height
-        Applitools::EyesLogger.debug "Viewport size is #{result}."
-        return result
-      rescue => e
-        Applitools::EyesLogger.error "Failed extracting viewport size using JavaScript: (#{e.message})"
-      end
+      result = if defined?(Applitools::Appium::Driver) && executor.is_a?(Applitools::Appium::Driver)
+                 Applitools::RectangleSize.from_any_argument(executor.window_size)
+               else
+                 begin
+                   width, height = executor.execute_script(JS_GET_VIEWPORT_SIZE)
+                   Applitools::RectangleSize.from_any_argument width: width, height: height
+                 rescue => e
+                   Applitools::EyesLogger.error "Failed extracting viewport size using JavaScript: (#{e.message})"
+                   Applitools::EyesLogger.info 'Using window size as viewport size.'
 
-      Applitools::EyesLogger.info 'Using window size as viewport size.'
+                   width, height = executor.manage.window.size.to_a
+                   width, height = height, width if executor.landscape_orientation? && height > width
 
-      width, height = executor.manage.window.size.to_a
-      width, height = height, width if executor.landscape_orientation? && height > width
-
-      result = Applitools::RectangleSize.new width, height
+                   Applitools::RectangleSize.new width, height
+                 end
+               end
       Applitools::EyesLogger.debug "Viewport size is #{result}."
       result
     end

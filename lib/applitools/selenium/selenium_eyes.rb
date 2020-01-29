@@ -187,7 +187,7 @@ module Applitools::Selenium
       end
 
       open_base(options) do
-        self.viewport_size = nil if force_driver_resolution_as_viewport_size
+        self.viewport_size = get_viewport_size if force_driver_resolution_as_viewport_size
         ensure_running_session
       end
       if runner

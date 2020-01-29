@@ -1,3 +1,8 @@
+## [Eyes.sdk.ruby 3.16.1] - 2020-01-29
+### Fixed
+- eyes_appium crashed trying to get viewport_size
+### Added
+- long_requests are used for start session
 ## [Eyes.sdk.ruby 3.16.0] - 2020-01-24
 ### Added
 - Screenshot uploading direct to cloud store
