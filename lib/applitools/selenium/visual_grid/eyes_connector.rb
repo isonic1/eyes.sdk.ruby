@@ -43,10 +43,9 @@ module Applitools
         target_to_check = target.finalize
         timeout = target_to_check.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
 
-        match_data = Applitools::Selenium::VgMatchWindowData.new
+        match_data = Applitools::Selenium::VgMatchWindowData.new(default_match_settings)
         match_data.tag = name
         match_data.render_id = render_status['renderId']
-        update_default_settings(match_data)
         begin
           driver_lock.synchronize do
             match_data.read_target(target_to_check, driver, selector_regions)
@@ -102,12 +101,6 @@ module Applitools
       # def match_level_keys
       #   %w(match_level exact scale remainder ).map(&:to_sym)
       # end
-
-      def update_default_settings(match_data)
-        config.match_level_keys.each do |k|
-          match_data.send("#{k}=", default_match_settings[k])
-        end
-      end
 
       def inferred_environment
         "useragent: #{render_status['userAgent']}"

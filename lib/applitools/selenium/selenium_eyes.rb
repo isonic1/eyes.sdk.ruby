@@ -253,9 +253,8 @@ module Applitools::Selenium
 
       check_in_frame target_frames: target_to_check.frames do
         begin
-          match_data = Applitools::MatchWindowData.new
+          match_data = Applitools::MatchWindowData.new(default_match_settings)
           match_data.tag = name
-          update_default_settings(match_data)
           eyes_element = target_to_check.region_to_check.call(driver)
 
           unless force_full_page_screenshot

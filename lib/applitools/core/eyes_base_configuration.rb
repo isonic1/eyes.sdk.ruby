@@ -7,11 +7,10 @@ require 'applitools/connectivity/proxy'
 require 'applitools/core/match_level'
 require 'applitools/core/match_level_setter'
 require 'applitools/connectivity/server_connector'
+require 'applitools/core/image_match_settings'
 
 module Applitools
   class EyesBaseConfiguration < AbstractConfiguration
-    include Applitools::MatchLevelSetter
-
     DEFAULT_CONFIG = {
       branch_name: ENV['APPLITOOLS_BRANCH'] || '',
       parent_branch_name: ENV['APPLITOOLS_PARENT_BRANCH'] || '',
@@ -20,10 +19,8 @@ module Applitools
       server_url: ENV['APPLITOOLS_SERVER_URL'] ||
         ENV['bamboo_APPLITOOLS_SERVER_URL'] || Applitools::Connectivity::ServerConnector::DEFAULT_SERVER_URL,
       api_key: ENV['APPLITOOLS_API_KEY'] || ENV['bamboo_APPLITOOLS_API_KEY'] || '',
-      match_level: Applitools::MatchLevel::STRICT,
-      scale: 0,
-      remainder: 0,
-      save_new_tests: true
+      save_new_tests: true,
+      default_match_settings: Applitools::ImageMatchSettings.new
     }.freeze
 
     class << self
@@ -106,8 +103,9 @@ module Applitools
     string_field :host_os
     string_field :host_app
     object_field :proxy, Applitools::Connectivity::Proxy
-    string_field :match_level
-    object_field :exact, Hash
+    enum_field :match_level, Applitools::MatchLevel.enum_values
+    object_field :exact, Applitools::ImageMatchSettings::Exact
+    object_field :default_match_settings, Applitools::ImageMatchSettings
     int_field :scale
     int_field :remainder
 
@@ -122,48 +120,38 @@ module Applitools
       self.proxy = Applitools::Connectivity::Proxy.new(uri, user, password)
     end
 
-    def match_level=(value)
-      return config_hash[:match_level] = value if Applitools::MatchLevel.enum_values.include?(value)
-      return config_hash[:match_level] = Applitools::MATCH_LEVEL[value.to_sym] if
-          Applitools::MATCH_LEVEL.keys.include?(value.to_sym)
-      raise Applitools::EyesError, "Unknown match level #{value}"
+    def custom_setter_for_exact(value)
+      default_match_settings.exact = value
     end
 
-    def set_default_match_settings(value, exact_options = {})
-      (self.match_level, self.exact) = match_level_with_exact(value, exact_options)
+    def custom_setter_for_match_level(value)
+      default_match_settings.match_level = value
     end
 
-    def default_match_settings=(value)
-      Applitools::ArgumentGuard.is_a? value, 'value', Hash
-      extra_keys = value.keys - match_level_keys
-      unless extra_keys.empty?
-        raise Applitools::EyesIllegalArgument.new(
-          "Pasiing extra keys is prohibited! Passed extra keys: #{extra_keys}"
-        )
-      end
-      result = default_match_settings.merge!(value)
-      (self.match_level, self.exact) = match_level_with_exact(result[:match_level], result[:exact])
-      self.scale = result[:scale]
-      self.remainder = result[:remainder]
-      result
+    def custom_setter_for_scale(value)
+      default_match_settings.scale = value
     end
 
-    def default_match_settings
-      {
-        match_level: match_level,
-        exact: exact,
-        scale: scale,
-        remainder: remainder
-      }
+    def custom_setter_for_remainder(value)
+      default_match_settings.remainder = value
     end
 
-    def match_level_keys
-      %w(match_level exact scale remainder).map(&:to_sym)
+    def custom_getter_for_exact(_value)
+      default_match_settings.exact
+    end
+
+    def custom_getter_for_scale(_value)
+      default_match_settings.scale
+    end
+
+    def custom_getter_for_remainder(_value)
+      default_match_settings.remainder
+    end
+
+    def custom_getter_for_match_level(_value)
+      default_match_settings.match_level
     end
 
     methods_to_delegate.push(:set_proxy)
-    methods_to_delegate.push(:set_default_match_settings)
-    methods_to_delegate.push(:default_match_settings=)
-    methods_to_delegate.push(:default_match_settings)
   end
 end
