@@ -1,3 +1,6 @@
+## [Eyes.sdk.ruby 3.16.2] - 2020-02-06
+### Fixed
+- DefaultMatchSettings being overridden incorrectly by ImageMatchSettings
 ## [Eyes.sdk.ruby 3.16.1] - 2020-01-29
 ### Fixed
 - eyes_appium crashed trying to get viewport_size

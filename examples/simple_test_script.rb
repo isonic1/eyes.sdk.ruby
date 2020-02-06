@@ -9,6 +9,7 @@ eyes = Applitools::Selenium::Eyes.new(runner: Applitools::ClassicRunner.new)
 # eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 eyes.match_level = Applitools::MATCH_LEVEL[:layout]
+# eyes.set_proxy('http://localhost:8000')
 # eyes.server_url = 'https://eyesfabric4eyes.applitools.com'
 
 begin

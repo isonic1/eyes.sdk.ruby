@@ -20,7 +20,7 @@ module Applitools
       end
 
       attr_accessor :element, :frames, :region_to_check, :coordinate_type, :options, :ignored_regions,
-        :floating_regions, :frame_or_element, :regions, :match_level, :layout_regions, :content_regions,
+        :floating_regions, :frame_or_element, :regions, :layout_regions, :content_regions,
         :strict_regions, :accessibility_regions
 
       private :frame_or_element, :frame_or_element=
@@ -235,13 +235,6 @@ module Applitools
         when Applitools::Selenium::VGRegion
           array[array.index(original)] = new
         end
-      end
-
-      def match_level(*args)
-        match_level = args.shift
-        exact_options = args.shift || {}
-        (options[:match_level], options[:exact]) = match_level_with_exact(match_level, exact_options)
-        self
       end
 
       def fully(value = true)

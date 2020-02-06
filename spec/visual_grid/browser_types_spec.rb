@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.shared_examples 'BrowserType' do |const, value|
   it 'Returns symbol' do
     expect(subject.const_get(const)).to be_a(Symbol)

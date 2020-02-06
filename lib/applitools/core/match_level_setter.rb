@@ -49,6 +49,6 @@ module Applitools::MatchLevelSetter
     allowed_keys.each do |k|
       result[EXACT_KEYS[k]] = options[k] unless options[k].nil?
     end
-    result
+    Applitools::ImageMatchSettings::Exact.from_exact_options(result)
   end
 end

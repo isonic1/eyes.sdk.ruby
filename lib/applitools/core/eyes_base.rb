@@ -319,7 +319,7 @@ module Applitools
       session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
          scenario_id_or_name: test_name, batch_info: batch,
          env_name: baseline_env_name, environment: app_environment,
-         default_match_settings: default_match_settings,
+         default_match_settings: default_match_settings.json_data,
          branch_name: branch_name, parent_branch_name: parent_branch_name, properties: properties
 
       match_window_data.start_info = session_start_info
@@ -486,12 +486,6 @@ module Applitools
       {}
     end
 
-    def update_default_settings(match_data)
-      config.match_level_keys.each do |k|
-        match_data.send("#{k}=", default_match_settings[k])
-      end
-    end
-
     def app_environment
       Applitools::AppEnvironment.new os: host_os, hosting_app: host_app,
           display_size: viewport_size, inferred: inferred_environment
@@ -600,7 +594,7 @@ module Applitools
       self.session_start_info = SessionStartInfo.new agent_id: base_agent_id, app_id_or_name: app_name,
                                                 scenario_id_or_name: test_name, batch_info: batch,
                                                 env_name: baseline_env_name, environment: app_env,
-                                                default_match_settings: default_match_settings,
+                                                default_match_settings: default_match_settings.json_data,
                                                 branch_name: branch_name, parent_branch_name: parent_branch_name,
                                                 properties: properties
 

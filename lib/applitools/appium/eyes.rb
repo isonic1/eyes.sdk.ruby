@@ -30,7 +30,7 @@ class Applitools::Appium::Eyes < Applitools::Selenium::SeleniumEyes
     logger.info "check_native(#{name}) is called"
     update_scaling_params
     target_to_check = target.finalize
-    match_data = Applitools::MatchWindowData.new
+    match_data = Applitools::MatchWindowData.new(default_match_settings)
     match_data.tag = name
     timeout = target_to_check.options[:timeout] || USE_DEFAULT_MATCH_TIMEOUT
 

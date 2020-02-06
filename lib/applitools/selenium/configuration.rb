@@ -36,12 +36,9 @@ module Applitools
       enum_field :accessibility_validation, Applitools::AccessibilityLevel.enum_values
       boolean_field :rendering_grid_force_put
 
-      def match_level_keys
-        super << :accessibility_validation
-      end
-
-      def default_match_settings
-        super.merge(accessibility_validation: accessibility_validation)
+      def custom_setter_for_accessibility_validation(value)
+        # self.default_match_settings = self.parent.class.default_config[:default_match_settings] unless default_match_settings
+        default_match_settings.accessibility_level = value
       end
 
       def add_browser(*args)
