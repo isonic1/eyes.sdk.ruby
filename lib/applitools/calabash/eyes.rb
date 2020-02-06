@@ -24,7 +24,7 @@ module Applitools
 
       def check(name, target)
         self.tag_for_debug = get_tag_for_debug(name)
-        check_it(name, target, Applitools::MatchWindowData.new)
+        check_it(name, target, Applitools::MatchWindowData.new(default_match_settings))
       end
 
       def inferred_environment
@@ -75,7 +75,6 @@ module Applitools
                           end
 
         match_window_data.tag = name
-        update_default_settings(match_window_data)
         match_window_data.read_target(target, nil)
 
         self.viewport_size = Applitools::Calabash::EyesSettings.instance.viewport_size if viewport_size.nil?

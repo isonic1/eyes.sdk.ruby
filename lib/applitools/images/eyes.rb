@@ -62,7 +62,7 @@ module Applitools::Images
     end
 
     def check(name, target)
-      check_it(name, target, Applitools::MatchWindowData.new).as_expected?
+      check_it(name, target, Applitools::MatchWindowData.new(default_match_settings)).as_expected?
     end
 
     def check_single(name, target, options = {})
@@ -84,7 +84,6 @@ module Applitools::Images
       region_provider = get_region_provider(target)
 
       match_window_data.tag = name
-      update_default_settings(match_window_data)
       match_window_data.read_target(target, nil)
 
       image = target.image

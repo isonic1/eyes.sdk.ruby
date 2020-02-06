@@ -18,30 +18,6 @@ module Applitools
           'Options' => {
             'Name' => nil,
             'UserInputs' => [],
-            'ImageMatchSettings' => {
-              'accessibilityLevel' => 'None',
-              'MatchLevel' => 'Strict',
-              'SplitTopHeight' => 0,
-              'SplitBottomHeight' => 0,
-              'IgnoreCaret' => true,
-              'IgnoreDisplacements' => false,
-              'Accessibility' => [],
-              'Ignore' => [],
-              'Floating' => [],
-              'Layout' => [],
-              'Strict' => [],
-              'Content' => [],
-              'Exact' => {
-                'MinDiffIntensity' => 0,
-                'MinDiffWidth' => 0,
-                'MinDiffHeight' => 0,
-                'MatchThreshold' => 0
-              },
-              'scale' => 0,
-              'remainder' => 0,
-              'EnablePatterns' => false,
-              'UseDom' => false
-            },
             'IgnoreExpectedOutputSettings' => false,
             'ForceMatch' => false,
             'ForceMismatch' => false,
@@ -79,9 +55,9 @@ module Applitools
       end
     end
 
-    attr_accessor :app_output, :user_inputs, :tag, :options, :ignore_mismatch
+    attr_accessor :app_output, :user_inputs, :tag, :options, :ignore_mismatch, :default_image_match_settings
 
-    def initialize
+    def initialize(default_image_match_settings = nil)
       @app_output = nil
       @ignored_regions = []
       @floating_regions = []
@@ -91,6 +67,7 @@ module Applitools
       @need_convert_content_regions_coordinates = false
       @need_convert_layout_regions_coordinates = false
       @need_convert_accessibility_regions_coordinates = false
+      self.default_image_match_settings = default_image_match_settings.deep_dup || Applitools::ImageMatchSettings.new
     end
 
     def screenshot
@@ -118,42 +95,43 @@ module Applitools
     def ignored_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        current_data['Options']['ImageMatchSettings']['Ignore'] << r.to_hash if self.class.valid_region(r)
+        # current_data['Options']['ImageMatchSettings']['Ignore'] << r.to_hash if self.class.valid_region(r)
+        default_image_match_settings.ignore << r.to_hash if self.class.valid_region(r)
       end
     end
 
     def floating_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        current_data['Options']['ImageMatchSettings']['Floating'] << r.to_hash
+        default_image_match_settings.floating << r.to_hash
       end
     end
 
     def layout_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        current_data['Options']['ImageMatchSettings']['Layout'] << r.to_hash if self.class.valid_region(r)
+        default_image_match_settings.layout << r.to_hash if self.class.valid_region(r)
       end
     end
 
     def strict_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        current_data['Options']['ImageMatchSettings']['Strict'] << r.to_hash if self.class.valid_region(r)
+        default_image_match_settings.strict << r.to_hash if self.class.valid_region(r)
       end
     end
 
     def content_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        current_data['Options']['ImageMatchSettings']['Content'] << r.to_hash if self.class.valid_region(r)
+        default_image_match_settings.content << r.to_hash if self.class.valid_region(r)
       end
     end
 
     def accessibility_regions=(value)
       Applitools::ArgumentGuard.is_a? value, 'value', Array
       value.each do |r|
-        current_data['Options']['ImageMatchSettings']['Accessibility'] << r.to_hash if self.class.valid_region(r)
+        default_image_match_settings.accessibility << r.to_hash if self.class.valid_region(r)
       end
     end
 
@@ -173,55 +151,55 @@ module Applitools
     end
 
     def match_level=(value)
-      current_data['Options']['ImageMatchSettings']['MatchLevel'] = value
+      default_image_match_settings.match_level = value
     end
 
     def match_level
-      current_data['Options']['ImageMatchSettings']['MatchLevel']
+      default_image_match_settings.match_level
     end
 
     def scale=(value)
-      current_data['Options']['ImageMatchSettings']['scale'] = value
+      default_image_match_settings.scale = value
     end
 
     def scale
-      current_data['Options']['ImageMatchSettings']['scale']
+      default_image_match_settings.scale
     end
 
     def remainder=(value)
-      current_data['Options']['ImageMatchSettings']['remainder'] = value
+      default_image_match_settings.remainder = value
     end
 
     def remainder
-      current_data['Options']['ImageMatchSettings']['remainder']
+      default_image_match_settings.remainder
     end
 
     def exact
-      current_data['Options']['ImageMatchSettings']['Exact']
+      default_image_match_settings.exact
     end
 
     def use_dom
-      current_data['Options']['ImageMatchSettings']['UseDom']
+      default_image_match_settings.use_dom
     end
 
     def use_dom=(value)
-      current_data['Options']['ImageMatchSettings']['UseDom'] = value
+      default_image_match_settings.use_dom = value
     end
 
     def enable_patterns
-      current_data['Options']['ImageMatchSettings']['EnablePatterns']
+      default_image_match_settings.enable_patterns
     end
 
     def enable_patterns=(value)
-      current_data['Options']['ImageMatchSettings']['EnablePatterns'] = value
+      default_image_match_settings.enable_patterns = value
     end
 
     def ignore_displacements
-      current_data['Options']['ImageMatchSettings']['IgnoreDisplacements']
+      default_image_match_settings.ignore_displacements
     end
 
     def ignore_displacements=(value)
-      current_data['Options']['ImageMatchSettings']['IgnoreDisplacements'] = value
+      default_image_match_settings.ignore_displacements = value
     end
 
     def render_id
@@ -234,13 +212,8 @@ module Applitools
     end
 
     def exact=(value)
-      raise Applitools::EyesError.new('You should pass a hash as a value!') unless value.nil? || value.is_a?(Hash)
-      return current_data['Options']['ImageMatchSettings']['Exact'] = nil if value.nil?
-      current_value = exact || {}
-      %w(MinDiffIntensity MinDiffWidth MinDiffHeight MatchThreshold).each do |k|
-        current_value[k] = value[k]
-      end
-      current_data['Options']['ImageMatchSettings']['Exact'] = current_value
+      Applitools::ArgumentGuard.is_a?(value, 'value', Applitools::ImageMatchSettings::Exact)
+      default_image_match_settings.exact = value
     end
 
     def read_target(target, driver)
@@ -348,23 +321,20 @@ module Applitools
     end
 
     def ignore_caret=(value)
-      current_data['Options']['ImageMatchSettings']['IgnoreCaret'] = value
+      default_image_match_settings.ignore_caret = value
     end
 
     def accessibility_validation
-      current_data['Options']['ImageMatchSettings']['AccessibilityLevel']
+      default_image_match_settings.accessibility_level
     end
 
     def accessibility_validation=(value)
-      current_data['Options']['ImageMatchSettings']['AccessibilityLevel'] = value
+      default_image_match_settings.accessibility_level = value
     end
 
     def convert_ignored_regions_coordinates
       return unless @need_convert_ignored_regions_coordinates
       self.ignored_regions = convert_regions_coordinates(@ignored_regions)
-      # self.ignored_regions = @ignored_regions.map do |r|
-      #   self.class.convert_coordinates(r, app_output.screenshot)
-      # end unless app_output.screenshot.nil?
       @need_convert_ignored_regions_coordinates = false
     end
 
@@ -457,7 +427,9 @@ module Applitools
           'You should convert coordinates for floating_regions!'
         )
       end
-      current_data.dup
+      result = current_data.dup
+      result['Options']['ImageMatchSettings'] = default_image_match_settings.json_data
+      result
     end
 
     def to_s

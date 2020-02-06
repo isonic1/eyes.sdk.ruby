@@ -61,7 +61,6 @@ describe Applitools::EyesBase, mock_connection: true do
     :user_inputs,
     :start_session,
     :base_agent_id,
-    :update_default_settings
     # :close_response_time
   ]
 
