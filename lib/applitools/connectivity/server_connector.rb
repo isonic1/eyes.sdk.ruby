@@ -336,7 +336,8 @@ module Applitools::Connectivity
     end
 
     def request(url, method, options = {})
-      Faraday::Connection.new(
+      Applitools::EyesLogger.debug("Requesting #{url} (method: #{method})")
+      response = Faraday::Connection.new(
         url,
         ssl: { ca_file: SSL_CERT },
         proxy: @proxy.nil? ? nil : @proxy.to_hash
@@ -347,6 +348,8 @@ module Applitools::Connectivity
         req.params = { apiKey: api_key }.merge(options[:query] || {})
         req.body = options[:body]
       end
+      Applitools::EyesLogger.debug("Got a response: #{response.status} #{response.reason_phrase}")
+      response
     end
 
     def dummy_request(url, method, options = {})
