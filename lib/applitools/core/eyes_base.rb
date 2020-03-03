@@ -618,7 +618,7 @@ module Applitools
       unless captured_dom_data.empty?
         begin
           logger.info 'Processing DOM..'
-          dom_url = server_connector.post_dom_json(captured_dom_data) do |json|
+          dom_url = server_connector.post_dom_json(captured_dom_data, runner.rendering_info(server_connector)) do |json|
             io = StringIO.new
             gz = Zlib::GzipWriter.new(io)
             gz.write(json.encode('UTF-8'))
