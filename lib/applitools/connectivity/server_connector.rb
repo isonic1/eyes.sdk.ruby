@@ -68,31 +68,23 @@ module Applitools::Connectivity
     end
 
     def put_screenshot(rendering_info, screenshot)
-      put_data(rendering_info, screenshot.image.to_blob, 'image/png', 'screenshot')
-    end
-
-    def put_dom(rendering_info, dom_data)
-      put_data(rendering_info, dom_data, 'application/octet-stream', 'dom data')
-    end
-
-    def put_data(rendering_info, data, content_type, log_message_entity)
       uuid = SecureRandom.uuid
       upload_path = URI.parse(rendering_info.results_url.gsub(/__random__/, uuid))
       retry_count = 3
       wait = 0.5
       loop do
-        raise ScreenshotUploadError, "Error uploading #{log_message_entity} (#{upload_path})" if retry_count <= 0
-        Applitools::EyesLogger.info("Trying to upload #{log_message_entity} (#{upload_path})...")
+        raise ScreenshotUploadError, "Error uploading screenshot (#{upload_path})" if retry_count <= 0
+        Applitools::EyesLogger.info("Trying to upload screenshot (#{upload_path})...")
         begin
           response = dummy_put(
             upload_path,
-            body: data,
+            body: screenshot.image.to_blob,
             headers: {
               'x-ms-blob-type': 'BlockBlob',
               'X-Auth-Token': rendering_info.access_token
             },
             query: URI.decode_www_form(upload_path.query).to_h,
-            content_type: content_type
+            content_type: 'image/png'
           )
           break if response.status == HTTP_STATUS_CODES[:created]
           Applitools::EyesLogger.info("Failed. Retrying in #{wait} seconds")
@@ -286,14 +278,23 @@ module Applitools::Connectivity
       Applitools::TestResults.new(response)
     end
 
-    def post_dom_json(dom_data, rendering_info)
+    def post_dom_json(dom_data)
       Applitools::EyesLogger.debug 'About to send captured DOM...'
+      # request_body = Oj.dump(dom_data)
       request_body = dom_data
       Applitools::EyesLogger.debug request_body
       processed_request_body = yield(request_body) if block_given?
-      location = put_dom(rendering_info, processed_request_body)
+      res = post(
+        endpoint_url + 'data',
+        body: processed_request_body.nil? ? request_body : processed_request_body,
+        content_type: 'application/octet-stream'
+      )
+
       Applitools::EyesLogger.debug 'Done!'
-      location
+      raise Applitools::EyesError.new("Request failed: #{res.status} #{res.body}") unless res.success?
+      Applitools::EyesLogger.debug  'Server response headers:'
+      Applitools::EyesLogger.debug  res.headers.inspect
+      res.headers['location']
     end
 
     private
