@@ -204,12 +204,13 @@ module Applitools::Connectivity
     def match_window(session, data)
       # Notice that this does not include the screenshot.
       json_data = Oj.dump(Applitools::Utils.camelcase_hash_keys(data.to_hash)).force_encoding('BINARY')
-      body = if data.screenshot.empty?
-               content_type = 'application/json'
-               json_data
-             else
+
+      body = if data.screenshot && data.app_output.screenshot_url.nil?
                content_type = 'application/octet-stream'
                [json_data.length].pack('L>') + json_data + data.screenshot
+             else
+               content_type = 'application/json'
+               json_data
              end
 
       Applitools::EyesLogger.debug 'Sending match data...'

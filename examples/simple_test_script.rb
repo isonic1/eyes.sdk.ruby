@@ -9,7 +9,7 @@ eyes = Applitools::Selenium::Eyes.new(runner: Applitools::ClassicRunner.new)
 # eyes.api_key = ENV['APPLITOOLS_API_KEY']
 eyes.log_handler = Logger.new(STDOUT)
 eyes.match_level = Applitools::MATCH_LEVEL[:layout]
-# eyes.set_proxy('http://localhost:8000')
+eyes.set_proxy('http://localhost:8000')
 # eyes.server_url = 'https://eyesfabric4eyes.applitools.com'
 
 begin
@@ -24,21 +24,21 @@ begin
 
   drv.get('https://applitools.com/helloworld?diff2')
 
-  eyes.check('Example1', Applitools::Selenium::Target.window.fully)
+  eyes.check('Example1', Applitools::Selenium::Target.window.fully.send_dom.use_dom)
   drv.find_element(:css, '.section.button-section button').click
-  eyes.check('Example2', Applitools::Selenium::Target.window.fully)
+  eyes.check('Example2', Applitools::Selenium::Target.window.fully.send_dom.use_dom)
   eyes.close
 
-  eyes.test(
-    app_name: 'Ruby SDK',
-    test_name: 'Applitools website test',
-    viewport_size: { width: 800, height: 600 },
-    driver: web_driver
-  ) do |driver|
-    driver.get 'http://www.applitools.com'
-    eyes.check_window('initial')
-    eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
-  end
+  # eyes.test(
+  #   app_name: 'Ruby SDK',
+  #   test_name: 'Applitools website test',
+  #   viewport_size: { width: 800, height: 600 },
+  #   driver: web_driver
+  # ) do |driver|
+  #   driver.get 'http://www.applitools.com'
+  #   eyes.check_window('initial')
+  #   eyes.check_region(:css, 'a.logo', tag: 'Applitools logo')
+  # end
 ensure
   web_driver.quit
 end

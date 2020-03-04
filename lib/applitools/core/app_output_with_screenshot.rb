@@ -20,5 +20,9 @@ module Applitools
     def to_s
       app_output.to_hash.to_s
     end
+
+    def screenshot_url
+      app_output.screenshot_url
+    end
   end
 end
