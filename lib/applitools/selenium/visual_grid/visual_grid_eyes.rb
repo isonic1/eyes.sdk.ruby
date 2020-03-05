@@ -103,7 +103,7 @@ module Applitools
       end
 
       def check(*args)
-
+        args.compact!
         case (first_arg = args.shift)
         when String
           tag = first_arg

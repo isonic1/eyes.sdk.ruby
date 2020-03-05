@@ -227,6 +227,7 @@ module Applitools::Selenium
     # @param [Applitools::Selenium::Target] target which area of the window to check.
     # @return [Applitools::MatchResult] The match results.
     def check(*args)
+      args.compact!
       case (first_arg = args.shift)
       when String
         name = first_arg

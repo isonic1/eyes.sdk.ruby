@@ -15,7 +15,7 @@ class Applitools::Appium::Eyes < Applitools::Selenium::SeleniumEyes
   private :perform_driver_settings_for_appium_driver
 
   def check(*args)
-
+    args.compact!
     case (first_arg = args.shift)
     when String
       name = first_arg

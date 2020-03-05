@@ -62,7 +62,7 @@ module Applitools::Images
     end
 
     def check(*args)
-
+      args.compact!
       case (first_arg = args.shift)
       when String
         name = first_arg
