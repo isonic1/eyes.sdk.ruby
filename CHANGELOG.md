@@ -1,4 +1,8 @@
-## [Eyes.sdk.ruby 3.16.2] - 2020-03-02
+## [Eyes.sdk.ruby 3.16.6] - 2020-03-05
+### Fixed
+- eyes#check might be called as #check(tag, target) as well as #check(target)
+- Selenium Eyes: ignore regions in the current target caused an exception 
+## [Eyes.sdk.ruby 3.16.5] - 2020-03-02
 ### Fixed
 - double slash issue for custom server URL
 ## [Eyes.sdk.ruby 3.16.2] - 2020-02-06
