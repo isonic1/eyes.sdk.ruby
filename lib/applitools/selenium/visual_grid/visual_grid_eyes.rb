@@ -102,7 +102,19 @@ module Applitools
         end
       end
 
-      def check(tag, target)
+      def check(*args)
+
+        case (first_arg = args.shift)
+        when String
+          tag = first_arg
+          target = args.shift
+        when Applitools::Selenium::Target
+          target = first_arg
+        when Hash
+          target = first_arg[:target]
+          tag = first_arg[:name] || first_arg[:tag]
+        end
+
         script = <<-END
           #{Applitools::Selenium::Scripts::PROCESS_PAGE_AND_POLL} return __processPageAndSerializePoll();
         END

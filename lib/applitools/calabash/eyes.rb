@@ -22,7 +22,19 @@ module Applitools
         open_base options
       end
 
-      def check(name, target)
+      def check(*args)
+
+        case (first_arg = args.shift)
+        when String
+          name = first_arg
+          target = args.shift
+        when Applitools::Selenium::Target
+          target = first_arg
+        when Hash
+          target = first_arg[:target]
+          name = first_arg[:name] || first_arg[:tag]
+        end
+
         self.tag_for_debug = get_tag_for_debug(name)
         check_it(name, target, Applitools::MatchWindowData.new(default_match_settings))
       end

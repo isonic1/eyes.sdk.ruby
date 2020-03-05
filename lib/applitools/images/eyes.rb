@@ -61,7 +61,19 @@ module Applitools::Images
       abort_if_not_closed
     end
 
-    def check(name, target)
+    def check(*args)
+
+      case (first_arg = args.shift)
+      when String
+        name = first_arg
+        target = args.shift
+      when Applitools::Selenium::Target
+        target = first_arg
+      when Hash
+        target = first_arg[:target]
+        name = first_arg[:name] || first_arg[:tag]
+      end
+
       check_it(name, target, Applitools::MatchWindowData.new(default_match_settings)).as_expected?
     end
 
