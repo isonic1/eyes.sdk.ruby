@@ -24,15 +24,15 @@ RSpec.configure do |config|
     end
   end
 
-  # config.before clear_environment: true do
-  #   Applitools::Helpers.instance_variable_set :@environment_variables, {}
-  # end
+  config.before clear_environment: true do
+    Applitools::Helpers.instance_variable_set :@environment_variables, {}
+  end
 
-  # config.include_context 'selenium workaround', selenium: true
-  # config.include_context 'selenium workaround', visual_grid: true
-  #
-  # config.after(:suite) do
-  #   puts $vg_runner.get_all_test_results if $vg_runner
-  #   puts $classic_runner.get_all_test_results if $classic_runner
-  # end
+  config.include_context 'selenium workaround', selenium: true
+  config.include_context 'selenium workaround', visual_grid: true
+
+  config.after(:suite) do
+    puts $vg_runner.get_all_test_results if $vg_runner
+    puts $classic_runner.get_all_test_results if $classic_runner
+  end
 end

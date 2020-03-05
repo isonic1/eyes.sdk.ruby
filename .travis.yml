@@ -1,18 +1,11 @@
 addons:
-  apt:
-    sources:
-      - google-chrome
-    packages:
-      - google-chrome-stable
-
+  chrome: stable
 
 language: ruby
 rvm:
   - 2.4.1
 gemfile:
   - GemfileTravis
-
-env: DISPLAY=':99.0' BROWSER=chrome
 services:
   - xvfb
 #branches:
@@ -25,12 +18,7 @@ before_install:
   - cd pkg; mkdir gems; mv ./*.gem ./gems; gem generate_index; cd ..
 #  - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
 before_script:
-  - wget http://chromedriver.storage.googleapis.com/77.0.3865.40/chromedriver_linux64.zip
-  - unzip chromedriver_linux64.zip -d /home/travis/build
-  - sudo mv -f /home/travis/build/chromedriver /usr/local/share/
-  - sudo chmod +x /usr/local/share/chromedriver
-  - sudo ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
   - export APPLITOOLS_BATCH_ID=$(java UUIDFromString $TRAVIS_COMMIT$TRAVIS_RUBY_VERSION)
   - echo $APPLITOOLS_BATCH_ID
 script:
-  - bundle exec rake
+  - bundle exec rake spec_test
