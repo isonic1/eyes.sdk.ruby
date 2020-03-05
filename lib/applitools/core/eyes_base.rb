@@ -650,7 +650,6 @@ module Applitools
           runner.rendering_info(server_connector),
           screenshot
         )
-        screenshot = nil
       end
 
       logger.info 'Getting title...'
