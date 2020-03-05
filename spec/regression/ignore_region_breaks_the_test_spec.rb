@@ -24,7 +24,7 @@ RSpec.describe 'Ignore region coordinates break the test' do
 
   it 'should not raise error' do
     driver.get('https://applitools.com/helloworld?diff1')
-    expect { eyes.check('name', target) }.to_not raise_error
+    expect { eyes.check(target) }.to_not raise_error
     eyes.close_async
     driver.quit
   end
