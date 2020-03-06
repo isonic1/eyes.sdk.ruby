@@ -58,7 +58,7 @@ module Applitools
         result = replace(separators['iframeStartToken'], separators['iframeEndToken'], data.first, frame_data)
         css_data = fetch_css_files(missing_css_list, server_connector)
         replace(separators['cssStartToken'], separators['cssEndToken'], result, css_data)
-      rescue StandardError
+      rescue StandardError => e
         logger.error(e.class)
         logger.error(e.message)
         logger.error(e)
